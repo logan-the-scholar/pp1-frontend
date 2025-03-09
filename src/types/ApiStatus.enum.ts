@@ -1,0 +1,6 @@
+export enum ApiStatusEnum {
+    TOKEN_EXPIRED = "TOKEN_EXPIRED",
+    USER_DELETED = "USER_DELETED",
+    NOT_ALLOWED_HERE = "NOT_ALLOWED_HERE",
+    UNKNOWN = "UNKNOWN",
+}
