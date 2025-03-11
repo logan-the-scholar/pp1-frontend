@@ -2,8 +2,8 @@
 @custom-variant dark (&:where(.dark, .dark *));
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #171717;
+  --foreground: #ffffff;
 }
 
 @theme inline {
@@ -21,7 +21,80 @@
 } */
 
 body {
-  background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: Mono, Menlo, Consolas, Monaco, Lucida Console, Liberation Mono, DejaVu Sans Mono, Bitstream Vera Sans Mono, Courier New, monospace, serif;
+}
+
+@keyframes blink {
+  70% {
+    opacity: 100;
+  }
+
+  50% {
+    opacity: 100;
+  }
+
+  35% {
+    opacity: 100;
+  }
+
+  20% {
+    opacity: 0;
+  }
+}
+
+.typing-effect {
+  white-space: nowrap;
+  overflow: hidden;
+  animation: typing 4s steps(44) 1s 1 normal both;
+}
+
+@keyframes typing {
+  from {
+    width: 0;
+  }
+
+  to {
+    width: 100%;
+  }
+}
+
+.blinking-cursor {
+  animation: blink 1s steps(2, start) infinite;
+}
+
+
+.grid-gradiant {
+  background:
+    radial-gradient(circle at bottom left, hsl(0, 0%, 2%) 5%, hsla(0, 0%, 1%, 0.9) 20%, rgba(0, 0, 0, 0) 50%),
+    linear-gradient(to top right, hsl(0, 0%, 2%), transparent);
+}
+
+@keyframes shake {
+
+  10%,
+  90% {
+    transform: translate3d(-1px, 0, 0);
+  }
+
+  20%,
+  80% {
+    transform: translate3d(2px, 0, 0);
+  }
+
+  30%,
+  50%,
+  70% {
+    transform: translate3d(-4px, 0, 0);
+  }
+
+  40%,
+  60% {
+    transform: translate3d(4px, 0, 0)
+  }
+
+}
+
+.shaky {
+  animation: shake 0.82s cubic-bezier(.36, .07, .19, .97) both;
 }
