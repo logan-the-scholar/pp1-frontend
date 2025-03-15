@@ -20,7 +20,8 @@ const NavButton: React.FC<{ className?: string, overwrite?: boolean, children: a
             className={overwrite ?
                 className
                 :
-                `hover:outline-2 hover:outline-offset-4 max-h-5/6 hover:outline-solid py-2 px-3 inline-block bg-gradient-to-br from-[#fa9726] via-[#ca2f2d] to-[#cf207b] cursor-pointer rounded-3xl ${className !== undefined ? ` ${className}` : ""}`
+                // `hover:outline-2 hover:outline-offset-4 max-h-5/6 hover:outline-solid h-fit py-2 px-3 inline-block bg-gradient-to-br from-[#fa9726] via-[#ca2f2d] to-[#cf207b] cursor-pointer rounded-3xl ${className !== undefined ? ` ${className}` : ""}`
+                `hover:outline-2 hover:outline-offset-4 max-h-5/6 hover:outline-solid h-fit py-2 px-3 inline-block bg-gradient-to-br cursor-pointer ${className !== undefined ? ` ${className}` : ""}`
             }
         >
             {hover && attributes?.onHover ? attributes?.onHover({}) : null}

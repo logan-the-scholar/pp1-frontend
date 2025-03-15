@@ -9,9 +9,11 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@monaco-editor/react": "^4.7.0-rc.0",
     "@react-three/drei": "^10.0.4",
     "@react-three/fiber": "^9.1.0",
     "lucide-react": "^0.479.0",
+    "monaco-editor": "^0.52.2",
     "next": "15.2.1",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",

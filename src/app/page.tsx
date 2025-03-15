@@ -1,141 +1,76 @@
 "use client";
 import NavBar from "@/components/NavBar"
-import { useRef } from "react";
-import { Canvas, useFrame } from "@react-three/fiber";
-import { OrbitControls } from "@react-three/drei";
-import React from "react";
-import * as THREE from 'three';
+import React, { useCallback, useEffect, useState } from "react";
+import LeftSide from "@/features/landing/LeftSide";
+import SquareCanvas from "@/features/landing/SquareCanvas";
+import { jetBrainsMono } from "@/helpers/Fonts";
+import RightSide from "@/features/landing/RightSide";
 
 export default function Home() {
+  const [scroll, setScroll] = useState<number>(0);
+  const [jumpPage, setJumPage] = useState<number>(0);
+  const [actualPage, setActualPage] = useState<number>(1);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setScroll(window.scrollY);
+    };
+
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
+  useEffect(() => {
+    if (window.scrollY > 0 && scroll < window.innerHeight && actualPage === 1) {
+      console.log(window.innerHeight)
+      scrollTo(2);
+      setActualPage(2);
+      // console.log(window.scroll);
+      // console.log(scroll);
+    }
+    // else if(window.scrollY > window.innerHeight && scroll < window.innerHeight * 2 && actualPage === 2) {
+    //   console.log(window.innerHeight)
+    //   scrollTo(1);
+    //   setActualPage(1);
+    // }
+
+  }, [scroll]);
+
+
+  const scrollTo = (page: number) => {
+    const element = document.getElementById("page-" + page);
+
+    if (element) {
+      element.scrollIntoView({ behavior: "smooth" });
+    }
+  };
 
   return (
     <>
       <NavBar />
-      <div className="absolute -z-20 inset-0">
-        <Canvas camera={{ position: [0, 0, -5] }}>
-          <ambientLight intensity={0.5} />
-          <directionalLight position={[5, 5, 5]} intensity={1} />
-          <RotatingCube />
-          <OrbitControls />
-          <BigBoxx />
-          {/* <Number /> */}
-          {/* <mesh position={[-3.4, -3, 0]} scale={[0.1, 0.1, 0.1]} rotation={[Math.PI / 10, 0, 0]}>
-            <torusKnotGeometry args={[10, 3, 23, 5]} />
-            <meshStandardMaterial color="white" wireframe />
-          </mesh> */}
-          {/* <mesh position={[2.4, 1.3, 0]} rotation={[Math.PI / 0.3, 4, 0]}>
-            <tetrahedronGeometry args={[0.3, 0]} />
-            <meshStandardMaterial color="magenta" wireframe wireframeLinewidth={1} />
-          </mesh> */}
-        </Canvas>
+      <div id="page-1" className={`${jetBrainsMono.className} italic text-8xl font-extrabold select-none flex items-center w-full h-[90vh]`}>
+        <div className="mr-6 ml-auto w-full h-fit grid gap-10">
+
+          <div className="flex w-fit mr-8 justify-self-center">
+            Share your {"{"}
+            <div className="h-full w-fit z-20 flex">
+              <div className="relative w-fit max-h-1 -mx-6">
+                <SquareCanvas />
+              </div>
+              <span>{"}"}</span>
+            </div>
+          </div>
+
+          <div className="justify-self-end z-30 mr-7 w-fit">
+            <span className="underline">thoughts</span> instantly.
+          </div>
+        </div>
       </div>
-      <div>landing</div>
-      <div>landing</div>
-      <div>landing</div>
-      <div>landing</div>
-      <div>landing</div>
-      <div>landing</div>
-      <div>landing</div>
-      <div>landing</div>
-      <div>landing</div>
-      <div>landing</div>
-      <div>landing</div>
-      <div>landing</div>
-      <div>landing</div>
-      <div>landing</div>
-      <div>landing</div>
-      <div>landing</div>
-      <div>landing</div>
-      <div>landing</div>
-      <div>landing</div>
-      <div>landing</div>
-      <div>landing</div>
-      <div>landing</div>
-      <div>landing</div>
-      <div>landing</div>
-      <div>landing</div>
-      <div>landing</div>
-      <div>landing</div>
-      <div>landing</div>
-      <div>landing</div>
-      <div>landing</div>
-      <div>landing</div>
-      <div>landing</div>
-      <div>landing</div>
-      <div>landing</div>
-      <div>landing</div>
-      <div>landing</div>
-      <div>landing</div>
-      <div>landing</div>
-      <div>landing</div>
-      <div>landing</div>
-      <div>landing</div>
-      <div>landing</div>
-      <div>landing</div>
-      <div>landing</div>
-      <div>landing</div>
-      <div>landing</div>
-      <div>landing</div>
-      <div>landing</div>
-      <div>landing</div>
-      <div>landing</div>
-      <div>landing</div>
-      <div>landing</div>
+
+      <div id="page-2" className="not-md:flex-col not-md:gap-y-5 flex mt-16 justify-evenly h-[100vh]">
+        <LeftSide />
+        <RightSide />
+      </div>
     </>
-  );
-}
-
-const RotatingCube = () => {
-  const cubeRef = useRef<any>(null!);
-
-  useFrame(() => {
-    if (cubeRef.current) {
-      cubeRef.current.rotation.x -= 0.001;
-      cubeRef.current.rotation.y += 0.001;
-    }
-  });
-
-  return (
-    <mesh ref={cubeRef}>
-      <boxGeometry args={[2.4, 2.4, 2.4]} scale={[4.0, 4.0, 4.0]} />
-      <meshStandardMaterial color="gray" wireframe wireframeLinewidth={2} />
-    </mesh>
-  );
-};
-
-const BigBoxx = () => {
-  const cubeRef = useRef<any>(null!);
-
-  useFrame(() => {
-    if (cubeRef.current) {
-      // cubeRef.current.rotation.x -= 0.001;
-      cubeRef.current.rotation.z += 0.001;
-    }
-  });
-
-  return (
-    <mesh ref={cubeRef} position={[0, 0, 6]} rotation={[0, 0, -5]}>
-      <boxGeometry args={[13, 13, 33, 5, 5, 5]} />
-      <meshStandardMaterial color="gray" wireframe wireframeLinewidth={1} />
-    </mesh>
-  );
-};
-
-const Number = () => {
-  const cubeRef = useRef<any>(null!);
-
-  useFrame(() => {
-    if (cubeRef.current) {
-      cubeRef.current.rotation.x += 0.01;
-      cubeRef.current.rotation.y += 0.01;
-    }
-  });
-
-  return (
-    <mesh ref={cubeRef} visible userData={{ hello: 'world' }} position={[0, 0, 0]} rotation={[Math.PI / 1, 0, 0]}>
-      {/* <sphereGeometry args={[1, 6, 6]} /> */}
-      <octahedronGeometry args={[1, 2]} />
-      <meshStandardMaterial color="gray" wireframe wireframeLinewidth={2} />
-    </mesh>
   );
 };
