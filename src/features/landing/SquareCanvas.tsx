@@ -67,7 +67,7 @@ const RotatingCube: React.FC<{ text: string }> = ({ text }) => {
             canvas.width = 512;
             canvas.height = 512;
 
-            ctx.fillStyle = "black";
+            ctx.fillStyle = "#171717";
             ctx.fillRect(0, 0, canvas.width, canvas.height);
 
             ctx.fillStyle = "white";
@@ -144,7 +144,7 @@ const BigBoxx = () => {
     return (
         <mesh ref={cubeRef} position={[0, 0, 16]} rotation={[0, 0, -5]}>
             <boxGeometry args={[13, 13, 66, 5, 5, 5]} />
-            <meshStandardMaterial color="gray" wireframe wireframeLinewidth={1} />
+            <meshStandardMaterial color="#171717" wireframe wireframeLinewidth={1} />
         </mesh>
     );
 };
