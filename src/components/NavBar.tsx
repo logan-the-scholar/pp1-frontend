@@ -71,15 +71,22 @@ const NavBar: React.FC = () => {
                         </span> */}
                         <CodedText content='Code session' />
                     </NavButton>
-
+                    {/* shadow-amber-400  */}
                     {/* TODO darle vida a esto... */}
-                    <NavButton
-                        overwrite={true}
-                        className='relative hover:scale-110 transition-transform duration-200 bg-transparent outline-2 outline-offset-0 max-h-5/6 outline-solid py-2 px-3 inline-block cursor-pointer rounded-full'
-                    >
-                        <User color="#ffffff" strokeWidth={3} />
-                    </NavButton>
+                    <div className='-z-10 relative max-h-5/6 gradient-1 bg-violet-800 rounded-full'>
+                        <NavButton
+                            overwrite={true}
+                            className='z-20 h-full box-border hover:-translate-y-[0.33em] transition-transform duration-200 hover:-translate-x-[0.2em] active:translate-0 bg-violet-600 border border-violet-950 py-2 px-3 -translate-y-[0.2em] -translate-x-[0.1em] inline-block cursor-pointer rounded-full'
+                        >
+                            <User color="#ffffff" strokeWidth={3} />
+                        </NavButton>
+                    </div>
 
+                    {/* <button className="mt-auto mb-7 self-center h-fit w-fit relative gradient-1 bg-violet-800 rounded-[0.75em] cursor-pointer">
+                        <span className="inline-block box-border hover:-translate-y-[0.33em] mb-[2px] mr-[2px] border hover:-translate-x-[0.2em] active:translate-0 py-[0.6em] px-5 bg-violet-600 border-violet-950 rounded-[0.75em] -translate-y-[0.2em] -translate-x-[0.1em] transition-all duration-100 ease-in">
+                            Create Account
+                        </span>
+                    </button> */}
                 </div>
 
                 <div className='absolute z-40 -bottom-[1px] right-0 m-auto w-7/11 h-px bg-neutral-800'></div>

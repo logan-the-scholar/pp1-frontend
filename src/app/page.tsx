@@ -93,9 +93,9 @@ export default function Home() {
       </div>
       <div className="w-4/5 border-b border-neutral-800 mx-auto"></div>
 
-      <div id="page-2" className="not-md:flex-col not-md:gap-y-5 flex justify-evenly h-[100vh] pt-[100px]">
+      <div id="page-2" className={`not-md:flex-col not-md:gap-y-5 flex h-[100vh] pt-[100px] ${hidePanelState ? "justify-center gap-5" : "justify-evenly"}`}>
         <LeftSide hidePanelState={hidePanelState} hidePanelTriggerer={setHidePanelState} />
-        <RightSide hidePanelTriggerer={setHidePanelState} />
+        <RightSide hidePanelState={hidePanelState} hidePanelTriggerer={setHidePanelState} />
       </div>
 
       {/* <div className="w-full h-lvh border border-amber-50">

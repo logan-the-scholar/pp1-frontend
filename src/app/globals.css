@@ -12,10 +12,80 @@
     transform-origin: left;
   }
 
-  .animate-unshrink {
-    animation: unshrink 0.5s ease-in-out forwards;
+  .animate-stretch {
+    animation: stretch 0.5s ease-in-out forwards;
     transform-origin: right;
   }
+
+  .animate-shrink-vertical {
+    animation: shrink-vertical 0.5s ease-in-out forwards;
+    transform-origin: left;
+  }
+
+  .animate-stretch-vertical {
+    animation: stretch-vertical 0.5s ease-in-out forwards;
+    transform-origin: right;
+  }
+  /* .list-items-purple li:hover {
+    text-decoration: underline;
+  } */
+
+}
+
+@utility bg-items-* {
+  & li {
+    padding: 3px 5px 3px 5px;
+    width: fit-content;
+    cursor: pointer;
+    /* background-color: #7f22fe; */
+    
+    background-color: --value(--color-*, [color]);
+    background-color: --modifier(--color-*, [color]);
+
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+}
+
+/* @utility ebox-offset-*::before {
+
+} */
+
+@utility ebox-* {
+
+  &::after {
+    z-index: -10;
+    content: "";
+    position: absolute;
+
+    width: calc(--value(integer)% + 100%);
+    height: calc(--value(integer)% + 100%);
+
+    top: 0px;
+    left: 0px;
+    clip-path: polygon(--value(integer)% 100%, 0% calc(100% - --value(integer)%), 0% 0%, calc(100% - --value(integer)%) 0%, 100% --value(integer)%, 100% 100%);
+    background-color: --value(--color-*, [color]);
+    background-color: --modifier(--color-*, [color]);
+
+  }
+
+  &::before {
+    content: "";
+    position: absolute;
+    z-index: 20;
+
+    top: 100%;
+    left: 100%;
+    width: --value(integer)%;
+    height: --value(integer)%;
+    transform-origin: center;
+    background-color: #000000;
+
+    clip-path: polygon(0 1px, 1px 0, 100% 98%, 98% 100%);
+
+  }
+
 }
 
 @theme inline {
@@ -148,6 +218,8 @@ button.gradient-button::before {
   background: linear-gradient(45deg, var(--first-shadow) 45%, var(--first-shadow) 64%, var(--second-shadow) 65%, var(--second-shadow) 75%, rgba(255, 255, 255, 0) 76%);
 }
 
+/*TODO GENERALIZAR ESTE UTIL */
+
 .gradient-1::before {
   --background: #5d0ec0;
   --shadow: #351174;
@@ -178,14 +250,35 @@ button.gradient-button::before {
     opacity: 0;
     overflow: hidden;
     width: 0px;
+    padding: 0px;
   }
 }
 
-@keyframes unshrink {
+@keyframes shrink-vertical {
+  0% {
+    transform: scaleY(1);
+    opacity: 1;
+  }
+
+  99% {
+    transform: scaleY(0);
+    opacity: 0;
+  }
+
+  100% {
+    opacity: 0;
+    overflow: hidden;
+    height: 0px;
+    padding: 0px;
+  }
+}
+
+@keyframes stretch {
   0% {
     opacity: 0;
     overflow: hidden;
     width: 0px;
+    padding: 0px;
   }
 
   1% {
@@ -197,4 +290,76 @@ button.gradient-button::before {
     transform: scaleX(1);
     opacity: 1;
   }
+}
+
+@keyframes stretch-vertical {
+  0% {
+    opacity: 0;
+    overflow: hidden;
+    height: 0px;
+    padding: 0px;
+  }
+
+  1% {
+    transform: scaleY(0);
+    opacity: 0;
+  }
+
+  100% {
+    transform: scaleY(1);
+    opacity: 1;
+  }
+}
+
+.static-shadow {
+  position: relative;
+}
+
+.static-shadow::before {
+  z-index: -5;
+  content: "";
+  box-sizing: border-box;
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  top: 0px;
+  left: 0px;
+  /* background-color: #ffb900; */
+  /* margin-top: 4px; */
+  /* margin-left: 4px; */
+  background-color: #5d0ec0;
+  border-radius: inherit;
+  box-shadow: 4px 4px 0px #5d0ec0;
+}
+
+/* .static-shadow::after{
+  z-index: -10;
+  content: "";
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  top: 0px;
+  left: 0px;
+  box-sizing: border-box;
+  border-radius: inherit;
+  box-shadow: 5px 5px 0px #ffb900;
+} */
+
+/* TODO HACER ESTO A UN UTIL y hacer la pestaña de chat tmb */
+
+.line::before {
+  z-index: -10;
+  content: "";
+  position: absolute;
+  width: 100%;
+  top: 2%;
+  left: 90%;
+  height: 3px;
+  background-color:
+    /* #e17100 */
+    #fe9a00
+    /* #7f22fe */
+  ;
+  /* border-bottom: 1px #5d0ec0; */
+
 }
