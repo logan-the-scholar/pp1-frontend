@@ -1,10 +1,10 @@
 "use client";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import { OrbitControls } from "@react-three/drei";
-import { useEffect, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import { CanvasTexture } from "three";
 
-const SquareCanvas: React.FC = () => {
+const SquareCanvas: React.FC<{ text?: string }> = ({ text: text_ }) => {
     const [text, setText] = useState("");
 
     return (
@@ -22,7 +22,7 @@ const SquareCanvas: React.FC = () => {
                     <ambientLight intensity={1.5} />
                     <directionalLight position={[3, 3, -3]} intensity={3} />
                     {/* <BigBoxx /> */}
-                    <RotatingCube text={text || "ctx.fillText(text.slice((i * fiting_text_lenght) + (i === 0 ? 0 : 1),((i + 1) * fiting_text_lenght + 1) - (i > 0 ? 0 : 1)).trimStart(),(6 / 100) * canvas.width,first_roll + (font_he"} />
+                    <RotatingCube text={text_ || "ctx.fillText(text.slice((i * fiting_text_lenght) + (i === 0 ? 0 : 1),((i + 1) * fiting_text_lenght + 1) - (i > 0 ? 0 : 1)).trimStart(),(6 / 100) * canvas.width,first_roll + (font_he"} />
                 </Canvas>
             </div >
             {/* <div className="w-full h-full absolute bg-transparent backdrop-blur-xs z-30">
@@ -83,14 +83,14 @@ const RotatingCube: React.FC<{ text: string }> = ({ text }) => {
             const fiting_text_lenght = Math.floor(writing_bound / ctx.measureText("o").width);
 
             for (let i = 0; i <= back_rolls; i++) {
-                if (i == 0) {
-                    console.log("writing_bound: ", writing_bound);
-                    console.log("text_measure: ", text_measure.width);
-                    console.log("char_width: ", ctx.measureText("o").width);
-                    console.log("fiting_text_lenght", fiting_text_lenght);
-                    // console.log("backrolls: ", Math.floor(text_measure.width / writing_bound));
-                    console.log("raw_backrolls: ", text_measure.width / writing_bound);
-                }
+                // if (i == 0) {
+                //     console.log("writing_bound: ", writing_bound);
+                //     console.log("text_measure: ", text_measure.width);
+                //     console.log("char_width: ", ctx.measureText("o").width);
+                //     console.log("fiting_text_lenght", fiting_text_lenght);
+                //     console.log("backrolls: ", Math.floor(text_measure.width / writing_bound));
+                //     console.log("raw_backrolls: ", text_measure.width / writing_bound);
+                // }
 
                 //? aqui deberia traerme el ultimo indice al que se hizo corte, y usarlo en el siguiente dibujado de linea.
                 //? extra: hacer que funcione con saltos de linea y tabuladores
@@ -132,19 +132,19 @@ const RotatingCube: React.FC<{ text: string }> = ({ text }) => {
 };
 
 
-const BigBoxx = () => {
-    const cubeRef = useRef<any>(null!);
+// const BigBoxx = () => {
+//     const cubeRef = useRef<any>(null!);
 
-    useFrame(() => {
-        if (cubeRef.current) {
-            cubeRef.current.rotation.z += 0.001;
-        }
-    });
+//     useFrame(() => {
+//         if (cubeRef.current) {
+//             cubeRef.current.rotation.z += 0.001;
+//         }
+//     });
 
-    return (
-        <mesh ref={cubeRef} position={[0, 0, 16]} rotation={[0, 0, -5]}>
-            <boxGeometry args={[13, 13, 66, 5, 5, 5]} />
-            <meshStandardMaterial color="#171717" wireframe wireframeLinewidth={1} />
-        </mesh>
-    );
-};
+//     return (
+//         <mesh ref={cubeRef} position={[0, 0, 16]} rotation={[0, 0, -5]}>
+//             <boxGeometry args={[13, 13, 66, 5, 5, 5]} />
+//             <meshStandardMaterial color="#171717" wireframe wireframeLinewidth={1} />
+//         </mesh>
+//     );
+// };

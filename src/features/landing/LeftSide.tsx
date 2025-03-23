@@ -11,9 +11,8 @@ const LeftSide: React.FC<{ hidePanelState: boolean, hidePanelTriggerer: Dispatch
 
     return (
         <>
-            {/* {hidePanelState && */}
             <div
-                className={`h-3/5 my-auto flex ${hidePanelState ? "animate-stretch" : "animate-shrink"}`}
+                className={`top-[50%] absolute left-0 h-fit flex ease-in-out ${hidePanelState ? "animate-re-shrink-300" : "animate-shrink-300 cursor-default"}`}
             >
                 <div
                     onClick={() => hidePanelTriggerer(false)}
@@ -22,11 +21,18 @@ const LeftSide: React.FC<{ hidePanelState: boolean, hidePanelTriggerer: Dispatch
                     <ChevronRight width={60} height={60} />
                 </div>
             </div>
-            {/* } */}
-            <div className={`flex flex-col px-5 not-md:w-fit md:max-w-[40%] md:w-[40%] h-4/5 py-2 ${hidePanelState ? "animate-shrink" : "animate-stretch"}`}>
-                <h1 className={`${jetBrainsMono.className} text-3xl font-bold`}>Fast & easy to use online pair programming tool</h1>
-                
-                {/* <div className="flex flex-col w-fit h-full "> */}
+
+            <div className="relative not-md:w-fit md:max-w-[40%] md:w-[40%]">
+                <div className={`relative font-bold mt-3 ease-linear animate-direction-50/50 text-3xl ${!hidePanelState ? "animate-re-rise-100/1500" : "animate-rise-1500/1500"}`}>
+                    {/* {"<div className='absolute'></div>"} */}
+                    Code together
+                    <div className="text-base font-normal">
+                        In a variety of programming languages—collaborate, create, and learn!
+                    </div>
+                </div>
+                <div className={`absolute flex flex-col px-5 w-full h-4/5 py-2 ease-linear -animate-direction-200/200 ${hidePanelState ? "animate-slide-1500/10" : "animate-re-slide-1500/200"}`}>
+                    <h1 className={`${jetBrainsMono.className} text-3xl font-bold`}>Fast & easy to use online pair programming tool</h1>
+
                     <div className="mt-6 mb-8">
                         Lorem ipsum dolor, sit amet consectetur adipisicing elit. Voluptatibus, iusto repellendus praesentium labore aperiam odio facilis ad alias at quibusdam voluptatum similique consequuntur commodi harum inventore quisquam nemo ea sint!
                     </div>
@@ -36,8 +42,7 @@ const LeftSide: React.FC<{ hidePanelState: boolean, hidePanelTriggerer: Dispatch
                             Create Account
                         </span>
                     </button>
-                {/* </div> */}
-
+                </div>
             </div>
 
         </>

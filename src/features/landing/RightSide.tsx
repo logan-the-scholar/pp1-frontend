@@ -2,10 +2,10 @@
 import { Editor } from "@monaco-editor/react";
 import { ExternalLink } from "lucide-react";
 import { editor } from "monaco-editor";
-import { useEffect, useRef, useState } from "react";
+import { Dispatch, useEffect, useRef, useState } from "react";
 
-const RightSide: React.FC<{ hidePanelState: boolean, hidePanelTriggerer: React.Dispatch<React.SetStateAction<boolean>> }> = ({ hidePanelState, hidePanelTriggerer }) => {
-    const initialCode = "//Your code here!";
+const RightSide: React.FC<{ hidePanelState: boolean, textSetter: Dispatch<React.SetStateAction<string | undefined>>, hidePanelTriggerer: React.Dispatch<React.SetStateAction<boolean>> }> = ({ textSetter, hidePanelState, hidePanelTriggerer }) => {
+    const initialCode = "//Your code here! \n";
     const editorRef = useRef<editor.IStandaloneCodeEditor | null>(null);
     // const divRef = useRef<HTMLDivElement>(null);
     const optionsRef = useRef<HTMLDivElement>(null);
@@ -13,8 +13,6 @@ const RightSide: React.FC<{ hidePanelState: boolean, hidePanelTriggerer: React.D
     const [showButtons, setShowButtons] = useState<boolean>(false);
     const [code, setCode] = useState<string>(initialCode);
     const [output, setOutput] = useState<string>();
-    // const [windowVisibility, setWindowVisibility] = useState<boolean>(true);
-    // const [showOptions, setShowOptions] = useState<boolean>(false);
     const outputRef = useRef<HTMLPreElement | null>(null);
 
     useEffect(() => {
@@ -37,6 +35,7 @@ const RightSide: React.FC<{ hidePanelState: boolean, hidePanelTriggerer: React.D
 
         // document.addEventListener("visibilitychange", windowChange);
 
+
         return () => {
             // setShowOptions(false);
             setShowButtons(false);
@@ -44,7 +43,6 @@ const RightSide: React.FC<{ hidePanelState: boolean, hidePanelTriggerer: React.D
             // document.removeEventListener("visibilitychange", windowChange);
         }
     }, []);
-
 
     const editorMount = (editor: editor.IStandaloneCodeEditor) => {
         editorRef.current = editor;
@@ -103,15 +101,17 @@ const RightSide: React.FC<{ hidePanelState: boolean, hidePanelTriggerer: React.D
         <>
             {/* //cambiar esto por un grid para evitar movimientos extraños */}
 
-            <div className={`h-full transition-all delay-100 duration-500 ${hidePanelState ? "w-[77%]" : "w-[40%]"}`}>
+            <div className="h-full transition-all delay-100 duration-500 w-[45%]">
 
-                <div className={`text-3xl font-bold h-fit`}>
-                    Try it!
-                    <div className="text-base mt-2 font-normal">The perfect editor provided by{" "}
-                        <a target="_blank" rel="noopener noreferrer" href="https://github.com/react-monaco-editor/react-monaco-editor" className="underline font-semibold cursor-pointer inline-flex">
-                            Monaco Editor
-                            <span><ExternalLink strokeWidth={2} /></span>
-                        </a>
+                <div className="relative h-max w-fit">
+                    <div className={`text-3xl font-bold h-fit transition-all ease-linear animate-direction-50/50 ${hidePanelState ? "animate-re-rise-500/1500" : "animate-rise-500/1500"}`}>
+                        Try it!
+                        <div className="text-base mt-2 font-normal">The perfect editor provided by{" "}
+                            <a target="_blank" rel="noopener noreferrer" href="https://github.com/react-monaco-editor/react-monaco-editor" className="underline font-semibold cursor-pointer inline-flex">
+                                Monaco Editor
+                                <span><ExternalLink strokeWidth={2} /></span>
+                            </a>
+                        </div>
                     </div>
                 </div>
 
@@ -119,32 +119,36 @@ const RightSide: React.FC<{ hidePanelState: boolean, hidePanelTriggerer: React.D
                 {/* not-md:gap-y-5 */}
                 <div className="w-full flex h-[30dvw] mt-5 not-md:flex-col justify-end">
                     {
-                        <div className={`mr-auto flex flex-col place-content-between h-full w-[38%] ${hidePanelState ? "animate-stretch" : "animate-shrink"}`}>
 
-                            {/* <div className=""></div> */}
+                    }
 
-                            <ul className="flex flex-col ml-3 mt-3 w-fit gap-2 bg-items-violet-600 list-disc list-inside select-none">
-                                <li>
-                                    Javascript
-                                </li>
-                                <li>
-                                    Java
-                                </li>
-                                <li>
-                                    Typescript
-                                </li>
-                            </ul>
-{/* line */}
-                            <div className={`ebox-5/neutral-800 w-full h-[50%] max-h-[50%] mt-4 border border-black bg-neutral-900 shadow-amber-500 text-neutral-400 relative ${hidePanelState ? "shadow-[0px_0px_0px]" : "shadow-[0px_0px_0px]"}`}>
+                    <div className={`ebox-5/neutral-800 relative h-full border border-black transition-all delay-100 duration-500 shadow-[0px_0px_0px] ${hidePanelState ? "w-full" : "w-full"}`}>
+
+                        <div className={`right-[105%] absolute justify-between flex flex-col h-full w-[70%] ease-linear ${!hidePanelState ? "animate-shrink-900" : "animate-re-shrink-900"}`}>
+
+                            <div className="h-max w-[110%] ml-6 mt-3 border-t-2 border-t-violet-600">
+                                <div className={`relative h-max w-max border-l-2 border-l-violet-600 ease-linear ${hidePanelState ? "animate-drop-800/400" : "animate-re-drop-50/400"}`}>
+                                    <ul className={`border-l border-violet-800 flex flex-col pt-3 w-fit gap-2 bg-items-violet-600/violet-900 list-disc list-inside select-none`}>
+                                        <li>
+                                            Javascript
+                                        </li>
+                                        <li>
+                                            Java
+                                        </li>
+                                        <li>
+                                            Typescript
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+
+                            <div className="relative bottom-0 ebox-5/neutral-800 w-full h-[50%] min-h-[50%] mt-4 border border-black bg-neutral-900 shadow-amber-500 text-neutral-400">
                                 <div className="z-10 top-0 left-0 relative select-none pl-2 pt-2 w-full border-b bg-inherit text-neutral-300 border-neutral-600 text-sm">Output</div>
                                 <pre ref={outputRef} className="top-0 left-0 pr-0 p-2 absolute max-h-full w-full h-full overflow-x-hidden text-wrap overflow-y-scroll">{output}</pre>
                             </div>
                         </div>
-                    }
 
-                    <div className={`ebox-5/neutral-800 relative h-full border border-black transition-all delay-100 duration-500 shadow-[0px_0px_0px] ${hidePanelState ? "w-[60%]" : "w-full"}`}>
-
-                        <div className={`absolute right-0 bottom-full py-1 px-2 select-none text-neutral-300 text-sm bg-neutral-900 ${hidePanelState ? "animate-stretch" : "animate-shrink"}`}>index.js</div>
+                        <div className={`absolute right-0 bottom-full py-1 px-2 select-none text-neutral-300 text-sm bg-neutral-900 ${true ? "animate-stretch" : "animate-shrink"}`}>index.js</div>
 
                         <Editor
                             loading={(
@@ -157,14 +161,20 @@ const RightSide: React.FC<{ hidePanelState: boolean, hidePanelTriggerer: React.D
                             theme="vs-dark"
                             onMount={(x) => editorMount(x)}
                             value={code}
-                            onChange={(x) => setCode(x || "")}
+                            onChange={(x) => {
+                                setCode(x || "");
+                                textSetter(x === initialCode ? undefined : x);
+                            }}
                         />
 
                         {showButtons &&
                             <div className="bottom-4 right-5 z-20 absolute">
                                 {code !== initialCode &&
                                     <button
-                                        onClick={() => setCode(initialCode)}
+                                        onClick={() => {
+                                            setCode(initialCode);
+                                            textSetter(undefined);
+                                        }}
                                         className="mr-2 underline px-3 py-1.5 shadow-[3px_3px_0px_#000000] active:translate-[2px] hover:shadow-[5px_5px_0px_#000000] border-black border bg-violet-600 text-white cursor-pointer"
                                     >
                                         Reset

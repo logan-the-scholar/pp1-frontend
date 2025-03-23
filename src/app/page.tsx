@@ -12,60 +12,45 @@ export default function Home() {
   const [scrollDirection, setScrollDirection] = useState("Estático");
   const [lastScrollY, setLastScrollY] = useState(0);
   const [hidePanelState, setHidePanelState] = useState<boolean>(false);
+  const [text, setText] = useState<string | undefined>(undefined);
+  const [finished, setFinished] = useState<boolean>(false);
+  const [button, setButton] = useState<boolean>(false);
+  const [hide, setHide] = useState<boolean>(false);
+  const [animate, setAnimate] = useState(false);
 
   useEffect(() => {
-    const handleScroll = () => {
-      if (window.scrollY > lastScrollY) {
-        setScrollDirection("⬇ Bajando");
-        console.log("⬇ Bajando");
-      } else if (window.scrollY < lastScrollY) {
-        setScrollDirection("⬆ Subiendo");
-        console.log("⬆ Subiendo");
-      }
-      setLastScrollY(window.scrollY);
+
+    let timeout: NodeJS.Timeout;
+
+    const startAnimation = () => {
+      setAnimate(true);
+      setTimeout(() => setAnimate(false), 1000);
+
+      timeout = setTimeout(startAnimation, 10000);
     };
 
-    window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
+    startAnimation();
+
+    return () => clearTimeout(timeout);
+
+    // const handleScroll = () => {
+    //   if (window.scrollY > lastScrollY) {
+    //     setScrollDirection("⬇ Bajando");
+    //     console.log("⬇ Bajando");
+    //   } else if (window.scrollY < lastScrollY) {
+    //     setScrollDirection("⬆ Subiendo");
+    //     console.log("⬆ Subiendo");
+    //   }
+    //   setLastScrollY(window.scrollY);
+    // };
+
+    // window.addEventListener("scroll", handleScroll);
+    // return () => window.removeEventListener("scroll", handleScroll);
   }, [lastScrollY]);
 
-  // const [scroll, setScroll] = useState<number>(0);
-  // const [jumpPage, setJumPage] = useState<number>(0);
-  // const [actualPage, setActualPage] = useState<number>(1);
-
-  // useEffect(() => {
-  //   const handleScroll = () => {
-  //     setScroll(window.scrollY);
-  //   };
-
-  //   window.addEventListener("scroll", handleScroll);
-  //   return () => window.removeEventListener("scroll", handleScroll);
-  // }, []);
-
-  // useEffect(() => {
-  //   if (window.scrollY > 0 && scroll < window.innerHeight && actualPage === 1) {
-  //     console.log(window.innerHeight)
-  // scrollTo(2);
-  // setActualPage(2);
-  // console.log(window.scroll);
-  // console.log(scroll);
-  // }
-  // else if(window.scrollY > window.innerHeight && scroll < window.innerHeight * 2 && actualPage === 2) {
-  //   console.log(window.innerHeight)
-  //   scrollTo(1);
-  //   setActualPage(1);
-  // }
-
-  // }, [scroll]);
-
-
-  // const scrollTo = (page: number) => {
-  //   const element = document.getElementById("page-" + page);
-
-  //   if (element) {
-  //     element.scrollIntoView({ behavior: "smooth" });
-  //   }
-  // };
+  useEffect(() => {
+    console.log(finished);
+  }, [finished]);
 
   return (
     <>
@@ -77,7 +62,15 @@ export default function Home() {
             Share your {"{"}
             <div className="h-full w-fit z-20 flex">
               <div className="relative w-fit max-h-1 -mx-6">
-                <SquareCanvas />
+
+                <div className={`relative w-fit h-fit ${animate ? "" : ""}`}>
+                  <SquareCanvas text={text} />
+                </div>
+
+                <div className={`absolute ${!animate ? "" : ""}`}>
+                  Code
+                </div>
+
               </div>
               <span>{"}"}</span>
             </div>
@@ -93,14 +86,24 @@ export default function Home() {
       </div>
       <div className="w-4/5 border-b border-neutral-800 mx-auto"></div>
 
-      <div id="page-2" className={`not-md:flex-col not-md:gap-y-5 flex h-[100vh] pt-[100px] ${hidePanelState ? "justify-center gap-5" : "justify-evenly"}`}>
+      {/* <div className="left-0 relative w-full h-1">
+        <button
+          className="p-3 absolute text-black cursor-pointer bg-amber-400"
+          onClick={() => setButton(!button)}
+        >
+          {button ? "stop" : "continue"}
+        </button>
+
+        <div className="w-full -top-[60lvh] left-0 h-[120lvh] absolute -z-20">
+          <HelicalCanvas hide={hide} setFinished={setFinished} button={button} />
+        </div>
+      </div> */}
+
+      <div id="page-2" className={`relative not-md:flex-col not-md:gap-y-5 flex h-[100vh] pt-[100px] ${hidePanelState ? "justify-center gap-5" : "justify-center gap-5"}`}>
         <LeftSide hidePanelState={hidePanelState} hidePanelTriggerer={setHidePanelState} />
-        <RightSide hidePanelState={hidePanelState} hidePanelTriggerer={setHidePanelState} />
+        <RightSide textSetter={setText} hidePanelState={hidePanelState} hidePanelTriggerer={setHidePanelState} />
       </div>
 
-      {/* <div className="w-full h-lvh border border-amber-50">
-        <HelicalCanvas />
-      </div> */}
     </>
   );
 };
