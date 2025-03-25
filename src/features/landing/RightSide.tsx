@@ -19,30 +19,7 @@ const RightSide: React.FC<{ hidePanelState: boolean, textSetter: Dispatch<React.
         if (outputRef.current) {
             outputRef.current.scrollTop = outputRef.current.scrollHeight;
         }
-
     }, [output]);
-
-
-    useEffect(() => {
-
-        // const windowChange = () => {
-        //     if (document.hidden) {
-        //         setWindowVisibility(false);
-        //     } else {
-        //         setWindowVisibility(true);
-        //     }
-        // };
-
-        // document.addEventListener("visibilitychange", windowChange);
-
-
-        return () => {
-            // setShowOptions(false);
-            setShowButtons(false);
-            // setWindowVisibility(true);
-            // document.removeEventListener("visibilitychange", windowChange);
-        }
-    }, []);
 
     const editorMount = (editor: editor.IStandaloneCodeEditor) => {
         editorRef.current = editor;
@@ -57,7 +34,6 @@ const RightSide: React.FC<{ hidePanelState: boolean, textSetter: Dispatch<React.
 
     const shouldHidePanel = (state: boolean) => {
         hidePanelTriggerer(state);
-        // setShowOptions(state);
     };
 
 
@@ -99,8 +75,6 @@ const RightSide: React.FC<{ hidePanelState: boolean, textSetter: Dispatch<React.
 
     return (
         <>
-            {/* //cambiar esto por un grid para evitar movimientos extraños */}
-
             <div className="h-full transition-all delay-100 duration-500 w-[45%]">
 
                 <div className="relative h-max w-fit">
@@ -115,20 +89,19 @@ const RightSide: React.FC<{ hidePanelState: boolean, textSetter: Dispatch<React.
                     </div>
                 </div>
 
-                {/* grid grid-flow-col grid-rows-3 gap-4 */}
-                {/* not-md:gap-y-5 */}
                 <div className="w-full flex h-[30dvw] mt-5 not-md:flex-col justify-end">
-                    {
 
-                    }
-
-                    <div className={`ebox-5/neutral-800 relative h-full border border-black transition-all delay-100 duration-500 shadow-[0px_0px_0px] ${hidePanelState ? "w-full" : "w-full"}`}>
+                    <div
+                        className={`ebox-5/neutral-800  relative h-full border border-black transition-all delay-100 duration-500 shadow-[0px_0px_0px] ${hidePanelState ? "w-full" : "w-full"}`}
+                    >
 
                         <div className={`right-[105%] absolute justify-between flex flex-col h-full w-[70%] ease-linear ${!hidePanelState ? "animate-shrink-900" : "animate-re-shrink-900"}`}>
 
-                            <div className="h-max w-[110%] ml-6 mt-3 border-t-2 border-t-violet-600">
-                                <div className={`relative h-max w-max border-l-2 border-l-violet-600 ease-linear ${hidePanelState ? "animate-drop-800/400" : "animate-re-drop-50/400"}`}>
-                                    <ul className={`border-l border-violet-800 flex flex-col pt-3 w-fit gap-2 bg-items-violet-600/violet-900 list-disc list-inside select-none`}>
+                            <div className="pb-3 h-max w-[110%] overflow-hidden relative ml-6 mt-4">
+                                <div className="absolute w-full h-0.5 bg-neutral-700"></div>
+                                {/* <div className="absolute w-1/4 h-0.5 bg-neutral-300 top-0"></div> */}
+                                <div className={`relative h-max w-max border-l-2 border-l-neutral-600 ease-linear ${hidePanelState ? "animate-drop-800/400" : "animate-re-drop-50/400"}`}>
+                                    <ul className={`border-l border-neutral-600 flex flex-col pt-3 w-fit gap-2 bg-items-neutral-600 list-disc list-inside select-none`}>
                                         <li>
                                             Javascript
                                         </li>
@@ -142,13 +115,25 @@ const RightSide: React.FC<{ hidePanelState: boolean, textSetter: Dispatch<React.
                                 </div>
                             </div>
 
-                            <div className="relative bottom-0 ebox-5/neutral-800 w-full h-[50%] min-h-[50%] mt-4 border border-black bg-neutral-900 shadow-amber-500 text-neutral-400">
-                                <div className="z-10 top-0 left-0 relative select-none pl-2 pt-2 w-full border-b bg-inherit text-neutral-300 border-neutral-600 text-sm">Output</div>
-                                <pre ref={outputRef} className="top-0 left-0 pr-0 p-2 absolute max-h-full w-full h-full overflow-x-hidden text-wrap overflow-y-scroll">{output}</pre>
+                            <div className={`ebox-5/neutral-800 relative bottom-0 w-full h-[50%] min-h-[50%] mt-4 border border-black bg-neutral-900 shadow-amber-500 text-neutral-400`}>
+                                <div
+                                    className="z-10 top-0 left-0 relative select-none pl-2 pt-2 w-full border-b bg-inherit text-neutral-300 border-neutral-600 text-sm"
+                                >
+                                    Output
+                                </div>
+                                <pre
+                                    ref={outputRef}
+                                    className="top-0 left-0 pr-0 p-2 absolute max-h-full w-full h-full overflow-x-hidden text-wrap overflow-y-scroll"
+                                >
+                                    {output}
+                                </pre>
                             </div>
                         </div>
 
-                        <div className={`absolute right-0 bottom-full py-1 px-2 select-none text-neutral-300 text-sm bg-neutral-900 ${true ? "animate-stretch" : "animate-shrink"}`}>index.js</div>
+                        <div
+                            className={`ebox-5/neutral-800 absolute right-0 bottom-full py-1 px-2 select-none text-neutral-300 text-sm bg-neutral-900 ${true ? "animate-stretch" : "animate-shrink"}`}>
+                            index.js
+                        </div>
 
                         <Editor
                             loading={(

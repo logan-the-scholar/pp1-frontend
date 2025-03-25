@@ -4,6 +4,7 @@
 :root {
   --background: #171717;
   --foreground: #ffffff;
+  scroll-behavior: smooth;
 }
 
 @property --bg-items-shadow {
@@ -21,15 +22,23 @@
     width: fit-content;
     cursor: pointer;
 
-    background-color: --value(--color-*, [color]);
+    border: 1px solid #ffffff;
+
+    /* background-color: --value(--color-*, [color]); */
     /* background-color: --modifier(--color-*, [color]); */
     /* border: 0px 1px 1px 0px black; */
 
-    box-shadow: 4px 4px 0px --modifier(--color-*, [color]);
+    box-shadow: 4px 4px 0px --value(--color-*, [color]);
     /* var(--bg-items-shadow); */
 
     &:hover {
-      text-decoration: underline;
+      /* text-decoration: underline; */
+      translate: -1px -1px;
+      box-shadow: 5px 5px 0px --value(--color-*, [color]);
+    }
+
+    &:active {
+      translate: 2px 2px;
     }
   }
 }
@@ -236,39 +245,22 @@ button.gradient-button::before {
 }
 
 @utility -animate-direction-* {
-  --re-direction: calc(--value(integer)%  * -1);
+  --re-direction: calc(--value(integer)% * -1);
   --direction: calc(--modifier(integer)% * -1);
 }
 
 @utility animate-slide-* {
-  /* --slide-direction: --value(percentage); */
   animation: slide --value(integer, [integer])ms var(--tw-ease) forwards;
   animation-delay: --modifier(integer, [integer])ms;
   transform-origin: right;
 }
 
 @utility animate-re-slide-* {
-  /* --re-slide-direction: --value(percentage); */
   opacity: 0;
   animation: re-slide --value(integer, [integer])ms var(--tw-ease) forwards;
   animation-delay: --modifier(integer, [integer])ms;
   transform-origin: right;
 }
-
-/* @utility -animate-slide-* {
-  --slide-direction: calc(--value(percentage) * -1);
-  opacity: 1;
-  animation: slide 1.5s ease-in-out forwards;
-  transform-origin: right;
-}
-
-@utility -animate-re-slide-* {
-  --re-slide-direction: calc(--value(percentage) * -1);
-  opacity: 0;
-  animation: re-slide 1.5s ease-in-out forwards;
-  animation-delay: 200ms;
-  transform-origin: right;
-} */
 
 @keyframes slide {
   0% {
@@ -281,7 +273,7 @@ button.gradient-button::before {
   30% {
     opacity: 1;
   }
-  
+
   99% {
     transform: translateX(var(--direction));
     opacity: 0;
@@ -426,7 +418,15 @@ button.gradient-button::before {
     height: 0px;
   }
 }
+/* 
+@property --animation-delay {
+  syntax: "*";
+  inherits: false;
+} */
 
+/* @utility animation-delay-* {
+  --animation-delay: --value(integer, [integer])ms;
+} */
 
 @utility animate-rise-* {
   opacity: 0;
@@ -438,23 +438,9 @@ button.gradient-button::before {
 @utility animate-re-rise-* {
   animation: re-rise --modifier(integer, [integer])ms var(--tw-ease) forwards;
   animation-delay: --value(integer, [integer])ms;
+  /* animation-delay: var(--animation-delay); */
   transform-origin: top;
 }
-
-/* @utility animate-slide-* {
-  --slide-direction: --value(percentage);
-  opacity: 1;
-  animation: slide 1.5s ease-in-out forwards;
-  transform-origin: right;
-}
-
-@utility aniamte-re-slide-* {
-  --re-slide-direction: --value(percentage);
-  opacity: 0;
-  animation: re-slide 1.5s ease-in-out forwards;
-  animation-delay: 200ms;
-  transform-origin: right;
-} */
 
 @keyframes rise {
   0% {
@@ -467,11 +453,11 @@ button.gradient-button::before {
     transform: translateY(var(--direction));
     opacity: 0;
   }
-  
+
   70% {
     opacity: 1;
   }
-  
+
   100% {
     transform: none;
     visibility: visible;
@@ -505,6 +491,65 @@ button.gradient-button::before {
 }
 
 
+@utility animate-abduct-* {
+  animation: abduct --modifier(integer, [integer])ms var(--tw-ease) forwards;
+  animation-delay: --value(integer, [integer])ms;
+  transform-origin: top;
+}
+
+@utility animate-re-abduct-* {
+  opacity: 0;
+  animation: re-abduct --modifier(integer, [integer])ms var(--tw-ease) forwards;
+  animation-delay: --value(integer, [integer])ms;
+  transform-origin: top;
+}
+
+@keyframes abduct {
+  0% {
+    visibility: visible;
+    transform: none;
+    opacity: 1;
+  }
+
+  70% {
+    opacity: 1;
+  }
+
+  99% {
+    transform: translateY(var(--re-direction));
+    opacity: 0;
+  }
+
+  100% {
+    position: absolute;
+    visibility: hidden;
+    opacity: 0;
+  }
+}
+
+@keyframes re-abduct {
+  0% {
+    visibility: hidden;
+    opacity: 0;
+  }
+
+  1% {
+    transform: translateY(var(--direction));
+    opacity: 0;
+  }
+
+  30% {
+    position: static;
+    opacity: 1;
+  }
+
+  100% {
+    position: static;
+    transform: none;
+    visibility: visible;
+    opacity: 1;
+  }
+}
 
 
 /* TODO HACER ESTO A UN UTIL y hacer la pestaña de chat tmb */

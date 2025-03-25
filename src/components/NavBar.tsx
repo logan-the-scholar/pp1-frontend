@@ -1,13 +1,9 @@
 "use client";
 import React, { useEffect, useState } from 'react'
 import NavButton from './NavButton';
-import { BookOpen, Braces, Sparkles, User, UserPlus } from 'lucide-react';
+import { User } from 'lucide-react';
 import { jetBrainsMono } from '@/helpers/Fonts';
 import CodedText from './CodedText';
-//sunset gradient
-//#fa9726 naranja
-//#ca2f2d salmon
-//#cf207b magenta
 
 const NavBar: React.FC = () => {
     const [isSticky, setIsSticky] = useState(false);
@@ -23,7 +19,7 @@ const NavBar: React.FC = () => {
 
     return (
         <>
-            <nav className='sticky top-0 z-40 w-full border-[0px] border-neutral-100 flex h-[70px] bg-transparent backdrop-blur-sm'>
+            <nav className='w-full flex h-full'>
 
                 {/* <div className={`h-full top-0 left-0 not-md:invisible not-md:w-0.5 ${isSticky ? "md:w-fit md:-mr-10" : "w-max"}`}>
                     <div
