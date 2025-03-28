@@ -7,6 +7,18 @@
   scroll-behavior: smooth;
 }
 
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+body {
+  color: var(--foreground);
+  font-family: Mono, Menlo, Consolas, Monaco, Lucida Console, Liberation Mono, DejaVu Sans Mono, Bitstream Vera Sans Mono, Courier New, monospace, serif;
+}
+
 @property --bg-items-shadow {
   syntax: "*";
   inherits: false;
@@ -43,53 +55,160 @@
   }
 }
 
+@property --ebox-offset-size {
+  syntax: "*";
+  inherits: false;
+}
+
+@property --ebox-line-color {
+  syntax: "<percentage>";
+  inherits: false;
+}
+
+@utility ebox-line-* {
+  --ebox-line-color: --value(--color-*, [color]);
+  --ebox-line-color: --modifier(--color-*, [color]);
+}
+
 @utility ebox-* {
 
-  &::after {
-    z-index: -10;
+  &::before {
+    z-index: -20;
     content: "";
     position: absolute;
+    --ebox-offset-size: --value(integer)%;
 
+    left: 0px;
     width: calc(--value(integer)% + 100%);
     height: calc(--value(integer)% + 100%);
-
-    top: 0px;
-    left: 0px;
-    clip-path: polygon(--value(integer)% 100%, 0% calc(100% - --value(integer)%), 0% 0%, calc(100% - --value(integer)%) 0%, 100% --value(integer)%, 100% 100%);
     background-color: --value(--color-*, [color]);
     background-color: --modifier(--color-*, [color]);
 
+    clip-path: polygon(--value(integer)% 100%, 0% calc(100% - --value(integer)%), 0% 0%, calc(100% - --value(integer)%) 0%, 100% --value(integer)%, 100% 100%);
   }
 
-  &::before {
+  &::after {
     content: "";
     position: absolute;
     z-index: 20;
 
-    top: 100%;
     left: 100%;
     width: --value(integer)%;
     height: --value(integer)%;
-    transform-origin: center;
-    background-color: #000000;
+    transform-origin: top left;
+    background-color: var(--ebox-line-color);
 
     clip-path: polygon(0 1px, 1px 0, 100% 98%, 98% 100%);
+  }
+}
+
+@utility ebox-top-perspective-* {
+  &::before {
+    bottom: -1px;
+    transform: rotateX(180deg);
+    animation: b --modifier(integer, [integer])ms ease-in-out forwards;
+    animation-delay: --value(integer, [integer])ms;
+  }
+
+  &::after {
+    transform-origin: center left;
+    bottom: calc(100% - 2px);
+    transform: rotateX(180deg);
+    animation: a --modifier(integer, [integer])ms ease-in-out forwards;
+    animation-delay: --value(integer, [integer])ms;
+  }
+}
+
+@utility ebox-re-top-perspective-* {
+  &::before {
+    bottom: -1px;
+    transform: rotateX(180deg);
+    clip-path: polygon(var(--ebox-offset-size) calc(100% - var(--ebox-offset-size)), 0% calc(100% - var(--ebox-offset-size)), 0% 0%, calc(100% - var(--ebox-offset-size)) 0%, 100% 0%, 100% calc(100% - var(--ebox-offset-size)));
+    animation: r-b --modifier(integer, [integer])ms ease-in-out forwards;
+    animation-delay: --value(integer, [integer])ms;
+  }
+
+  &::after {
+    transform-origin: center left;
+    bottom: calc(100% - 1px);
+    transform: rotateX(180deg);
+    clip-path: polygon(0 1px, 1px 0, 100% 0%, 98% 2%);
+    animation: r-a --modifier(integer, [integer])ms ease-in-out forwards;
+    animation-delay: --value(integer, [integer])ms;
+  }
+}
+
+@utility ebox-perspective-* {
+  &::before {
+    top: 0px;
+    animation: b --modifier(integer, [integer])ms ease-in-out forwards;
+    animation-delay: --value(integer, [integer])ms;
+  }
+
+  &::after {
+    top: 100%;
+    animation: a --modifier(integer, [integer])ms ease-in-out forwards;
+    animation-delay: --value(integer, [integer])ms;
+  }
+}
+
+@utility ebox-re-perspective-* {
+  &::before {
+    top: 0px;
+    clip-path: polygon(var(--ebox-offset-size) calc(100% - var(--ebox-offset-size)), 0% calc(100% - var(--ebox-offset-size)), 0% 0%, calc(100% - var(--ebox-offset-size)) 0%, 100% 0%, 100% calc(100% - var(--ebox-offset-size)));
+    animation: r-b --modifier(integer, [integer])ms ease-in-out forwards;
+    animation-delay: --value(integer, [integer])ms;
 
   }
 
+  &::after {
+    top: 100%;
+    clip-path: polygon(0 1px, 1px 0, 100% 0%, 98% 2%);
+    animation: r-a --modifier(integer, [integer])ms ease-in-out forwards;
+    animation-delay: --value(integer, [integer])ms;
+  }
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+@keyframes b {
+  1% {
+    clip-path: polygon(var(--ebox-offset-size) 100%, 0% calc(100% - var(--ebox-offset-size)), 0% 0%, calc(100% - var(--ebox-offset-size)) 0%, 100% var(--ebox-offset-size), 100% 100%);
+  }
+
+  100% {
+    clip-path: polygon(var(--ebox-offset-size) calc(100% - var(--ebox-offset-size)), 0% calc(100% - var(--ebox-offset-size)), 0% 0%, calc(100% - var(--ebox-offset-size)) 0%, 100% 0%, 100% calc(100% - var(--ebox-offset-size)));
+  }
 }
 
-body {
-  color: var(--foreground);
-  font-family: Mono, Menlo, Consolas, Monaco, Lucida Console, Liberation Mono, DejaVu Sans Mono, Bitstream Vera Sans Mono, Courier New, monospace, serif;
+@keyframes r-b {
+  1% {
+    clip-path: polygon(var(--ebox-offset-size) calc(100% - var(--ebox-offset-size)), 0% calc(100% - var(--ebox-offset-size)), 0% 0%, calc(100% - var(--ebox-offset-size)) 0%, 100% 0%, 100% calc(100% - var(--ebox-offset-size)));
+  }
+
+  100% {
+    clip-path: polygon(var(--ebox-offset-size) 100%, 0% calc(100% - var(--ebox-offset-size)), 0% 0%, calc(100% - var(--ebox-offset-size)) 0%, 100% var(--ebox-offset-size), 100% 100%);
+  }
 }
+
+@keyframes a {
+  1% {
+    clip-path: polygon(0 1px, 1px 0, 100% 98%, 98% 100%);
+  }
+
+  100% {
+    clip-path: polygon(0 1px, 1px 0, 100% 0%, 98% 2%);
+  }
+}
+
+@keyframes r-a {
+  1% {
+    clip-path: polygon(0 1px, 1px 0, 100% 0%, 98% 2%);
+  }
+
+  100% {
+    clip-path: polygon(0 1px, 1px 0, 100% 98%, 98% 100%);
+  }
+}
+
 
 @keyframes blink {
   70% {
@@ -129,14 +248,13 @@ body {
   animation: blink 1s steps(2, start) infinite;
 }
 
-
-.grid-gradiant {
+/* .grid-gradiant {
   background:
     radial-gradient(circle at bottom left, hsl(0, 0%, 2%) 5%, hsla(0, 0%, 1%, 0.9) 20%, rgba(0, 0, 0, 0) 50%),
     linear-gradient(to top right, hsl(0, 0%, 2%), transparent);
-}
+} */
 
-@keyframes shake {
+/* @keyframes shake {
 
   10%,
   90% {
@@ -159,17 +277,17 @@ body {
     transform: translate3d(4px, 0, 0)
   }
 
-}
+} */
 
-.shaky {
+/* .shaky {
   animation: shake 0.82s cubic-bezier(.36, .07, .19, .97) both;
-}
+} */
 
-.coded-button:hover span::before,
+/* .coded-button:hover span::before,
 .coded-button:focus span::before {
   animation: coded-animation linear both 1.4s;
-  /* animation-duration: 1s; */
-}
+  }
+  animation-duration: 1s;
 
 .coded-button span {
   --spacing2: 1.2em;
@@ -188,9 +306,9 @@ body {
   justify-self: flex-start;
   background: inherit;
   text-orientation: sideways-right;
-}
+} */
 
-.gradient-button {
+/* .gradient-button {
   position: relative;
 }
 
@@ -205,13 +323,13 @@ button.gradient-button::before {
   height: 100%;
   position: absolute;
   border-radius: inherit;
-  /* background: linear-gradient(65deg, rgba(41, 41, 41, 0.623) 35%, rgba(41, 41, 41, 0.623) 54%, rgba(41, 41, 41, 0.733) 55%, rgba(41, 41, 41, 0.733) 65%, rgba(255, 255, 255, 0) 70%); */
   background: linear-gradient(45deg, var(--first-shadow) 45%, var(--first-shadow) 64%, var(--second-shadow) 65%, var(--second-shadow) 75%, rgba(255, 255, 255, 0) 76%);
-}
+  } */
+/* background: linear-gradient(65deg, rgba(41, 41, 41, 0.623) 35%, rgba(41, 41, 41, 0.623) 54%, rgba(41, 41, 41, 0.733) 55%, rgba(41, 41, 41, 0.733) 65%, rgba(255, 255, 255, 0) 70%); */
 
 /*TODO GENERALIZAR ESTE UTIL */
 
-.gradient-1::before {
+.key-button::before {
   --background: #5d0ec0;
   --shadow: #351174;
   --shadow2: #431a8a;
@@ -418,15 +536,6 @@ button.gradient-button::before {
     height: 0px;
   }
 }
-/* 
-@property --animation-delay {
-  syntax: "*";
-  inherits: false;
-} */
-
-/* @utility animation-delay-* {
-  --animation-delay: --value(integer, [integer])ms;
-} */
 
 @utility animate-rise-* {
   opacity: 0;

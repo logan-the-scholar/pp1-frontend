@@ -69,7 +69,7 @@ const NavBar: React.FC = () => {
                     </NavButton>
                     {/* shadow-amber-400  */}
                     {/* TODO darle vida a esto... */}
-                    <div className='-z-10 relative max-h-5/6 gradient-1 bg-violet-800 rounded-full'>
+                    <div className='-z-10 relative max-h-5/6 key-button bg-violet-800 rounded-full'>
                         <NavButton
                             overwrite={true}
                             className='z-20 h-full box-border hover:-translate-y-[0.33em] transition-transform duration-200 hover:-translate-x-[0.2em] active:translate-0 bg-violet-600 border border-violet-950 py-2 px-3 -translate-y-[0.2em] -translate-x-[0.1em] inline-block cursor-pointer rounded-full'
@@ -78,7 +78,7 @@ const NavBar: React.FC = () => {
                         </NavButton>
                     </div>
 
-                    {/* <button className="mt-auto mb-7 self-center h-fit w-fit relative gradient-1 bg-violet-800 rounded-[0.75em] cursor-pointer">
+                    {/* <button className="mt-auto mb-7 self-center h-fit w-fit relative key-button bg-violet-800 rounded-[0.75em] cursor-pointer">
                         <span className="inline-block box-border hover:-translate-y-[0.33em] mb-[2px] mr-[2px] border hover:-translate-x-[0.2em] active:translate-0 py-[0.6em] px-5 bg-violet-600 border-violet-950 rounded-[0.75em] -translate-y-[0.2em] -translate-x-[0.1em] transition-all duration-100 ease-in">
                             Create Account
                         </span>

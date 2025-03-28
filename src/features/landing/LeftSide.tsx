@@ -1,18 +1,16 @@
 "use client";
 import { jetBrainsMono } from "@/helpers/Fonts";
-import { ChevronRight } from "lucide-react";
+import { ChevronRight, ExternalLink } from "lucide-react";
 import { Dispatch, SetStateAction, useEffect, useRef, useState } from "react";
 
 const LeftSide: React.FC<{ hidePanelState: boolean, hidePanelTriggerer: Dispatch<SetStateAction<boolean>> }> = ({ hidePanelState, hidePanelTriggerer }) => {
     const animateRef = useRef<HTMLDivElement | null>(null);
     const [animate, setAnimate] = useState<boolean>(false);
-    // const [hide, setHide] = useState<boolean>(false);
-
-    // const handleClick = () => {
-
-    // };
+    const [animateDesc, setAnimateDesc] = useState(false);
 
     useEffect(() => {
+        let timeout: NodeJS.Timeout;
+
         const observer = new IntersectionObserver(([entry]) => {
             console.log(entry.isIntersecting);
             setAnimate(entry.isIntersecting);
@@ -22,9 +20,21 @@ const LeftSide: React.FC<{ hidePanelState: boolean, hidePanelTriggerer: Dispatch
 
         if (animateRef.current) observer.observe(animateRef.current);
 
-        return () => observer.disconnect(); // Limpieza al desmontar
-    }, []);
+        const startAnimation = () => {
+            setAnimateDesc(false);
+            setTimeout(() => setAnimateDesc(true), 7500);
 
+            timeout = setTimeout(startAnimation, 15000);
+        };
+
+        startAnimation();
+
+        return () => {
+            clearTimeout(timeout);
+            observer.disconnect();
+        };
+    }, []);
+    
     return (
         <>
             <div
@@ -39,39 +49,39 @@ const LeftSide: React.FC<{ hidePanelState: boolean, hidePanelTriggerer: Dispatch
             </div>
 
             <div ref={animateRef} className="overflow-hidden relative not-md:w-fit md:max-w-[40%] md:w-[40%]">
-                <div className={`absolute! font-bold mt-3 ease-linear animate-direction-50/50 text-3xl ${!hidePanelState ? "animate-re-rise-100/1500" : "animate-rise-1500/1500"}`}>
-                    {/* {"<div className='absolute'></div>"} */}
-                    Code together
-                    <div className="text-base font-normal">
-                        In a variety of programming languages—collaborate, create, and learn!
-                    </div>
-                </div>
 
-                <div className={`h-9/10 absolute ease-linear animate-direction-50/50 ${!animate ? "animate-re-rise-100/800" : "animate-rise-100/800"}`}>
+                <div className={`h-full absolute ease-linear animate-direction-50/50 ${!animate ? "animate-re-rise-100/800" : "animate-rise-100/800"}`}>
                     <div
-                        className={`absolute flex flex-col w-full h-full py-2 ease-linear -animate-direction-200/200 ${hidePanelState ? "animate-slide-1500/10" : "animate-re-slide-1500/200"}`}
+                        className={`absolute px-5 flex gap-3 flex-col w-full h-8/10 py-2 justify-center ease-linear -animate-direction-200/200 ${hidePanelState ? "animate-slide-1500/10" : "animate-re-slide-1500/200"}`}
                     >
-                        <h1 className={`${jetBrainsMono.className} text-3xl font-bold mx-5`}
+                        <h1 className={`${jetBrainsMono.className} text-3xl font-bold`}
                         >
                             Fast & easy to use online pair programming tool
                         </h1>
 
-                        <div className="mt-6 mb-8">
-                            Lorem ipsum dolor, sit amet consectetur adipisicing elit. Voluptatibus, iusto repellendus praesentium labore aperiam odio facilis ad alias at quibusdam voluptatum similique consequuntur commodi harum inventore quisquam nemo ea sint!
-                        </div>
+                        <ul className="min-h-max py-2 list-none">
+                            <li className={`text-base font-normal absolute! mt-3 ease-linear animate-direction-50/50 ${animateDesc ? "animate-re-rise-100/1500" : "animate-rise-1500/1500"}`}>
+                                Code together in a variety of programming languages—collaborate, create, and learn!
+                                {/* <div className="text-base font-normal">
+                                </div> */}
+                            </li>
 
-                        <div className="mb-6 mt-auto mx-5 flex justify-around">
-                            <button className="mt-auto mb-7 self-center h-fit w-fit relative gradient-1 bg-violet-800 rounded-[0.75em] cursor-pointer">
-                                <span className="inline-block box-border hover:-translate-y-[0.33em] mb-[2px] mr-[2px] border hover:-translate-x-[0.2em] active:translate-0 py-[0.6em] px-5 bg-violet-600 border-violet-950 rounded-[0.75em] -translate-y-[0.2em] -translate-x-[0.1em] transition-all duration-100 ease-in">
-                                    Create Account
-                                </span>
-                            </button>
-                            <button className="mt-auto mb-7 self-center h-fit w-fit relative gradient-1 bg-violet-800 rounded-[0.75em] cursor-pointer">
-                                <span className="inline-block box-border hover:-translate-y-[0.33em] mb-[2px] mr-[2px] border hover:-translate-x-[0.2em] active:translate-0 py-[0.6em] px-5 bg-violet-600 border-violet-950 rounded-[0.75em] -translate-y-[0.2em] -translate-x-[0.1em] transition-all duration-100 ease-in">
-                                    Log In
-                                </span>
-                            </button>
-                        </div>
+                            <li
+                                // onAnimationStart={() => setTitleAnimation(false)}
+                                // onAnimationEnd={() => setTitleAnimation(true)}
+                                className={`relative text-base mt-2 font-normal transition-all ease-linear animate-direction-50/50 ${!animateDesc ? "animate-re-rise-500/1500" : "animate-rise-1500/1500"}`}>
+                                Try it! the perfect editor provided by{" "}
+                                <a target="_blank" rel="noopener noreferrer" href="https://github.com/react-monaco-editor/react-monaco-editor" className="underline font-semibold cursor-pointer inline-flex">
+                                    Monaco Editor
+                                    <span><ExternalLink strokeWidth={2} /></span>
+                                </a>
+                            </li>
+                        </ul>
+
+                        {/* <div className="mt-6 mb-8">
+                            Lorem ipsum dolor, sit amet consectetur adipisicing elit. Voluptatibus, iusto repellendus praesentium labore aperiam odio facilis ad alias at quibusdam voluptatum similique consequuntur commodi harum inventore quisquam nemo ea sint!
+                        </div> */}
+
                     </div>
                 </div>
             </div>

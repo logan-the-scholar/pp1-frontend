@@ -7,9 +7,10 @@ import { jetBrainsMono } from "@/helpers/Fonts";
 import RightSide from "@/features/landing/RightSide";
 import HelicalCanvas from "@/features/landing/HelicalTube";
 import { Tv } from "lucide-react";
+import Footer from "@/components/Footer";
 
 export default function Home() {
-  const [scrollDirection, setScrollDirection] = useState("Estático");
+  // const [scrollDirection, setScrollDirection] = useState("Estático");
   const [lastScrollY, setLastScrollY] = useState(0);
   const [hidePanelState, setHidePanelState] = useState<boolean>(false);
   const [text, setText] = useState<string | undefined>(undefined);
@@ -19,7 +20,8 @@ export default function Home() {
   const [animateCube, setAnimateCube] = useState(false);
   const animateRef = useRef<HTMLDivElement | null>(null);
   const [motdAnimate, setMotdAnimate] = useState<boolean>(false);
-  const [motdAnimationEnd, setMotdAnimationEnd] = useState<boolean>(false)
+  const [motdAnimationEnd, setMotdAnimationEnd] = useState<boolean>(false);
+  const perspectiveRef = useRef<HTMLDivElement>(null);
 
   const motdtext = "Show them how you {code} in real time";
 
@@ -32,7 +34,9 @@ export default function Home() {
       console.log(entry.isIntersecting);
     }, { threshold: 0.7 });
 
-    if (animateRef.current) observer.observe(animateRef.current);
+    if (animateRef.current) {
+      observer.observe(animateRef.current);
+    }
 
     const startAnimation = () => {
       setAnimateCube(false);
@@ -53,16 +57,16 @@ export default function Home() {
   useEffect(() => {
 
     const handleScroll = () => {
-      if (window.scrollY > lastScrollY) {
-        setScrollDirection("⬇ Bajando");
-        // console.log("⬇ Bajando", window.scrollY);
-
-      } else if (window.scrollY < lastScrollY) {
-        setScrollDirection("⬆ Subiendo");
-        // console.log("⬆ Subiendo", window.scrollY);
-
-      }
       setLastScrollY(window.scrollY);
+      // if (window.scrollY > lastScrollY) {
+      //   setScrollDirection("⬇ Bajando");
+      //   console.log("⬇ Bajando", window.scrollY);
+
+      // } else if (window.scrollY < lastScrollY) {
+      //   setScrollDirection("⬆ Subiendo");
+      //   console.log("⬆ Subiendo", window.scrollY);
+
+      // }
 
     };
 
@@ -73,10 +77,9 @@ export default function Home() {
 
   return (
     <>
-      {/* <div className={`${lastScrollY > 200 ? "sticky" : "sticky"} top-0 w-full h-fit animate-abduct-${(lastScrollY > 200 ? lastScrollY - 200 : 0) / 2}/1000`}> */}
-      <div style={{
-        // transform: `translateY(-${lastScrollY > 200 ? (lastScrollY - 200) * 0.25 : 0}px)`
-      }} className={`z-40 top-0 w-full sticky h-[70px] ease-in-out transition-transform duration-75 bg-transparent backdrop-blur-sm`}>
+      <div
+        //style={{ transform: `translateY(-${lastScrollY > 200 ? (lastScrollY - 200) * 0.25 : 0}px)`}} 
+        className={`z-40 top-0 w-full sticky h-[70px] ease-in-out transition-transform duration-75 bg-transparent backdrop-blur-sm`}>
         <NavBar />
       </div>
 
@@ -156,7 +159,7 @@ export default function Home() {
 
           </div>
         </div>
-        <div className="w-4/5 border-b border-neutral-800 mx-auto"></div>
+        <div className="w-4/5 pb-[40px] border-t border-neutral-800 mx-auto"></div>
 
         {/* <div className="left-0 relative w-full h-1">
         <button
@@ -169,14 +172,31 @@ export default function Home() {
         <div className="w-full -top-[60lvh] left-0 h-[120lvh] absolute -z-20">
           <HelicalCanvas hide={hide} setFinished={setFinished} button={button} />
         </div>
-      </div> */}
+        </div> */}
 
-        <div id="page-2" className={`relative not-md:flex-col not-md:gap-y-5 flex h-[100vh] mb-auto pt-[80px] ${hidePanelState ? "justify-center gap-5" : "justify-center gap-5"}`}>
+        <div ref={perspectiveRef} className={`relative not-md:flex-col not-md:gap-y-5 flex h-[100vh] mb-auto pt-[40px] ${hidePanelState ? "justify-center gap-5" : "justify-center gap-5"}`}>
           <LeftSide hidePanelState={hidePanelState} hidePanelTriggerer={setHidePanelState} />
           <RightSide textSetter={setText} hidePanelState={hidePanelState} hidePanelTriggerer={setHidePanelState} />
         </div>
-      </div>
 
+        <div id="page-3" className="h-[100vh] flex">
+          <div className="mb-6 mt-auto mx-5 flex justify-around">
+            <button className="mt-auto mb-7 self-center h-fit w-fit relative key-button bg-violet-800 rounded-[0.75em] cursor-pointer">
+              <span className="inline-block box-border hover:-translate-y-[0.33em] mb-[2px] mr-[2px] border hover:-translate-x-[0.2em] active:translate-0 py-[0.6em] px-5 bg-violet-600 border-violet-950 rounded-[0.75em] -translate-y-[0.2em] -translate-x-[0.1em] transition-all duration-100 ease-in">
+                Create Account
+              </span>
+            </button>
+            <button className="mt-auto mb-7 self-center h-fit w-fit relative key-button bg-violet-800 rounded-[0.75em] cursor-pointer">
+              <span className="inline-block box-border hover:-translate-y-[0.33em] mb-[2px] mr-[2px] border hover:-translate-x-[0.2em] active:translate-0 py-[0.6em] px-5 bg-violet-600 border-violet-950 rounded-[0.75em] -translate-y-[0.2em] -translate-x-[0.1em] transition-all duration-100 ease-in">
+                Log In
+              </span>
+            </button>
+          </div>
+        </div>
+
+        <Footer />
+
+      </div>
     </>
   );
 };
