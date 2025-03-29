@@ -15,7 +15,7 @@ const LeftSide: React.FC<{ hidePanelState: boolean, hidePanelTriggerer: Dispatch
             console.log(entry.isIntersecting);
             setAnimate(entry.isIntersecting);
         },
-            { threshold: 0.5 }
+            { threshold: 0.7 }
         );
 
         if (animateRef.current) observer.observe(animateRef.current);
@@ -30,11 +30,14 @@ const LeftSide: React.FC<{ hidePanelState: boolean, hidePanelTriggerer: Dispatch
         startAnimation();
 
         return () => {
+
             clearTimeout(timeout);
             observer.disconnect();
         };
     }, []);
-    
+
+    const divref = useRef<HTMLDivElement>(null);
+
     return (
         <>
             <div
@@ -50,7 +53,10 @@ const LeftSide: React.FC<{ hidePanelState: boolean, hidePanelTriggerer: Dispatch
 
             <div ref={animateRef} className="overflow-hidden relative not-md:w-fit md:max-w-[40%] md:w-[40%]">
 
-                <div className={`h-full absolute ease-linear animate-direction-50/50 ${!animate ? "animate-re-rise-100/800" : "animate-rise-100/800"}`}>
+                <div
+                    ref={divref}
+                    className={`h-full absolute ease-linear animate-direction-50/50 ${!animate ? "animate-re-rise-1300/1200" : "animate-rise-100/1200"}`}
+                >
                     <div
                         className={`absolute px-5 flex gap-3 flex-col w-full h-8/10 py-2 justify-center ease-linear -animate-direction-200/200 ${hidePanelState ? "animate-slide-1500/10" : "animate-re-slide-1500/200"}`}
                     >
@@ -62,8 +68,6 @@ const LeftSide: React.FC<{ hidePanelState: boolean, hidePanelTriggerer: Dispatch
                         <ul className="min-h-max py-2 list-none">
                             <li className={`text-base font-normal absolute! mt-3 ease-linear animate-direction-50/50 ${animateDesc ? "animate-re-rise-100/1500" : "animate-rise-1500/1500"}`}>
                                 Code together in a variety of programming languages—collaborate, create, and learn!
-                                {/* <div className="text-base font-normal">
-                                </div> */}
                             </li>
 
                             <li
@@ -77,10 +81,6 @@ const LeftSide: React.FC<{ hidePanelState: boolean, hidePanelTriggerer: Dispatch
                                 </a>
                             </li>
                         </ul>
-
-                        {/* <div className="mt-6 mb-8">
-                            Lorem ipsum dolor, sit amet consectetur adipisicing elit. Voluptatibus, iusto repellendus praesentium labore aperiam odio facilis ad alias at quibusdam voluptatum similique consequuntur commodi harum inventore quisquam nemo ea sint!
-                        </div> */}
 
                     </div>
                 </div>

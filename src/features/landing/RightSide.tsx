@@ -8,21 +8,13 @@ import { useParallax } from "react-scroll-parallax";
 const RightSide: React.FC<{ hidePanelState: boolean, textSetter: Dispatch<React.SetStateAction<string | undefined>>, hidePanelTriggerer: React.Dispatch<React.SetStateAction<boolean>> }> = ({ textSetter, hidePanelState, hidePanelTriggerer }) => {
     const initialCode = "//Your code here! \n";
     const editorRef = useRef<editor.IStandaloneCodeEditor | null>(null);
-    const optionsRef = useRef<HTMLDivElement>(null);
     const scrollRef = useRef<HTMLDivElement>(null);
     const [showButtons, setShowButtons] = useState<boolean>(false);
     const [code, setCode] = useState<string>(initialCode);
-    const [output, setOutput] = useState<string>();
     const outputRef = useRef<HTMLPreElement | null>(null);
-    const animateRef = useRef<HTMLDivElement>(null);
+    // const animateRef = useRef<HTMLDivElement>(null);
     const [perspective, setPerspective] = useState<number>(0);
-    const [animation, setAnimation] = useState<boolean>(false);
-
-    useEffect(() => {
-        if (outputRef.current) {
-            outputRef.current.scrollTop = outputRef.current.scrollHeight;
-        }
-    }, [output]);
+    // const [animation, setAnimation] = useState<boolean>(false);
 
     useEffect(() => {
         if (hidePanelState && perspective === 0) {
@@ -101,26 +93,12 @@ const RightSide: React.FC<{ hidePanelState: boolean, textSetter: Dispatch<React.
         <>
             <div className="mt-auto h-fit transition-all delay-100 duration-500 w-[45%]">
 
-                {/* <div className="relative h-max w-fit">
-                    <div
-                        onAnimationStart={() => setTitleAnimation(false)}
-                        onAnimationEnd={() => setTitleAnimation(true)}
-                        className={`text-3xl font-bold h-fit transition-all ease-linear animate-direction-50/50 ${hidePanelState ? "animate-re-rise-500/1500" : "animate-rise-500/1500"}`}
-                    >
-                        Try it!
-                        <div className="text-base mt-2 font-normal">The perfect editor provided by{" "}
-                            <a target="_blank" rel="noopener noreferrer" href="https://github.com/react-monaco-editor/react-monaco-editor" className="underline font-semibold cursor-pointer inline-flex">
-                                Monaco Editor
-                                <span><ExternalLink strokeWidth={2} /></span>
-                            </a>
-                        </div>
-                    </div>
-                </div> */}
-
                 <div className={`w-full flex h-[30dvw] not-md:flex-col transition-all duration-2000 justify-end ${perspective === 0 ? "-translate-y-4" : perspective === 2 ? "translate-y-4" : ""}`}>
 
+                    {/*TODO cambiar el e-box por un div y su contenido en 95% por ejemplo, en lugar de usar before,
+                    ampliar con margin o padding y usar parallax para la animacion del contenido*/}
                     <div
-                        onAnimationStart={() => setAnimation(true)}
+                        // onAnimationStart={() => setAnimation(true)}
                         onAnimationEnd={(x) => next()}
                         className={`ebox-5/neutral-800 ebox-line-neutral-500 relative h-full border-[1px] border-neutral-500 w-full ${perspective === 0 ? "ebox-re-perspective-1/2000" : perspective === 1 ? "ebox-perspective-1/500" : perspective === 2 ? "ebox-re-top-perspective-1/2000" : "ebox-top-perspective-1/500"}`}
                     >
@@ -155,7 +133,7 @@ const RightSide: React.FC<{ hidePanelState: boolean, textSetter: Dispatch<React.
                                     ref={outputRef}
                                     className="top-0 left-0 pr-0 p-2 absolute max-h-full w-full h-full overflow-x-hidden text-wrap overflow-y-scroll"
                                 >
-                                    {output}
+                                    {"output"}
                                 </pre>
                             </div>
                         </div>
@@ -200,14 +178,14 @@ const RightSide: React.FC<{ hidePanelState: boolean, textSetter: Dispatch<React.
                                         Reset
                                     </button>
                                 }
-                                <button
+                                {/* <button
                                     onClick={() => {
                                         setPerspective(perspective >= 3 ? 0 : perspective + 1);
                                     }}
                                     className="mr-2 underline px-3 py-1.5 shadow-[3px_3px_0px_#000000] active:translate-[2px] hover:shadow-[5px_5px_0px_#000000] border-black border bg-violet-600 text-white cursor-pointer"
                                 >
                                     Perspect. {perspective}
-                                </button>
+                                </button> */}
                                 <button
                                     disabled={code === initialCode}
                                     onClick={() => run()}

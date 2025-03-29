@@ -19,32 +19,15 @@ body {
   font-family: Mono, Menlo, Consolas, Monaco, Lucida Console, Liberation Mono, DejaVu Sans Mono, Bitstream Vera Sans Mono, Courier New, monospace, serif;
 }
 
-@property --bg-items-shadow {
-  syntax: "*";
-  inherits: false;
-}
-
-@utility bg-items-shadow-* {
-  --bg-items-shadow: --value(--color-*, [color]);
-}
-
 @utility bg-items-* {
   & li {
     padding: 3px 5px 3px 5px;
     width: fit-content;
     cursor: pointer;
-
     border: 1px solid #ffffff;
-
-    /* background-color: --value(--color-*, [color]); */
-    /* background-color: --modifier(--color-*, [color]); */
-    /* border: 0px 1px 1px 0px black; */
-
     box-shadow: 4px 4px 0px --value(--color-*, [color]);
-    /* var(--bg-items-shadow); */
 
     &:hover {
-      /* text-decoration: underline; */
       translate: -1px -1px;
       box-shadow: 5px 5px 0px --value(--color-*, [color]);
     }
@@ -209,7 +192,6 @@ body {
   }
 }
 
-
 @keyframes blink {
   70% {
     opacity: 100;
@@ -248,104 +230,46 @@ body {
   animation: blink 1s steps(2, start) infinite;
 }
 
-/* .grid-gradiant {
-  background:
-    radial-gradient(circle at bottom left, hsl(0, 0%, 2%) 5%, hsla(0, 0%, 1%, 0.9) 20%, rgba(0, 0, 0, 0) 50%),
-    linear-gradient(to top right, hsl(0, 0%, 2%), transparent);
-} */
+@property --key-bg {
+  syntax: "*";
+  inherits: false;
+  /* initial-value: #00000000; */
+}
 
-/* @keyframes shake {
+@property --key-sh {
+  syntax: "*";
+  inherits: false;
+  /* initial-value: #00000000; */
+}
 
-  10%,
-  90% {
-    transform: translate3d(-1px, 0, 0);
-  }
+@utility key-bg-* {
+  --key-bg: --value(--color-*, [color]);
+  --key-bg: --modifier(--color-*, [color]);
+  /* --ebox-line-color: --value(--color-*, [color]);
+  --ebox-line-color: --modifier(--color-*, [color]); */
+}
 
-  20%,
-  80% {
-    transform: translate3d(2px, 0, 0);
-  }
+@utility key-sh-* {
+  --key-sh: --value(--color-*, [color]);
+  --key-sh: --modifier(--color-*, [color]);
+}
 
-  30%,
-  50%,
-  70% {
-    transform: translate3d(-4px, 0, 0);
-  }
-
-  40%,
-  60% {
-    transform: translate3d(4px, 0, 0)
-  }
-
-} */
-
-/* .shaky {
-  animation: shake 0.82s cubic-bezier(.36, .07, .19, .97) both;
-} */
-
-/* .coded-button:hover span::before,
-.coded-button:focus span::before {
-  animation: coded-animation linear both 1.4s;
-  }
-  animation-duration: 1s;
-
-.coded-button span {
-  --spacing2: 1.2em;
-  padding-inline: var(--spacing2);
-  transition: 0.3s;
-  box-sizing: border-box;
+@utility key-button-* {
+  /* height: fit-content; */
+  /* width: fit-content; */
   position: relative;
-  display: flex;
+  background: linear-gradient(--value(angle, [angle]), var(--key-sh) 45%, var(--key-sh) 64%, var(--key-sh) 65%, var(--key-sh) 75%, var(--key-bg) 76%);
+
+  & span {
+    width: 100%;
+    height: 100%;
+    display: inline-block;
+    box-sizing: border-box;
+    border-radius: inherit;
+  }
 }
 
-.coded-button span::before {
-  color: #8f8f8f;
-  content: "";
-  box-sizing: border-box;
-  position: absolute;
-  justify-self: flex-start;
-  background: inherit;
-  text-orientation: sideways-right;
-} */
-
-/* .gradient-button {
-  position: relative;
-}
-
-button.gradient-button::before {
-  --first-shadow: rgba(41, 41, 41, 0.733);
-  --second-shadow: rgba(41, 41, 41, 0.733);
-  top: 0;
-  left: 0;
-  box-sizing: border-box;
-  content: "";
-  width: 100%;
-  height: 100%;
-  position: absolute;
-  border-radius: inherit;
-  background: linear-gradient(45deg, var(--first-shadow) 45%, var(--first-shadow) 64%, var(--second-shadow) 65%, var(--second-shadow) 75%, rgba(255, 255, 255, 0) 76%);
-  } */
-/* background: linear-gradient(65deg, rgba(41, 41, 41, 0.623) 35%, rgba(41, 41, 41, 0.623) 54%, rgba(41, 41, 41, 0.733) 55%, rgba(41, 41, 41, 0.733) 65%, rgba(255, 255, 255, 0) 70%); */
-
-/*TODO GENERALIZAR ESTE UTIL */
-
-.key-button::before {
-  --background: #5d0ec0;
-  --shadow: #351174;
-  --shadow2: #431a8a;
-  top: 0;
-  left: 0;
-  box-sizing: border-box;
-  content: "";
-  width: 100%;
-  height: 100%;
-  position: absolute;
-  border-radius: inherit;
-  background: linear-gradient(45deg, var(--shadow2) 45%, var(--shadow2) 64%, var(--shadow2) 65%, var(--shadow2) 75%, var(--background) 76%);
-}
-
-
-/* HELLYEA ANIMATIONS */
+/* ======================= HELLYEA ANIMATIONS ======================= */
 
 @property --direction {
   syntax: "*";
@@ -547,7 +471,6 @@ button.gradient-button::before {
 @utility animate-re-rise-* {
   animation: re-rise --modifier(integer, [integer])ms var(--tw-ease) forwards;
   animation-delay: --value(integer, [integer])ms;
-  /* animation-delay: var(--animation-delay); */
   transform-origin: top;
 }
 
@@ -577,10 +500,9 @@ button.gradient-button::before {
 
 @keyframes re-rise {
   0% {
-    position: static;
-    visibility: visible;
-    transform: none;
-    opacity: 1;
+    /* visibility: visible; */
+    /* transform: none; */
+    /* opacity: 1; */
   }
 
   30% {
@@ -598,7 +520,6 @@ button.gradient-button::before {
     opacity: 0;
   }
 }
-
 
 @utility animate-abduct-* {
   animation: abduct --modifier(integer, [integer])ms var(--tw-ease) forwards;
@@ -660,8 +581,7 @@ button.gradient-button::before {
   }
 }
 
-
-/* TODO HACER ESTO A UN UTIL y hacer la pestaña de chat tmb */
+/* TODO HACER ESTO A UN UTIL y hacer la pestaña (triangulo) de chat tmb */
 
 .line::before {
   z-index: -10;
@@ -679,3 +599,82 @@ button.gradient-button::before {
   /* border-bottom: 1px #5d0ec0; */
 
 }
+
+/* .grid-gradiant {
+  background:
+    radial-gradient(circle at bottom left, hsl(0, 0%, 2%) 5%, hsla(0, 0%, 1%, 0.9) 20%, rgba(0, 0, 0, 0) 50%),
+    linear-gradient(to top right, hsl(0, 0%, 2%), transparent);
+} */
+
+/* @keyframes shake {
+
+  10%,
+  90% {
+    transform: translate3d(-1px, 0, 0);
+  }
+
+  20%,
+  80% {
+    transform: translate3d(2px, 0, 0);
+  }
+
+  30%,
+  50%,
+  70% {
+    transform: translate3d(-4px, 0, 0);
+  }
+
+  40%,
+  60% {
+    transform: translate3d(4px, 0, 0)
+  }
+
+} */
+
+/* .shaky {
+  animation: shake 0.82s cubic-bezier(.36, .07, .19, .97) both;
+} */
+
+/* .coded-button:hover span::before,
+.coded-button:focus span::before {
+  animation: coded-animation linear both 1.4s;
+  }
+  animation-duration: 1s;
+
+.coded-button span {
+  --spacing2: 1.2em;
+  padding-inline: var(--spacing2);
+  transition: 0.3s;
+  box-sizing: border-box;
+  position: relative;
+  display: flex;
+}
+
+.coded-button span::before {
+  color: #8f8f8f;
+  content: "";
+  box-sizing: border-box;
+  position: absolute;
+  justify-self: flex-start;
+  background: inherit;
+  text-orientation: sideways-right;
+} */
+
+/* .gradient-button {
+  position: relative;
+}
+
+button.gradient-button::before {
+  --first-shadow: rgba(41, 41, 41, 0.733);
+  --second-shadow: rgba(41, 41, 41, 0.733);
+  top: 0;
+  left: 0;
+  box-sizing: border-box;
+  content: "";
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  border-radius: inherit;
+  background: linear-gradient(45deg, var(--first-shadow) 45%, var(--first-shadow) 64%, var(--second-shadow) 65%, var(--second-shadow) 75%, rgba(255, 255, 255, 0) 76%);
+  } */
+/* background: linear-gradient(65deg, rgba(41, 41, 41, 0.623) 35%, rgba(41, 41, 41, 0.623) 54%, rgba(41, 41, 41, 0.733) 55%, rgba(41, 41, 41, 0.733) 65%, rgba(255, 255, 255, 0) 70%); */

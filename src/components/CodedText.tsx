@@ -1,5 +1,8 @@
 import { useEffect } from "react";
 
+/** UNUSED component 
+ * @deprecated
+*/
 const CodedText: React.FC<{ content: string; className?: string, overwrite?: boolean }> = ({ content, className, overwrite }) => {
 
     useEffect(() => {

@@ -1,12 +1,12 @@
 import { LucideProps, Sparkle, Sparkles } from "lucide-react";
 import { DOMAttributes, ForwardRefExoticComponent, MouseEventHandler, RefAttributes, useState } from "react";
 
-
 type attributes = {
     onClick?: () => any;//ForwardRefExoticComponent<Omit<LucideProps, "ref"> & RefAttributes<SVGSVGElement>>;
     onHover?: React.FC;
 };
 
+/** UNUSED component */
 const NavButton: React.FC<{ className?: string, overwrite?: boolean, children: any } & attributes> = ({ children = false, className, onHover, onClick, overwrite = false }) => {
     const [hover, setHover] = useState<boolean>(false);
     const [click, setClick] = useState<boolean>(false);
