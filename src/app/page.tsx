@@ -1,60 +1,72 @@
 "use client";
 import NavBar from "@/components/NavBar"
 import React, { useEffect, useRef, useState } from "react";
-import LeftSide from "@/features/landing/LeftSide";
+import LeftSide from "@/features/landing/SecondPage/LeftSide";
 import SquareCanvas from "@/features/landing/SquareCanvas";
 import { jetBrainsMono } from "@/helpers/Fonts";
-import RightSide from "@/features/landing/RightSide";
-import HelicalCanvas from "@/features/landing/HelicalTube";
+import RightSide from "@/features/landing/SecondPage/RightSide";
 import { Tv } from "lucide-react";
 import Footer from "@/components/Footer";
 import ThirdPage from "@/features/landing/ThirdPage";
+import { Parallax } from "react-scroll-parallax";
+import SecondPage from "@/features/landing/SecondPage/SecondPage";
 
 export default function Home() {
   const [lastScrollY, setLastScrollY] = useState(0);
-  const [hidePanelState, setHidePanelState] = useState<boolean>(false);
   const [text, setText] = useState<string | undefined>(undefined);
-  // const [finished, setFinished] = useState<boolean>(false);
-  // const [button, setButton] = useState<boolean>(false);
-  // const [hide, setHide] = useState<boolean>(false);
   const [animateCube, setAnimateCube] = useState(false);
   const animateRef = useRef<HTMLDivElement | null>(null);
   const [motdAnimate, setMotdAnimate] = useState<boolean>(false);
-  const perspectiveRef = useRef<HTMLDivElement>(null);
+  const svgRef = useRef<SVGSVGElement | null>(null);
+  const [light, setLight] = useState<boolean>(false);
 
+  const L_MAX_TIMEOUT = 24000;
+  const L_MIN_TIMEOUT = 12000;
+  const L_FLASH = 100;
+  const ABDUCT_CICLE = 20000;
   const motdtext = "Show them how you {code} in real time";
+
 
   useEffect(() => {
 
-    let timeout: NodeJS.Timeout;
+    let abduct_timeout: NodeJS.Timeout;
+    let light_timeout: NodeJS.Timeout;
 
     const observer = new IntersectionObserver(([entry]) => {
       setMotdAnimate(entry.isIntersecting);
-      console.log(entry.isIntersecting);
+
     }, { threshold: 0.7 });
 
     if (animateRef.current) {
       observer.observe(animateRef.current);
     }
 
-    const startAnimation = () => {
+    const abductAnimation = () => {
       setAnimateCube(false);
-      setTimeout(() => setAnimateCube(true), 10000);
+      setTimeout(() => setAnimateCube(true), ABDUCT_CICLE / 2);
 
-      timeout = setTimeout(startAnimation, 20000);
+      abduct_timeout = setTimeout(abductAnimation, ABDUCT_CICLE);
     };
 
-    startAnimation();
+    const lightAnimation = () => {
+      setLight(true);
+      setTimeout(() => setLight(false), L_FLASH);
+
+      light_timeout = setTimeout(lightAnimation, Math.floor(Math.random() * (L_MAX_TIMEOUT - L_MIN_TIMEOUT + 1)) + L_MIN_TIMEOUT);
+    };
+
+    abductAnimation();
+    lightAnimation();
 
     return () => {
-      clearTimeout(timeout);
+      clearTimeout(abduct_timeout);
+      clearTimeout(light_timeout);
       observer.disconnect();
     }
   }, []);
 
 
   useEffect(() => {
-
     const handleScroll = () => {
       setLastScrollY(window.scrollY);
     };
@@ -64,10 +76,10 @@ export default function Home() {
 
   }, [lastScrollY]);
 
+
   return (
     <>
       <div
-        //style={{ transform: `translateY(-${lastScrollY > 200 ? (lastScrollY - 200) * 0.25 : 0}px)`}} 
         className={`z-40 top-0 w-full sticky h-[70px] ease-in-out transition-transform duration-75 bg-transparent backdrop-grayscale-100 backdrop-blur-sm`}>
         <NavBar />
       </div>
@@ -75,17 +87,20 @@ export default function Home() {
       <div className="px-4">
         <div ref={animateRef} className={`${jetBrainsMono.className} italic text-8xl font-extrabold select-none flex items-center w-full h-[90vh]`}>
           <div className="relative mr-6 ml-auto w-full h-fit grid gap-10">
+            {/*  PARALLAX AQUI, EFECTO DE LUZ SAUCER Y DIVIDIR A COMPONENTE (TALVEZ) */}
 
             <div className="flex w-fit ml-24 ease-in-out relative transition-all duration-1000">
-              Share your 
+              Share your
               <div className="ml-18 h-full w-fit z-20 flex transition-all ease-in-out duration-1000">
-                <div className="relative w-fit delay-1500 max-h-1 -mx-6 transition-all duration-500">
+                <div className="relative w-0.5 delay-1500 max-h-1 -mx-6 transition-all duration-500">
+
+                  <div className={`absolute -top-[350px] -left-[120px] test ${!light ? "" : "opacity-0"}`}></div>
 
                   <div className={`transition-all top-0 left-0 duration-1000 w-fit h-fit ease-in-out -animate-direction-1000/1000 ${animateCube ? "animate-abduct-100/1000 absolute" : "animate-re-abduct-300/1000 relative"}`}>
                     <SquareCanvas text={text} />
                   </div>
 
-                  <div className={`transition-all duration-1000 top-0 left-0 px-4 w-fit text-center ease-in-out -animate-direction-1000/1000 ${animateCube ? "animate-re-abduct-100/1000 relative" : "animate-abduct-300/1000 absolute"}`}>
+                  <div className={`[text-shadow:_0_12px_0px_#0a0a0a] transition-all duration-1000 top-0 left-0 px-4 w-fit text-center ease-in-out -animate-direction-1000/1000 ${animateCube ? "animate-re-abduct-100/1000 relative" : "animate-abduct-300/1000 absolute"}`}>
                     Code
                   </div>
 
@@ -119,7 +134,7 @@ export default function Home() {
                             animationDelay: `${500 + (i * 50)}ms`,
                             transformOrigin: "top",
                           }}
-                          className={`${x === " " ? "opacity-0!" : ""} relative ease-in-out animate-direction-50/50 ${!motdAnimate && "animate-re-rise-500/200"}`}
+                          className={`${x === " " ? "opacity-0!" : ""} relative ease-in-out animate-direction-50/50 ${!motdAnimate && "animate-rise-500/200"}`}
                           key={`${x === " " ? "_" : x}${i}`}
                         >
                           {x === " " ? "_" : x}
@@ -128,6 +143,7 @@ export default function Home() {
                     })}
 
                     <Tv
+                      ref={svgRef}
                       style={{
                         opacity: 0,
                         animation: "rise 200ms linear forwards",
@@ -137,32 +153,15 @@ export default function Home() {
                       className="ml-4" strokeWidth={3}
                     />
                   </>
-
               }
 
             </div>
 
           </div>
         </div>
-        <div className="w-4/5 pb-[40px] border-t border-neutral-800 mx-auto"></div>
+        <div className="w-4/5 pb-1 border-t border-neutral-800 mx-auto"></div>
 
-        {/* <div className="left-0 relative w-full h-1">
-        <button
-          className="p-3 absolute text-black cursor-pointer bg-amber-400"
-          onClick={() => setButton(!button)}
-        >
-          {button ? "stop" : "continue"}
-        </button>
-
-        <div className="w-full -top-[60lvh] left-0 h-[120lvh] absolute -z-20">
-          <HelicalCanvas hide={hide} setFinished={setFinished} button={button} />
-        </div>
-        </div> */}
-
-        <div ref={perspectiveRef} className={`relative not-md:flex-col not-md:gap-y-5 flex h-[100vh] mb-auto pt-[40px] ${hidePanelState ? "justify-center gap-5" : "justify-center gap-5"}`}>
-          <LeftSide hidePanelState={hidePanelState} hidePanelTriggerer={setHidePanelState} />
-          <RightSide textSetter={setText} hidePanelState={hidePanelState} hidePanelTriggerer={setHidePanelState} />
-        </div>
+        <SecondPage setText={setText}/>
 
         <ThirdPage />
 

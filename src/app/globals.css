@@ -255,8 +255,6 @@ body {
 }
 
 @utility key-button-* {
-  /* height: fit-content; */
-  /* width: fit-content; */
   position: relative;
   background: linear-gradient(--value(angle, [angle]), var(--key-sh) 45%, var(--key-sh) 64%, var(--key-sh) 65%, var(--key-sh) 75%, var(--key-bg) 76%);
 
@@ -267,6 +265,21 @@ body {
     box-sizing: border-box;
     border-radius: inherit;
   }
+
+}
+
+.test {
+  width: 500px;
+  height: 600px;
+  /* background: conic-gradient(from 45deg at 50% 0%, */
+      /* rgba(255, 255, 200, 0.8) 0deg, */
+      /* rgba(255, 255, 100, 0.5) 60deg, */
+      /* rgba(0, 0, 0, 0) 120deg); */
+  /* border-radius: 50%; */
+
+    background: radial-gradient(ellipse at top,rgba(235, 235, 208, 0.486) 0%, rgba(0, 0, 0, 0) 70%, rgba(0, 0, 0, 0) 100%);
+
+  clip-path: polygon(50% 0%, 0% 100%, 100% 100%);
 }
 
 /* ======================= HELLYEA ANIMATIONS ======================= */
@@ -578,6 +591,21 @@ body {
     transform: none;
     visibility: visible;
     opacity: 1;
+  }
+}
+
+@utility flash-light-* {
+  animation: flash --modifier(integer, [integer])ms var(--tw-ease) forwards;
+  animation-delay: --value(integer, [integer])ms;
+}
+
+@keyframes flash {
+  0% {
+    opacity: 1;
+  }
+
+  100% {
+    opacity: 0;
   }
 }
 
