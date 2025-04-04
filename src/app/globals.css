@@ -474,6 +474,21 @@ body {
   }
 }
 
+
+@utility transition-rise-* {
+  opacity: 1;
+  transform: translateY(var(--direction));
+  transition: opacity var(--tw-duration) ease-in, transform var(--tw-duration) ease-in;
+  transition-delay: --value(integer, [integer])ms;
+}
+
+@utility transition-re-rise-* {
+  opacity: 0;
+  transform: translateY(var(--re-direction));
+  transition: opacity var(--tw-duration) ease-out, transform var(--tw-duration) ease-out;
+  transition-delay: --value(integer, [integer])ms;
+}
+
 @utility animate-rise-* {
   opacity: 0;
   animation: rise --modifier(integer, [integer])ms var(--tw-ease) forwards;
@@ -513,9 +528,6 @@ body {
 
 @keyframes re-rise {
   0% {
-    /* visibility: visible; */
-    /* transform: none; */
-    /* opacity: 1; */
   }
 
   30% {

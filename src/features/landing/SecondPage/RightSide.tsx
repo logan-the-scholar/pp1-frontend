@@ -1,20 +1,16 @@
 "use client";
 import { Editor } from "@monaco-editor/react";
-import { ExternalLink } from "lucide-react";
 import { editor } from "monaco-editor";
 import { Dispatch, useEffect, useRef, useState } from "react";
-import { useParallax } from "react-scroll-parallax";
 
-const RightSide: React.FC<{ hidePanelState: boolean, textSetter: Dispatch<React.SetStateAction<string | undefined>>, hidePanelTriggerer: React.Dispatch<React.SetStateAction<boolean>> }> = ({ textSetter, hidePanelState, hidePanelTriggerer }) => {
+const RightSide: React.FC<{ rightAnim: boolean, hidePanelState: boolean, textSetter: Dispatch<React.SetStateAction<string | undefined>>, hidePanelTriggerer: React.Dispatch<React.SetStateAction<boolean>> }> = ({ rightAnim, textSetter, hidePanelState, hidePanelTriggerer }) => {
     const initialCode = "//Your code here! \n";
     const editorRef = useRef<editor.IStandaloneCodeEditor | null>(null);
     const scrollRef = useRef<HTMLDivElement>(null);
     const [showButtons, setShowButtons] = useState<boolean>(false);
     const [code, setCode] = useState<string>(initialCode);
     const outputRef = useRef<HTMLPreElement | null>(null);
-    // const animateRef = useRef<HTMLDivElement>(null);
     const [perspective, setPerspective] = useState<number>(0);
-    // const [animation, setAnimation] = useState<boolean>(false);
 
     useEffect(() => {
         if (hidePanelState && perspective === 0) {
@@ -93,7 +89,12 @@ const RightSide: React.FC<{ hidePanelState: boolean, textSetter: Dispatch<React.
         <>
             <div className="mt-auto h-fit transition-all delay-100 duration-500 w-[45%]">
 
-                <div className={`w-full flex h-[30dvw] not-md:flex-col transition-all duration-2000 justify-end ${perspective === 0 ? "-translate-y-4" : perspective === 2 ? "translate-y-4" : ""}`}>
+                <div
+                    className={`w-full flex h-[25dvw] not-md:flex-col ease-linear animate-direction-30/1 transition-all justify-end 
+${perspective === 0 ? "duration-2000 -translate-y-4" : perspective === 2 ? "duration-2000 translate-y-4" : ""} 
+${true ? "duration-800 transition-rise-100 scale-100" : "duration-800 transition-re-rise-100 scale-70"}`
+                    }
+                >
 
                     {/*TODO cambiar el e-box por un div y su contenido en 95% por ejemplo, en lugar de usar before,
                     ampliar con margin o padding y usar parallax para la animacion del contenido*/}
@@ -103,9 +104,9 @@ const RightSide: React.FC<{ hidePanelState: boolean, textSetter: Dispatch<React.
                         className={`ebox-5/neutral-800 ebox-line-neutral-500 relative h-full border-[1px] border-neutral-500 w-full ${perspective === 0 ? "ebox-re-perspective-1/2000" : perspective === 1 ? "ebox-perspective-1/500" : perspective === 2 ? "ebox-re-top-perspective-1/2000" : "ebox-top-perspective-1/500"}`}
                     >
 
-                        <div className={`right-[105%] absolute justify-between flex flex-col h-full w-[70%] ease-linear ${!hidePanelState ? "animate-shrink-900" : "animate-re-shrink-900"}`}>
+                        <div className={`right-[115%] absolute justify-between flex flex-col h-full w-[70%] ease-linear ${!hidePanelState ? "animate-shrink-900" : "animate-re-shrink-900"}`}>
 
-                            <div className="pb-3 h-max w-[110%] overflow-hidden relative ml-6 mt-4">
+                            <div className="pb-3 h-max w-[120%] overflow-hidden relative ml-6 mt-4">
                                 <div className="absolute w-full h-0.5 bg-neutral-700"></div>
                                 {/* <div className="absolute w-1/4 h-0.5 bg-neutral-300 top-0"></div> */}
                                 <div className={`relative h-max w-max border-l-2 border-l-neutral-600 ease-linear ${hidePanelState ? "animate-drop-800/400" : "animate-re-drop-50/400"}`}>

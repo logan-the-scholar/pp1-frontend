@@ -83,7 +83,7 @@ const HelicalTube: React.FC<{
             }
 
             const rotation = move();
-            console.log(rotation);
+            // console.log(rotation);
 
             if (cubeRef.current && cubeRef2.current) {
                 cubeRef.current.rotateOnAxis(new Vector3(0, 1, 0), rotation);

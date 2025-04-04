@@ -3,7 +3,7 @@ const ThirdPage = () => {
 
     return (
         <>
-            <div className="w-4/5 mb-[80px] pb-[80px] border-b border-neutral-800 mx-auto"></div>
+            <div className="w-4/5 mb-[80px] pb-[80px] border-neutral-800 mx-auto"></div>
             <div id="page-3" className="h-[90vh] w-9/10 mx-auto flex-row">
                 <div>
                     Hands on the keyboard! start codding right now
