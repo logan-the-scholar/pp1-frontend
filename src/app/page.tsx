@@ -1,32 +1,25 @@
 "use client";
 import NavBar from "@/components/NavBar"
 import React, { useEffect, useRef, useState } from "react";
-import LeftSide from "@/features/landing/SecondPage/LeftSide";
 import SquareCanvas from "@/features/landing/SquareCanvas";
 import { jetBrainsMono } from "@/helpers/Fonts";
-import RightSide from "@/features/landing/SecondPage/RightSide";
 import { Tv } from "lucide-react";
-import Footer from "@/components/Footer";
-import ThirdPage from "@/features/landing/ThirdPage";
-import { Parallax } from "react-scroll-parallax";
 import SecondPage from "@/features/landing/SecondPage/SecondPage";
+import { ApiUrl } from "@/types/UrlObject.type";
 
 export default function Home() {
-  const [lastScrollY, setLastScrollY] = useState(0);
   const [text, setText] = useState<string | undefined>(undefined);
   const [animateCube, setAnimateCube] = useState(false);
   const animateRef = useRef<HTMLDivElement | null>(null);
   const [motdAnimate, setMotdAnimate] = useState<boolean>(false);
   const svgRef = useRef<SVGSVGElement | null>(null);
   const [light, setLight] = useState<boolean>(false);
-  const [scroll, setScroll] = useState<"up" | "down">("up");
 
   const L_MAX_TIMEOUT = 24000;
   const L_MIN_TIMEOUT = 12000;
   const L_FLASH = 100;
   const ABDUCT_CICLE = 20000;
   const motdtext = "Show them how you {code} in real time";
-
 
   useEffect(() => {
 
@@ -64,24 +57,30 @@ export default function Home() {
     }
   }, []);
 
+  const navigate = (url: string) => {
+    window.location.href = url;
+  };
+
+  const [scroll, setScroll] = useState<"up" | "down">("up");
+  const [lastScrollY, setLastScrollY] = useState(0);
 
   useEffect(() => {
-    const handleScroll = () => {
-      setLastScrollY(window.scrollY);
-    };
+      const handleScroll = () => {
+          setLastScrollY(window.scrollY);
+      };
 
-    const currentScrollY = window.scrollY;
+      const currentScrollY = window.scrollY;
 
-    if (currentScrollY > lastScrollY) {
-      setScroll("down");
-      console.log("down");
-    } else if (currentScrollY < lastScrollY) {
-      setScroll("up");
-      console.log("up");
-    }
+      if (currentScrollY > lastScrollY) {
+          setScroll("down");
+          console.log("down");
+      } else if (currentScrollY < lastScrollY) {
+          setScroll("up");
+          console.log("up");
+      }
 
-    window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
+      window.addEventListener("scroll", handleScroll);
+      return () => window.removeEventListener("scroll", handleScroll);
 
   }, [lastScrollY]);
 
@@ -90,8 +89,8 @@ export default function Home() {
     <>
       {/* bg-transparent backdrop-grayscale-100 backdrop-blur-sm */}
       <div
-        className={`z-40 top-0 bg-neutral-950 w-full sticky h-[70px] ease-in-out transition-transform duration-75 `}>
-        <NavBar />
+        className={`z-40 top-0 w-full sticky h-[70px]`}>
+        <NavBar minimize={scroll === "down"} />
       </div>
 
       <div>
@@ -171,16 +170,21 @@ export default function Home() {
             <div className="before:w-full bg-neutral-950 before:h-full before:-z-10 before:border before:border-0 before:absolute before:-right-3 before:-bottom-3 right-0 bottom-0 absolute border border-0">
               {/* <div className="ml-auto text-base not-italic w-fit mr-1 bg-inherit">- x</div> */}
               {/* <div className="border-t font-normal border-0 text-center text-base not-italic">Are you ready?</div> */}
-              <div className="py-3 flex text-base font-normal gap-3 px-8 bg-inherit">
-                
-                <button className="shadow-violet-700 h-12 key-sh-violet-900 key-bg-violet-700 key-button-[45deg] rounded-[8px] cursor-pointer">
-                  <span className="hover:-translate-y-[0.33em] mb-[2px] mr-[2px] border hover:-translate-x-[0.2em] active:translate-0 py-[0.6em] px-5 bg-violet-600 border-violet-950 -translate-y-[0.2em] -translate-x-[0.1em] transition-all duration-100 ease-in">
+              <div className="py-3 flex text-base font-normal gap-6 px-8 bg-inherit">
+
+                <button
+                  onClick={() => navigate(ApiUrl.auth.register)}
+                  className="shadow-violet-700 h-12 key-sh-violet-900 key-bg-violet-700 key-button-[45deg] rounded-[8px] cursor-pointer"
+                >
+                  <span className="hover:-translate-y-[0.44em] hover:-translate-x-[0.3em] active:translate-0 py-[0.6em] px-5 bg-violet-600 border border-violet-950 -translate-y-[0.3em] -translate-x-[0.2em] transition-all duration-100 ease-in">
                     Create Account
                   </span>
                 </button>
                 {/* shadow-[0_15px_30px_-12px] */}
-                <button className="shadow-violet-700 h-12 key-sh-violet-900 key-bg-violet-700 key-button-[60deg] bg-violet-800 rounded-[8px] cursor-pointer">
-                  <span className="hover:-translate-y-[0.33em] mb-[2px] mr-[2px] hover:-translate-x-[0.2em] active:translate-0 py-[0.6em] px-5 bg-violet-600 border border-violet-950 -translate-y-[0.2em] -translate-x-[0.1em] transition-all duration-100 ease-in">
+                <button
+                  onClick={() => navigate(ApiUrl.auth.login)}
+                  className="shadow-violet-700 h-12 key-sh-violet-900 key-bg-violet-700 key-button-[60deg] bg-violet-800 rounded-[8px] cursor-pointer">
+                  <span className="hover:-translate-y-[0.44em] hover:-translate-x-[0.3em] active:translate-0 py-[0.6em] px-5 bg-violet-600 border border-violet-950 -translate-y-[0.3em] -translate-x-[0.2em] transition-all duration-100 ease-in">
                     Log In
                   </span>
                 </button>

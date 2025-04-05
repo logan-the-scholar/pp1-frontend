@@ -14,6 +14,21 @@
   --font-mono: var(--font-geist-mono);
 }
 
+input:-webkit-autofill {
+  background-color: transparent !important; /* Evita el fondo amarillo */
+  color: inherit !important; /* Mantiene el color original del texto */
+  /* transition: background-color 5000s ease-in-out 0s;  */
+}
+
+input:-webkit-autofill,
+input:-webkit-autofill:hover, 
+input:-webkit-autofill:focus, 
+input:-webkit-autofill:active {
+  background-color: transparent !important;
+  color: inherit !important;
+  box-shadow: 0 0 0px 1000px #ffffff inset !important;
+}
+
 body {
   color: var(--foreground);
   font-family: Mono, Menlo, Consolas, Monaco, Lucida Console, Liberation Mono, DejaVu Sans Mono, Bitstream Vera Sans Mono, Courier New, monospace, serif;
