@@ -2,10 +2,12 @@
 import React, { useEffect, useState } from 'react'
 import { User } from 'lucide-react';
 import { jetBrainsMono } from '@/helpers/Fonts';
-import CodedText from './CodedText';
+import Link from 'next/link';
+import { usePathname } from 'next/navigation';
+import { ApiUrl } from '@/types/UrlObject.type';
 
 const NavBar: React.FC<{ title?: string, minimize?: boolean }> = ({ title = "CodeSaucer0.1", minimize = false }) => {
-
+    const path = usePathname();
 
     return (
         <>
@@ -22,21 +24,36 @@ const NavBar: React.FC<{ title?: string, minimize?: boolean }> = ({ title = "Cod
                 <div className={`${jetBrainsMono.className} ml-auto px-3 w-[50%] pt-3 flex justify-between z-20 mr-6 not-md:size-0 not-md:invisible`}>
 
                     <button
-                        className={`gradient-button coded-button transition-opacity duration-700 ease-in-out ${minimize ? "opacity-0" : "opacity-100"}`}
+                        className={`${path === "/" ? "forever-bracket" : "bracket"} mt-3 h-fit py-1 px-3 transition-opacity duration-700 ease-in-out ${minimize ? "opacity-0" : "opacity-100"}`}
                     >
-                        Home
+                        {
+                            path === "/" ? "Home" :
+                                <Link className='h-full' href={"/"}>
+                                    Home
+                                </Link>
+                        }
                     </button>
 
                     <button
-                        className={`gradient-button coded-button transition-opacity duration-700 ease-in-out ${minimize ? "opacity-0" : "opacity-100"}`}
+                        className={`mt-3 bracket h-fit py-1 px-3 transition-opacity duration-700 ease-in-out ${minimize ? "opacity-0" : "opacity-100"}`}
                     >
-                        About
+                        {
+                            path === "nowhere" ? "About" :
+                                <Link href={"/nowhere"}>
+                                    About
+                                </Link>
+                        }
                     </button>
 
                     <button
-                        className={`gradient-button coded-button transition-opacity duration-700 ease-in-out ${minimize ? "opacity-0" : "opacity-100"}`}
+                        className={`mt-3 bracket h-fit py-1 px-3 transition-opacity duration-700 ease-in-out ${minimize ? "opacity-0" : "opacity-100"}`}
                     >
-                        Code Sandbox
+                        {
+                            path === "nowhere" ? "sandbox" :
+                                <Link href={"/nowhere"}>
+                                    Code Sandbox
+                                </Link>
+                        }
                     </button>
 
                     <div className={`-z-10 relative max-h-5/6 key-button bg-violet-800 rounded-xl transition-opacity duration-700 ease-in-out ${minimize ? "opacity-0" : "opacity-100"}`}>
@@ -51,7 +68,7 @@ const NavBar: React.FC<{ title?: string, minimize?: boolean }> = ({ title = "Cod
                 <div className={`absolute z-40 m-auto w-full h-px flex justify-center ${minimize ? "-bottom-[1px]" : "-bottom-[1px]"}`}>
                     <div className={`h-px transition-all duration-1000 bg-neutral-700 ${minimize ? "w-1/3" : "w-7/11"}`}></div>
                 </div>
-            </nav>
+            </nav >
         </>
     );
 };

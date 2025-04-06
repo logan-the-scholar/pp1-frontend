@@ -4,18 +4,24 @@ import NavBar from '@/components/NavBar'
 import React, { useEffect, useState } from 'react'
 import Link from 'next/link';
 import { ApiUrl } from '@/types/UrlObject.type';
+import { IUserCredentials } from '@/types/zTypes';
 
 const Login = () => {
-    const [credentials, setCredentials] = useState();
+    const initial: IUserCredentials = { mail: "", password: "" }
+    const [credentials, setCredentials] = useState<IUserCredentials>(initial);
     const [showPass, setShowPass] = useState<boolean>(false);
 
-    const login = (x: React.FormEvent<HTMLFormElement>) => {
-        x.preventDefault();
+    const login = (e: React.FormEvent<HTMLFormElement>) => {
+        e.preventDefault();
     }
 
-    useEffect(() => {
+    const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const { name } = e.target;
+        let { value } = e.target;
+        if (name === "email") value = value.toLowerCase();
 
-    }, [showPass]);
+        setCredentials({ ...credentials, [name]: value });
+    };
 
     return (
         <>
@@ -25,15 +31,11 @@ const Login = () => {
             </div>
             <div className='px-4 w-full h-[100vh] absolute top-0 pt-[100px] flex justify-center'>
                 <div
-                    // className={`ebox-5/neutral-800 ebox-line-neutral-500 relative h-full border-[1px] border-neutral-500 w-full ${perspective === 0 ? "ebox-re-perspective-1/2000" : perspective === 1 ? "ebox-perspective-1/500" : perspective === 2 ? "ebox-re-top-perspective-1/2000" : "ebox-top-perspective-1/500"}`}
                     className='px-16 relative ebox-5/neutral-800 ebox-line-neutral-500 border border-neutral-500 w-2/5 not-md:w-9/10 bg-neutral-900 h-fit p-6 ebox-re-perspective-1/500'
                 >
-                    {/* <h2 className='text-2xl'>
-                        Log In to CodeSaucer
-                    </h2> */}
 
                     <div className='w-full flex justify-around'>
-                        <button className="cursor-pointer w-4/5 border border-neutral-500 key-sh-[#00000000] key-bg-[#00000000] key-button-[60deg] bg-transparent rounded-[8px] mb-5">
+                        <button className="focus:outline-3 focus:outline-violet-700 cursor-pointer w-4/5 border border-neutral-500 key-sh-[#00000000] key-bg-[#00000000] key-button-[60deg] bg-transparent rounded-[8px] mb-5">
                             <span className="p-1.5 hover:-translate-y-[0.33em] -skew-x-2 mb-[2px] mr-[2px] hover:-translate-x-[0.3em] active:translate-0 border bg-[#121212] border-white -translate-y-[0.2em] -translate-x-[0.2em] transition-all duration-100 ease-in">
                                 <div className='w-full flex justify-center'>
                                     <svg
@@ -52,7 +54,7 @@ const Login = () => {
                     </div>
 
                     <div className='w-full flex justify-around'>
-                        <button className="w-4/5 self-center cursor-pointer border border-neutral-500 key-sh-[#00000000] key-bg-[#00000000] key-button-[60deg] bg-transparent rounded-[8px]">
+                        <button className="focus:outline-3 focus:outline-violet-700 w-4/5 self-center cursor-pointer border border-neutral-500 key-sh-[#00000000] key-bg-[#00000000] key-button-[60deg] bg-transparent rounded-[8px]">
                             <span className="p-2 hover:-translate-y-[0.33em] -skew-x-2 mb-[2px] mr-[2px] hover:-translate-x-[0.3em] active:translate-0 border bg-[#121212] border-white -translate-y-[0.2em] -translate-x-[0.2em] transition-all duration-100 ease-in">
                                 <div className='w-full flex justify-center'>
                                     <svg
@@ -95,10 +97,10 @@ const Login = () => {
                                 <Mail />
                                 <input
                                     placeholder='example@mail.com'
-                                    // autoComplete='aaaaa'
+                                    onChange={(e) => handleChange(e)}
                                     className='px-3 py-1 bg-transparent w-full outline-0 focus:outline-offset-0'
                                     type="text" name="mail" id="mail"
-                                // value={}
+                                    value={credentials?.mail || ""}
                                 />
                             </div>
                         </div>
@@ -112,9 +114,10 @@ const Login = () => {
                                 <Key />
                                 <input
                                     placeholder='*******'
+                                    onChange={(e) => handleChange(e)}
                                     className='px-3 py-1 bg-transparent outline-0 focus:outline-offset-0 w-full'
-                                    type="text" name="password" id="password"
-                                // value={}
+                                    type={showPass ? "text" : "password"} name="password" id="password"
+                                    value={credentials?.password || ""}
                                 />
                                 <div
                                     onMouseDown={() => setShowPass(true)}
@@ -133,7 +136,7 @@ const Login = () => {
                         <div className='w-full flex justify-center mb-3'>
                             <button
                                 type="submit"
-                                className="cursor-pointer border border-neutral-500 key-sh-[#00000000] key-bg-[#00000000] key-button-[60deg] bg-transparent rounded-[8px]"
+                                className="focus:outline-3 focus:outline-violet-700 cursor-pointer border border-neutral-500 key-sh-[#00000000] key-bg-[#00000000] key-button-[60deg] bg-transparent rounded-[8px]"
                             >
                                 <span className="p-2 hover:-translate-y-[0.33em] -skew-x-2 mb-[2px] mr-[2px] hover:-translate-x-[0.3em] active:translate-0 border bg-[#121212] border-white -translate-y-[0.2em] -translate-x-[0.2em] transition-all duration-100 ease-in">
                                     Log In

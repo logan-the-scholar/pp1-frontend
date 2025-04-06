@@ -15,18 +15,20 @@
 }
 
 input:-webkit-autofill {
-  background-color: transparent !important; /* Evita el fondo amarillo */
-  color: inherit !important; /* Mantiene el color original del texto */
+  background-color: transparent !important;
+  /* Evita el fondo amarillo */
+  color: white !important;
+  /* Mantiene el color original del texto */
   /* transition: background-color 5000s ease-in-out 0s;  */
 }
 
 input:-webkit-autofill,
-input:-webkit-autofill:hover, 
-input:-webkit-autofill:focus, 
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus,
 input:-webkit-autofill:active {
   background-color: transparent !important;
-  color: inherit !important;
-  box-shadow: 0 0 0px 1000px #ffffff inset !important;
+  color: white !important;
+  box-shadow: 0 0 0px 1000px #262626 inset !important;
 }
 
 body {
@@ -207,6 +209,37 @@ body {
   }
 }
 
+.bracket:hover {
+  position: relative;
+  cursor: pointer;
+
+  &::after {
+    position: absolute;
+    content: "]";
+  }
+
+  &::before {
+    left: 2px;
+    position: absolute;
+    content: "[";
+  }
+}
+
+.forever-bracket {
+  position: relative;
+
+  &::after {
+    position: absolute;
+    content: "]";
+  }
+
+  &::before {
+    left: 2px;
+    position: absolute;
+    content: "[";
+  }
+}
+
 @keyframes blink {
   70% {
     opacity: 100;
@@ -287,12 +320,12 @@ body {
   width: 500px;
   height: 600px;
   /* background: conic-gradient(from 45deg at 50% 0%, */
-      /* rgba(255, 255, 200, 0.8) 0deg, */
-      /* rgba(255, 255, 100, 0.5) 60deg, */
-      /* rgba(0, 0, 0, 0) 120deg); */
+  /* rgba(255, 255, 200, 0.8) 0deg, */
+  /* rgba(255, 255, 100, 0.5) 60deg, */
+  /* rgba(0, 0, 0, 0) 120deg); */
   /* border-radius: 50%; */
 
-    background: radial-gradient(ellipse at top,rgba(235, 235, 208, 0.486) 0%, rgba(0, 0, 0, 0) 70%, rgba(0, 0, 0, 0) 100%);
+  background: radial-gradient(ellipse at top, rgba(235, 235, 208, 0.486) 0%, rgba(0, 0, 0, 0) 70%, rgba(0, 0, 0, 0) 100%);
 
   clip-path: polygon(50% 0%, 0% 100%, 100% 100%);
 }
@@ -542,8 +575,7 @@ body {
 }
 
 @keyframes re-rise {
-  0% {
-  }
+  0% {}
 
   30% {
     opacity: 1;
