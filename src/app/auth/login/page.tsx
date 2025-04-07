@@ -5,6 +5,7 @@ import React, { useEffect, useState } from 'react'
 import Link from 'next/link';
 import { ApiUrl } from '@/types/UrlObject.type';
 import { IUserCredentials } from '@/types/zTypes';
+import { redirectToGitHub } from '@/services/redirectGithub';
 
 const Login = () => {
     const initial: IUserCredentials = { mail: "", password: "" }
@@ -13,7 +14,7 @@ const Login = () => {
 
     const login = (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
-    }
+    };
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { name } = e.target;
@@ -35,7 +36,10 @@ const Login = () => {
                 >
 
                     <div className='w-full flex justify-around'>
-                        <button className="focus:outline-3 focus:outline-violet-700 cursor-pointer w-4/5 border border-neutral-500 key-sh-[#00000000] key-bg-[#00000000] key-button-[60deg] bg-transparent rounded-[8px] mb-5">
+                        <button
+                            onClick={() => redirectToGitHub()}
+                            className="focus:outline-1 focus:outline-violet-700 cursor-pointer w-4/5 border border-neutral-500 key-sh-[#00000000] key-bg-[#00000000] key-button-[60deg] bg-transparent rounded-[8px] mb-5"
+                        >
                             <span className="p-1.5 hover:-translate-y-[0.33em] -skew-x-2 mb-[2px] mr-[2px] hover:-translate-x-[0.3em] active:translate-0 border bg-[#121212] border-white -translate-y-[0.2em] -translate-x-[0.2em] transition-all duration-100 ease-in">
                                 <div className='w-full flex justify-center'>
                                     <svg
@@ -54,7 +58,7 @@ const Login = () => {
                     </div>
 
                     <div className='w-full flex justify-around'>
-                        <button className="focus:outline-3 focus:outline-violet-700 w-4/5 self-center cursor-pointer border border-neutral-500 key-sh-[#00000000] key-bg-[#00000000] key-button-[60deg] bg-transparent rounded-[8px]">
+                        <button className="focus:outline-1 focus:outline-violet-700 w-4/5 self-center cursor-pointer border border-neutral-500 key-sh-[#00000000] key-bg-[#00000000] key-button-[60deg] bg-transparent rounded-[8px]">
                             <span className="p-2 hover:-translate-y-[0.33em] -skew-x-2 mb-[2px] mr-[2px] hover:-translate-x-[0.3em] active:translate-0 border bg-[#121212] border-white -translate-y-[0.2em] -translate-x-[0.2em] transition-all duration-100 ease-in">
                                 <div className='w-full flex justify-center'>
                                     <svg
@@ -136,7 +140,7 @@ const Login = () => {
                         <div className='w-full flex justify-center mb-3'>
                             <button
                                 type="submit"
-                                className="focus:outline-3 focus:outline-violet-700 cursor-pointer border border-neutral-500 key-sh-[#00000000] key-bg-[#00000000] key-button-[60deg] bg-transparent rounded-[8px]"
+                                className="focus:outline-1 focus:outline-violet-700 cursor-pointer border border-neutral-500 key-sh-[#00000000] key-bg-[#00000000] key-button-[60deg] bg-transparent rounded-[8px]"
                             >
                                 <span className="p-2 hover:-translate-y-[0.33em] -skew-x-2 mb-[2px] mr-[2px] hover:-translate-x-[0.3em] active:translate-0 border bg-[#121212] border-white -translate-y-[0.2em] -translate-x-[0.2em] transition-all duration-100 ease-in">
                                     Log In

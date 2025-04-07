@@ -36,7 +36,8 @@ const LeftSide: React.FC<{ leftAnim: boolean, hidePanelState: boolean, hidePanel
                     <ChevronRight width={60} height={60} />
                 </div>
             </div>
-
+            {/* //TODO TRANSItIONATize THIS ANIMATIONS 
+*/}
             <div className="overflow-hidden relative not-md:w-fit md:max-w-[35%] md:w-[35%]">
                 <div
                     className={`h-full relative ease-linear animate-direction-30/1 duration-1200 ${leftAnim ? "transition-rise-100" : "transition-re-rise-100"}`}
@@ -44,6 +45,9 @@ const LeftSide: React.FC<{ leftAnim: boolean, hidePanelState: boolean, hidePanel
                     <div
                         className={`absolute px-5 pb-6 flex gap-3 flex-col w-full h-full py-2 justify-center ease-linear -animate-direction-200/200 ${hidePanelState ? "animate-slide-1500/10" : "animate-re-slide-1500/200"}`}
                     >
+                        <div className={`rounded-full bg-[#f59e0b85] absolute ease-in-out transition-opacity duration-1200 -z-10 size-36 bottom-3 left-6 -rotate-45 ${leftAnim ? "delay-1200 opacity-100" : "delay-10 opacity-0"}`}>
+                            <div className="shadow-[-9px_6px_0px_#0a0a0a] rounded-full bg-[#7e22fe85] w-full h-full left-6 absolute"></div>
+                        </div>
                         <h1 className={`${jetBrainsMono.className} text-3xl font-bold`}
                         >
                             Fast & easy to use online pair programming tool

@@ -64,6 +64,7 @@ export default function Home() {
   const [scroll, setScroll] = useState<"up" | "down">("up");
   const [lastScrollY, setLastScrollY] = useState(0);
 
+  //TODO USAR EL PARALLAX EN LUGAR DE ESTA WEA QUE NO SIRVE
   useEffect(() => {
       const handleScroll = () => {
           setLastScrollY(window.scrollY);
