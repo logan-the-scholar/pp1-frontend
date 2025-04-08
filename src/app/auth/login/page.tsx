@@ -5,23 +5,66 @@ import React, { useEffect, useState } from 'react'
 import Link from 'next/link';
 import { ApiUrl } from '@/types/UrlObject.type';
 import { IUserCredentials } from '@/types/zTypes';
-import { redirectToGitHub } from '@/services/redirectGithub';
+import { openGithubPopup } from '@/services/openGithubPopup';
+import { ErrorHelper } from '@/helpers/ErrorHelper';
+import { ApiStatusEnum } from '@/types/ApiStatus.enum';
 
 const Login = () => {
     const initial: IUserCredentials = { mail: "", password: "" }
     const [credentials, setCredentials] = useState<IUserCredentials>(initial);
     const [showPass, setShowPass] = useState<boolean>(false);
+    const [loading, setLoading] = useState<boolean>(false);
+    const [windowError, setWindowError] = useState<string | null>(null);
+    const [openError, setOpenError] = useState<boolean>(false);
 
     const login = (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
     };
 
+    useEffect(() => {
+        function handleMessage(event: MessageEvent) {
+            if (event.origin !== window.origin && !event.data.code) return;
+
+            console.log("Sesión recibida del popup:", event.data);
+            // if (event.data.code) {
+            //     setLoading(false);
+            // }
+        }
+
+        window.addEventListener("message", handleMessage);
+        return () => {
+            window.removeEventListener("message", handleMessage)
+        };
+    }, []);
+
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const { name } = e.target;
+        let { name } = e.target;
         let { value } = e.target;
-        if (name === "email") value = value.toLowerCase();
+        if (name === "fire_signal") {
+            name = "mail";
+            value = value.toLowerCase();
+        }
 
         setCredentials({ ...credentials, [name]: value });
+    };
+
+    const openPopup = async () => {
+        try {
+            await openGithubPopup();
+        } catch (error) {
+
+            if (error instanceof ErrorHelper) {
+                if (error.message === ApiStatusEnum.WINDOW_CLOSED_BY_USER) {
+                    setWindowError("The Popup was closed, try again");
+
+                } else if (error.message === ApiStatusEnum.WINDOW_FAILED_TO_OPEN) {
+                    setWindowError("Failed to open Popup, try again or contact support");
+                }
+
+                setLoading(false);
+                setOpenError(true);
+            }
+        }
     };
 
     return (
@@ -31,14 +74,22 @@ const Login = () => {
                 <NavBar title='LogIn to CodeSaucer' />
             </div>
             <div className='px-4 w-full h-[100vh] absolute top-0 pt-[100px] flex justify-center'>
+
+                <div className='relative w-1/6'>
+                </div>
+
                 <div
                     className='px-16 relative ebox-5/neutral-800 ebox-line-neutral-500 border border-neutral-500 w-2/5 not-md:w-9/10 bg-neutral-900 h-fit p-6 ebox-re-perspective-1/500'
                 >
 
                     <div className='w-full flex justify-around'>
                         <button
-                            onClick={() => redirectToGitHub()}
-                            className="focus:outline-1 focus:outline-violet-700 cursor-pointer w-4/5 border border-neutral-500 key-sh-[#00000000] key-bg-[#00000000] key-button-[60deg] bg-transparent rounded-[8px] mb-5"
+                            disabled={loading}
+                            onClick={() => {
+                                setLoading(true);
+                                openPopup();
+                            }}
+                            className="disabled:opacity-65 disabled:cursor-not-allowed focus:outline-1 focus:outline-violet-700 cursor-pointer w-4/5 border border-neutral-500 key-sh-[#00000000] key-bg-[#00000000] key-button-[60deg] bg-transparent rounded-[8px] mb-5"
                         >
                             <span className="p-1.5 hover:-translate-y-[0.33em] -skew-x-2 mb-[2px] mr-[2px] hover:-translate-x-[0.3em] active:translate-0 border bg-[#121212] border-white -translate-y-[0.2em] -translate-x-[0.2em] transition-all duration-100 ease-in">
                                 <div className='w-full flex justify-center'>
@@ -58,7 +109,9 @@ const Login = () => {
                     </div>
 
                     <div className='w-full flex justify-around'>
-                        <button className="focus:outline-1 focus:outline-violet-700 w-4/5 self-center cursor-pointer border border-neutral-500 key-sh-[#00000000] key-bg-[#00000000] key-button-[60deg] bg-transparent rounded-[8px]">
+                        <button
+                            disabled={loading}
+                            className="disabled:opacity-65 disabled:cursor-not-allowed focus:outline-1 focus:outline-violet-700 w-4/5 self-center cursor-pointer border border-neutral-500 key-sh-[#00000000] key-bg-[#00000000] key-button-[60deg] bg-transparent rounded-[8px]">
                             <span className="p-2 hover:-translate-y-[0.33em] -skew-x-2 mb-[2px] mr-[2px] hover:-translate-x-[0.3em] active:translate-0 border bg-[#121212] border-white -translate-y-[0.2em] -translate-x-[0.2em] transition-all duration-100 ease-in">
                                 <div className='w-full flex justify-center'>
                                     <svg
@@ -95,15 +148,16 @@ const Login = () => {
                         <div className='flex-row outline-1 bg-neutral-800 mb-5'>
                             <label
                                 className='w-full text-xs ml-2'
-                                htmlFor="mail"
+                                htmlFor="fire_signal"
                             >Mail</label>
                             <div className='flex ml-2'>
                                 <Mail />
                                 <input
+                                    disabled={loading}
                                     placeholder='example@mail.com'
                                     onChange={(e) => handleChange(e)}
                                     className='px-3 py-1 bg-transparent w-full outline-0 focus:outline-offset-0'
-                                    type="text" name="mail" id="mail"
+                                    type="text" name="fire_signal" id="fire_signal"
                                     value={credentials?.mail || ""}
                                 />
                             </div>
@@ -117,6 +171,8 @@ const Login = () => {
                             <div className='flex ml-2'>
                                 <Key />
                                 <input
+                                    disabled={loading}
+                                    autoComplete="new-password"
                                     placeholder='*******'
                                     onChange={(e) => handleChange(e)}
                                     className='px-3 py-1 bg-transparent outline-0 focus:outline-offset-0 w-full'
@@ -139,12 +195,21 @@ const Login = () => {
 
                         <div className='w-full flex justify-center mb-3'>
                             <button
+                                disabled={loading}
                                 type="submit"
-                                className="focus:outline-1 focus:outline-violet-700 cursor-pointer border border-neutral-500 key-sh-[#00000000] key-bg-[#00000000] key-button-[60deg] bg-transparent rounded-[8px]"
+                                className="flex disabled:cursor-not-allowed focus:outline-1 focus:outline-violet-700 cursor-pointer border border-neutral-500 key-sh-[#00000000] key-bg-[#00000000] key-button-[60deg] bg-transparent rounded-[8px]"
                             >
-                                <span className="p-2 hover:-translate-y-[0.33em] -skew-x-2 mb-[2px] mr-[2px] hover:-translate-x-[0.3em] active:translate-0 border bg-[#121212] border-white -translate-y-[0.2em] -translate-x-[0.2em] transition-all duration-100 ease-in">
-                                    Log In
-                                </span>
+                                {loading ?
+                                    <>
+                                        <span className="font-extrabold animate-bounce [animation-delay:0ms] pl-3 py-2">.</span>
+                                        <span className="font-extrabold animate-bounce [animation-delay:200ms] py-2">.</span>
+                                        <span className="font-extrabold animate-bounce [animation-delay:400ms] pr-3 py-2">.</span>
+                                    </>
+                                    :
+                                    <span className="p-2 hover:-translate-y-[0.33em] -skew-x-2 mb-[2px] mr-[2px] hover:-translate-x-[0.3em] active:translate-0 border bg-[#121212] border-white -translate-y-[0.2em] -translate-x-[0.2em] transition-all duration-100 ease-in">
+                                        Log In
+                                    </span>
+                                }
                             </button>
                         </div>
 
@@ -155,6 +220,24 @@ const Login = () => {
                         </div>
                     </form>
                 </div>
+
+                <div className='relative w-1/6'>
+                    {/* {
+                        windowError !== null && */}
+                    <div
+                        className={`absolute inline-block ease-in-out transition-all ebox-5/red-300 ebox-line-red-800 max-w-full text-red-800 ebox-re-perspective-400/1000 origin-left duration-700 ${openError ? "delay-700 scale-100" : "delay-100 scale-0"}`}>
+                        <div className='border-b flex justify-end border-red-800 font-bold px-2 text-red-800 text-xl h-fit bg-red-200'>
+                            <span onClick={() => setOpenError(false)} className='cursor-pointer'>
+                                - x
+                            </span>
+                        </div>
+                        <div className='px-2 py-3 bg-red-200'>
+                            {windowError}
+                        </div>
+                    </div>
+                    {/* } */}
+                </div>
+
             </div>
         </>
     );
