@@ -1,4 +1,4 @@
-import { ApiStatusEnum } from "@/types/ApiStatus.enum";
+import { ApiStatusEnum } from "@/types/enum/ApiStatus.enum";
 
 export class ErrorHelper extends Error {
     error: string | undefined;

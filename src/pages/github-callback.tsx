@@ -1,21 +1,12 @@
-import { useRouter } from "next/router";
-import { JSX, useEffect } from "react";
+import { useEffect } from "react";
 
-export default function GithubCallback(): JSX.Element {
-  // const { code } = router.query;
+const GithubCallback = () => {
 
   useEffect(() => {
     const queryParams = new URLSearchParams(window.location.search);
     const code = queryParams.get('code');
     if (window.opener) {
-      // if(code === null) {
-      //   window.opener.postMessage({error: "no se"}, window.origin);
-      //   window.close();
-      // } 
-      // else {
-      //   window.close();
-      // }
-      window.opener.postMessage({ code }, window.origin);
+      window.opener.postMessage({ code, type: "session-success" }, window.origin);
     }
   }, []);
 
@@ -25,3 +16,5 @@ export default function GithubCallback(): JSX.Element {
     </div>
   );
 }
+
+export default GithubCallback;

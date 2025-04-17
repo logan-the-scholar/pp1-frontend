@@ -7,7 +7,9 @@ import { ApiUrl } from '@/types/UrlObject.type';
 import { IUserCredentials } from '@/types/zTypes';
 import { openGithubPopup } from '@/services/openGithubPopup';
 import { ErrorHelper } from '@/helpers/ErrorHelper';
-import { ApiStatusEnum } from '@/types/ApiStatus.enum';
+import { ApiStatusEnum } from '@/types/enum/ApiStatus.enum';
+import { UserAuth } from '@/services/userAuth';
+import { ApiResponse } from '@/types/ApiResponse.type';
 
 const Login = () => {
     const initial: IUserCredentials = { mail: "", password: "" }
@@ -22,13 +24,19 @@ const Login = () => {
     };
 
     useEffect(() => {
-        function handleMessage(event: MessageEvent) {
+        async function handleMessage(event: MessageEvent) {
             if (event.origin !== window.origin && !event.data.code) return;
 
-            console.log("Sesión recibida del popup:", event.data);
-            // if (event.data.code) {
-            //     setLoading(false);
-            // }
+            if (event.data.type === "session-success") {
+                const response: ApiResponse.Login | ErrorHelper = await UserAuth.githubSignIn(event.data.code);
+
+                if (response instanceof ErrorHelper) {
+                    setWindowError(response.message);
+                    setLoading(false);
+                    setOpenError(true);
+                }
+
+            }
         }
 
         window.addEventListener("message", handleMessage);
@@ -40,6 +48,7 @@ const Login = () => {
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         let { name } = e.target;
         let { value } = e.target;
+
         if (name === "fire_signal") {
             name = "mail";
             value = value.toLowerCase();
@@ -71,8 +80,10 @@ const Login = () => {
         <>
             <div
                 className={`z-40 top-0 bg-neutral-950 w-full sticky h-[70px] ease-in-out transition-transform duration-75 `}>
-                <NavBar title='LogIn to CodeSaucer' />
+
+                <NavBar minimize={loading} title='LogIn to CodeSaucer' />
             </div>
+
             <div className='px-4 w-full h-[100vh] absolute top-0 pt-[100px] flex justify-center'>
 
                 <div className='relative w-1/6'>

@@ -6,4 +6,5 @@ export enum ApiStatusEnum {
 
     WINDOW_CLOSED_BY_USER = "The user closed the window",
     WINDOW_FAILED_TO_OPEN = "The window could not be opened",
+    NETWORK_ERROR = "Network error try again in a few minutes",
 }

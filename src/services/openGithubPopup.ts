@@ -1,5 +1,5 @@
 import { ErrorHelper } from "@/helpers/ErrorHelper";
-import { ApiStatusEnum } from "@/types/ApiStatus.enum";
+import { ApiStatusEnum } from "@/types/enum/ApiStatus.enum";
 import { error } from "console";
 
 export const openGithubPopup = (redirect_uri?: string | undefined) => {
@@ -20,7 +20,7 @@ export const openGithubPopup = (redirect_uri?: string | undefined) => {
         }
 
         const handleMessage = (event: MessageEvent) => {
-            if (event.data.type === 'github-success') {
+            if (event.data.type === 'session-success') {
                 clearInterval(checkPopupClosed);
                 window.removeEventListener('message', handleMessage);
                 popup.close();

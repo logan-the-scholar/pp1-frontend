@@ -1,7 +1,8 @@
 import { ErrorHelper } from "@/helpers/ErrorHelper";
 import { fetchCatch } from "./fetch-error";
-import { ApiStatusEnum } from "@/types/ApiStatus.enum";
+import { ApiStatusEnum } from "@/types/enum/ApiStatus.enum";
 
+/** Fetch a backend request, including the authentication token, as Bearer header token, from the local storage */
 export async function fetchWrap(url: string | URL | globalThis.Request, options: RequestInit) {
 
     const userSession = localStorage.getItem("userSession");
@@ -20,11 +21,13 @@ export async function fetchWrap(url: string | URL | globalThis.Request, options:
         } catch (error) {
 
             if (error instanceof ErrorHelper) {
+                
                 // if (error.message === ApiStatusEnum.TOKEN_EXPIRED) {
                 //     window.location.href = "/api/auth/logout?from=out_session";
                 //     localStorage.clear();
                 //     throw new ErrorHelper(ApiStatusEnum.TOKEN_EXPIRED, "Debes iniciar sesion nuevamente");
                 // } else 
+
                 if (error.message === ApiStatusEnum.USER_DELETED) {
                     window.location.href = "api/auth/logout?from=user_blocked";
                     localStorage.clear();

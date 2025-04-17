@@ -1,6 +1,7 @@
 import { ErrorHelper } from "@/helpers/ErrorHelper";
-import { ApiStatusEnum } from "@/types/ApiStatus.enum";
+import { ApiStatusEnum } from "@/types/enum/ApiStatus.enum";
 
+/** Fetch and catch the backend response in case of error, formating it to an `ApiStatusEnum` error */
 export async function fetchCatch(url: string | URL | globalThis.Request, options: RequestInit) {
     try {
         const response: Response = await fetch(url, { ...options });
@@ -13,7 +14,14 @@ export async function fetchCatch(url: string | URL | globalThis.Request, options
         }
 
         return data;
-    } catch (error) {
+        
+    } catch (error: any) {
+
+        if(error.message !== null && (error.message as string).includes("NetworkError")) {
+            console.error(error);
+            throw new ErrorHelper(ApiStatusEnum.NETWORK_ERROR, "500");
+        }
+
         throw error;
     }
 }
