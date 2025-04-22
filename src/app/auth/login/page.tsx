@@ -3,13 +3,13 @@ import { Eye, EyeClosed, Key, Mail } from 'lucide-react';
 import NavBar from '@/components/NavBar'
 import React, { useEffect, useState } from 'react'
 import Link from 'next/link';
-import { ApiUrl } from '@/types/UrlObject.type';
 import { IUserCredentials } from '@/types/zTypes';
 import { openGithubPopup } from '@/services/openGithubPopup';
 import { ErrorHelper } from '@/helpers/ErrorHelper';
 import { ApiStatusEnum } from '@/types/enum/ApiStatus.enum';
 import { UserAuth } from '@/services/userAuth';
 import { ApiResponse } from '@/types/ApiResponse.type';
+import { AppUrl } from '@/types/UrlObject.type';
 
 const Login = () => {
     const initial: IUserCredentials = { mail: "", password: "" }
@@ -225,7 +225,7 @@ const Login = () => {
                         </div>
 
                         <div className='w-full text-center'>Not registered yet?{" "}
-                            <Link href={ApiUrl.auth.register} className='underline'>
+                            <Link href={AppUrl.auth.register} className='underline'>
                                 Create an account
                             </Link>
                         </div>

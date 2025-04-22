@@ -1,13 +1,60 @@
 "use client";
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import { User } from 'lucide-react';
 import { jetBrainsMono } from '@/helpers/Fonts';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { ApiUrl } from '@/types/UrlObject.type';
+import UserDropDown from './UserDropDown';
 
 const NavBar: React.FC<{ title?: string, minimize?: boolean }> = ({ title = "CodeSaucer0.1", minimize = false }) => {
     const path = usePathname();
+    const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+    const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+    const divRef = useRef<HTMLDivElement>(null);
+
+    useEffect(() => {
+
+        const mouseOut = (event: MouseEvent) => {
+            if (
+                divRef.current &&
+                event.target instanceof Node &&
+                !divRef.current.contains(event.relatedTarget as Node)
+            ) {
+                timeoutRef.current = setTimeout(() => {
+                    setIsDropdownOpen(false);
+                }, 2000);
+            }
+        };
+
+        const clickOut = (event: MouseEvent) => {
+            if (divRef.current && !divRef.current.contains(event.target as Node)) {
+                setIsDropdownOpen(false);
+            }
+        };
+
+        const mouseEnter = () => {
+            if (timeoutRef.current) {
+                clearTimeout(timeoutRef.current);
+                timeoutRef.current = null;
+            }
+        };
+
+        const element = divRef.current;
+
+        if (element) {
+            element.addEventListener("mouseout", mouseOut);
+            element.addEventListener("mouseover", mouseEnter);
+        }
+        document.addEventListener("mousedown", clickOut);
+
+        return () => {
+            if (element) {
+                element.removeEventListener("mouseout", mouseOut);
+                element.removeEventListener("mouseover", mouseEnter);
+            }
+            document.removeEventListener("mousedown", clickOut);
+        };
+    }, []);
 
     return (
         <>
@@ -56,12 +103,25 @@ const NavBar: React.FC<{ title?: string, minimize?: boolean }> = ({ title = "Cod
                         }
                     </button>
 
-                    <div className={`-z-10 relative max-h-5/6 key-button bg-violet-800 rounded-xl transition-opacity duration-700 ease-in-out ${minimize ? "opacity-0" : "opacity-100"}`}>
+                    <div
+                        ref={divRef}
+                        onClick={(event) => {
+                            event.stopPropagation();
+                            setIsDropdownOpen(!isDropdownOpen);
+                        }}
+                        className={`-z-10 relative max-h-5/6 key-button bg-violet-800 rounded-xl transition-opacity duration-700 ease-in-out ${minimize ? "opacity-0" : "opacity-100"}`}>
                         <button
                             className='z-20 h-full box-border hover:-translate-y-[0.33em] transition-transform duration-200 hover:-translate-x-[0.2em] active:translate-0 bg-violet-600 border border-violet-950 py-2 px-3 -translate-y-[0.2em] -translate-x-[0.1em] inline-block cursor-pointer rounded-xl'
                         >
                             <User color="#ffffff" strokeWidth={3} />
                         </button>
+                        {
+                            <div
+                                className={`relative transition-all ${isDropdownOpen ? "" : ""}`}
+                            >
+                                <UserDropDown />
+                            </div>
+                        }
                     </div>
 
                 </div>

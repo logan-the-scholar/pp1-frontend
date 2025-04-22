@@ -5,7 +5,7 @@ import SquareCanvas from "@/features/landing/SquareCanvas";
 import { jetBrainsMono } from "@/helpers/Fonts";
 import { Tv } from "lucide-react";
 import SecondPage from "@/features/landing/SecondPage/SecondPage";
-import { ApiUrl } from "@/types/UrlObject.type";
+import { AppUrl } from "@/types/UrlObject.type";
 
 export default function Home() {
   const [text, setText] = useState<string | undefined>(undefined);
@@ -88,7 +88,6 @@ export default function Home() {
 
   return (
     <>
-      {/* bg-transparent backdrop-grayscale-100 backdrop-blur-sm */}
       <div
         className={`z-40 top-0 w-full sticky h-[70px]`}>
         <NavBar minimize={scroll === "down"} />
@@ -97,7 +96,7 @@ export default function Home() {
       <div>
         <div ref={animateRef} className={`${jetBrainsMono.className} px-4 italic text-8xl font-extrabold select-none flex items-center w-full h-[90vh]`}>
           <div className="relative mr-6 ml-auto w-full h-fit grid gap-10">
-            {/*  PARALLAX AQUI, EFECTO DE LUZ SAUCER Y DIVIDIR A COMPONENTE (TALVEZ) */}
+            {/* DIVIDIR A COMPONENTE (TALVEZ) */}
 
             <div className="flex w-fit ml-24 ease-in-out relative transition-all duration-1000">
               Share your
@@ -126,7 +125,7 @@ export default function Home() {
               className={`text-2xl relative font-normal not-italic ease-in-out animate-direction-50/50 mt-[5vw] ml-9 w-fit flex ${!motdAnimate && "animate-re-rise-500/200"}`}
             >
               {
-                //TODO hacer esto despues de montaje
+                //TODO hacer esto despues de montaje y aumentar delay
                 !motdAnimate ?
                   <>
                     <span className="relative">
@@ -141,7 +140,6 @@ export default function Home() {
                         <span
                           style={{
                             opacity: 0,
-                            // transition: "opacity 200ms ease-out, transform 200ms ease-out",
                             animation: "rise 200ms linear forwards",
                             animationDelay: `${500 + (i * 50)}ms`
                           }}
@@ -174,7 +172,7 @@ export default function Home() {
               <div className="py-3 flex text-base font-normal gap-6 px-8 bg-inherit">
 
                 <button
-                  onClick={() => navigate(ApiUrl.auth.register)}
+                  onClick={() => navigate(AppUrl.auth.register)}
                   className="shadow-violet-700 h-12 key-sh-violet-900 key-bg-violet-700 key-button-[45deg] rounded-[8px] cursor-pointer"
                 >
                   <span className="hover:-translate-y-[0.44em] hover:-translate-x-[0.3em] active:translate-0 py-[0.6em] px-5 bg-violet-600 border border-violet-950 -translate-y-[0.3em] -translate-x-[0.2em] transition-all duration-100 ease-in">
@@ -183,7 +181,7 @@ export default function Home() {
                 </button>
                 {/* shadow-[0_15px_30px_-12px] */}
                 <button
-                  onClick={() => navigate(ApiUrl.auth.login)}
+                  onClick={() => navigate(AppUrl.auth.login)}
                   className="shadow-violet-700 h-12 key-sh-violet-900 key-bg-violet-700 key-button-[60deg] bg-violet-800 rounded-[8px] cursor-pointer">
                   <span className="hover:-translate-y-[0.44em] hover:-translate-x-[0.3em] active:translate-0 py-[0.6em] px-5 bg-violet-600 border border-violet-950 -translate-y-[0.3em] -translate-x-[0.2em] transition-all duration-100 ease-in">
                     Log In
@@ -194,7 +192,6 @@ export default function Home() {
 
           </div>
         </div>
-        {/* <div className="w-4/5 pb-1 border-t border-neutral-800 mx-auto"></div> */}
 
         <SecondPage setText={setText} />
 
