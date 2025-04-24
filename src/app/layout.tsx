@@ -24,7 +24,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
     <html lang="en">
       <body
         id="page-1"
-        className={`${geistSans.variable} ${geistMono.variable} antialiased w-full h-10/10 bg-neutral-950`}
+        className={`${geistSans.variable} ${geistMono.variable} antialiased w-full h-10/10 bg-neutral-950 selection:bg-amber-400 selection:text-black`}
       >
         <Providers>
           {children}

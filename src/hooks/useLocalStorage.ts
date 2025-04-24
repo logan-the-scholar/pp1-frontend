@@ -1,6 +1,6 @@
 import { useState, useEffect, Dispatch } from "react";
 
-export function useLocalStorage<S>(key: string, initialValue: any): [S, Dispatch<any>] {
+export function useLocalStorage<S>(key: string, initialValue: any): [S, Dispatch<React.SetStateAction<S>>] {
   const [storedValue, setStoredValue] = useState(() => {
     if (typeof window === "undefined") {
       return initialValue;

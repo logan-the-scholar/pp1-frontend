@@ -171,20 +171,20 @@ export default function Home() {
               {/* <div className="border-t font-normal border-0 text-center text-base not-italic">Are you ready?</div> */}
               <div className="py-3 flex text-base font-normal gap-6 px-8 bg-inherit">
 
-                <button
+                {/* <button
                   onClick={() => navigate(AppUrl.auth.register)}
                   className="shadow-violet-700 h-12 key-sh-violet-900 key-bg-violet-700 key-button-[45deg] rounded-[8px] cursor-pointer"
                 >
                   <span className="hover:-translate-y-[0.44em] hover:-translate-x-[0.3em] active:translate-0 py-[0.6em] px-5 bg-violet-600 border border-violet-950 -translate-y-[0.3em] -translate-x-[0.2em] transition-all duration-100 ease-in">
                     Create Account
                   </span>
-                </button>
+                </button> */}
                 {/* shadow-[0_15px_30px_-12px] */}
                 <button
-                  onClick={() => navigate(AppUrl.auth.login)}
+                  onClick={() => navigate(AppUrl.auth.signin)}
                   className="shadow-violet-700 h-12 key-sh-violet-900 key-bg-violet-700 key-button-[60deg] bg-violet-800 rounded-[8px] cursor-pointer">
                   <span className="hover:-translate-y-[0.44em] hover:-translate-x-[0.3em] active:translate-0 py-[0.6em] px-5 bg-violet-600 border border-violet-950 -translate-y-[0.3em] -translate-x-[0.2em] transition-all duration-100 ease-in">
-                    Log In
+                    Sign In
                   </span>
                 </button>
               </div>

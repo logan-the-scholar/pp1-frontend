@@ -13,13 +13,12 @@ export const AppUrl = {
         /** /auth */
         _: "/auth",
         
-        /** /auth/register */
-        register: "/auth/register",
-        /** /auth/login */
-        login: "/auth/login"
+        /** /auth/signin */
+        signin: "/auth/signin"
     },
 
     dashboard: {
+        /** /dashboard */
         _: "/dashboard",
     },
 

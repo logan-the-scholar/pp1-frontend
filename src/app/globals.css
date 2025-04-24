@@ -7,6 +7,7 @@
   --background: #171717;
   --foreground: #ffffff;
   scroll-behavior: smooth;
+
 }
 
 @theme inline {
@@ -36,6 +37,7 @@ input:-webkit-autofill:active {
 body {
   color: var(--foreground);
   font-family: Mono, Menlo, Consolas, Monaco, Lucida Console, Liberation Mono, DejaVu Sans Mono, Bitstream Vera Sans Mono, Courier New, monospace, serif;
+
 }
 
 @utility bg-items-* {
@@ -139,6 +141,21 @@ body {
     animation-delay: --value(integer, [integer])ms;
   }
 }
+
+.animate-marquee {
+  animation: marquee 20s linear infinite;
+}
+
+@keyframes marquee {
+  0% {
+    transform: translateX(120%);
+  }
+
+  100% {
+    transform: translateX(-120%);
+  }
+}
+
 
 @utility ebox-perspective-* {
   &::before {

@@ -58,25 +58,31 @@ const NavBar: React.FC<{ title?: string, minimize?: boolean }> = ({ title = "Cod
 
     return (
         <>
-            <nav className={`bg-neutral-950 w-full relative flex transition-all duration-700 ${minimize ? "h-[80%]" : "h-full"}`}>
+            <nav className={`mx-auto bg-neutral-950 text-neutral-300 w-[calc(100%-48px)] relative flex transition-all px-12 duration-700 ${minimize ? "h-[80%]" : "h-full"}`}>
 
-                <div className="h-full top-0 left-0 not-md:invisible ml-2 not-md:w-0.5 md:w-fit">
+                {/*
+                 //TODO cambiar el color del icono (pasarlo a svg talvez) 
+                 */}
+                <div className="h-full top-0 left-0 not-md:invisible not-md:w-0.5 md:w-fit">
                     <div className={`pr-2 pb-2`}>
                         <img src="/40964.svg" alt="icon.png" className={`-rotate-45 transition-all duration-500 invert-100 ${minimize ? "w-6 h-6 opacity-0" : "w-15 h-15 opacity-100"}`} />
                     </div>
                 </div>
 
-                <h1 className='font-bold italic max-w-fit text-4xl mt-auto -ml-2 mb-2 typing-effect mr-2'>{title}<span className='blinking-cursor'>_</span></h1>
+                <h1 className='select-none font-bold italic max-w-fit text-4xl mt-auto -ml-2 mb-2 typing-effect mr-2'>
+                    {title}
+                    <span className='blinking-cursor'>_</span>
+                </h1>
 
-                <div className={`${jetBrainsMono.className} ml-auto px-3 w-[50%] pt-3 flex justify-between z-20 mr-6 not-md:size-0 not-md:invisible`}>
+                <div className={`${jetBrainsMono.className} ml-auto px-3 w-[50%] pt-3 flex justify-between z-20 mr-2 not-md:size-0 not-md:invisible`}>
 
                     <button
-                        className={`${path === "/" ? "forever-bracket" : "bracket"} mt-3 h-fit py-1 px-3 transition-opacity duration-700 ease-in-out ${minimize ? "opacity-0" : "opacity-100"}`}
+                        className={`bracket mt-3 h-fit py-1 px-3 transition-opacity duration-700 ease-in-out ${minimize ? "opacity-0" : "opacity-100"}`}
                     >
                         {
                             path === "/" ? "Home" :
                                 <Link className='h-full' href={"/"}>
-                                    Home
+                                    Try it
                                 </Link>
                         }
                     </button>
@@ -87,7 +93,7 @@ const NavBar: React.FC<{ title?: string, minimize?: boolean }> = ({ title = "Cod
                         {
                             path === "nowhere" ? "About" :
                                 <Link href={"/nowhere"}>
-                                    About
+                                    Pricing
                                 </Link>
                         }
                     </button>
@@ -98,7 +104,7 @@ const NavBar: React.FC<{ title?: string, minimize?: boolean }> = ({ title = "Cod
                         {
                             path === "nowhere" ? "sandbox" :
                                 <Link href={"/nowhere"}>
-                                    Code Sandbox
+                                    Support
                                 </Link>
                         }
                     </button>
@@ -125,8 +131,8 @@ const NavBar: React.FC<{ title?: string, minimize?: boolean }> = ({ title = "Cod
                     </div>
 
                 </div>
-                <div className={`absolute z-40 m-auto w-full h-px flex justify-center ${minimize ? "-bottom-[1px]" : "-bottom-[1px]"}`}>
-                    <div className={`h-px transition-all duration-1000 bg-neutral-700 ${minimize ? "w-1/3" : "w-7/11"}`}></div>
+                <div className={`absolute z-40 m-auto w-[calc(100%-48px)] pr-12 h-px flex justify-center ${minimize ? "-bottom-[1px]" : "-bottom-[1px]"}`}>
+                    <div className={`h-px transition-all duration-1000 bg-neutral-700 ${minimize ? "w-1/3" : "w-11/11"}`}></div>
                 </div>
             </nav >
         </>

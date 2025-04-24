@@ -9,6 +9,7 @@ const SecondPage: React.FC<{ setText: Dispatch<SetStateAction<string | undefined
     // const [opacity, setOpacity] = useState(0);
     const [leftAnim, setLeftAnim] = useState<boolean>(false);
     const [rightAnim, setRightAnim] = useState<boolean>(false);
+    const textList = ["Javascript", "Typescript", "Java", "React.Js", "Improve your code feedback"]
 
     // const START = 0.15 // AQUI DEBE INICIAR EN 0
     // const END = 0.85 // AQUI DEBE ESTAR EN 0
@@ -44,11 +45,38 @@ const SecondPage: React.FC<{ setText: Dispatch<SetStateAction<string | undefined
             }}
         >
             <div
-                className={`pb-20 relative not-md:flex-col not-md:gap-y-5 flex h-[100vh] mb-auto justify-center gap-10`}
+                className={`pb-10 relative not-md:flex-col not-md:gap-y-5 flex h-[100vh] mb-auto justify-center gap-10`}
             >
                 <LeftSide leftAnim={leftAnim} hidePanelState={hidePanelState} hidePanelTriggerer={setHidePanelState} />
                 <RightSide rightAnim={rightAnim} textSetter={setText} hidePanelState={hidePanelState} hidePanelTriggerer={setHidePanelState} />
             </div>
+            {/* <div className="mb-10 overflow-hidden py-2 w-full bg-violet-600 text-2xl font-bold">
+                {
+
+                    <div className="flex animate-marquee">
+                        {
+                            textList.map((x, i) => {
+                                return (
+                                    <span className="inline-block whitespace-nowrap tracking-widest" key={x + "_" + i}>
+                                        <span className="mx-8">{x}</span><span className="mx-8">/</span>
+                                    </span>
+                                );
+                            })
+                        }
+
+                        {
+                            textList.map((x, i) => {
+                                return (
+                                    <span className="inline-block whitespace-nowrap tracking-widest" key={x + "_" + i}>
+                                        <span className="mx-8">{x}</span><span className="mx-8">/</span>
+                                    </span>
+                                );
+                            })
+                        }
+                    </div>
+
+                }
+            </div> */}
         </Parallax >
     );
 };
