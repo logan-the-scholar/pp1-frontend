@@ -89,10 +89,10 @@ const Login = () => {
                 <NavBar minimize={loading} title='LogIn to CodeSaucer' />
             </div> */}
 
-            <div className='px-4 w-full h-[100vh] top-0 pt-[50px] flex flex-col items-center'>
-                <div className='text-4xl w-fit font-semibold mb-4'>
+            <div className='px-4 w-full h-[100vh] top-0 pt-[70px] flex flex-col items-center'>
+                {/* <div className='text-4xl w-fit font-semibold mb-4'>
                     Sign in to CodeSaucer
-                </div>
+                </div> */}
 
                 <div className='relative w-1/6'>
                 </div>
@@ -233,9 +233,9 @@ const Login = () => {
                         </div>
 
                         <div className='w-full text-center'>Not registered yet?{" "}
-                            <div onClick={() => null} className='underline cursor-pointer'>
+                            <span onClick={() => null} className='underline cursor-pointer'>
                                 Create an account
-                            </div>
+                            </span>
                         </div>
                     </form>
 

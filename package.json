@@ -9,6 +9,7 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@minoru/react-dnd-treeview": "^3.5.2",
     "@monaco-editor/react": "^4.7.0-rc.0",
     "@react-three/drei": "^10.0.4",
     "@react-three/fiber": "^9.1.0",
@@ -17,6 +18,7 @@
     "next": "15.2.1",
     "next-auth": "^4.24.11",
     "react": "^19.0.0",
+    "react-dnd": "^16.0.1",
     "react-dom": "^19.0.0",
     "react-scroll-parallax": "^3.4.5",
     "three": "^0.174.0",

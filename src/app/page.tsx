@@ -1,8 +1,8 @@
 "use client";
-import NavBar from "@/components/NavBar"
+import LandingNavBar from "@/components/LandingNavBar"
 import React, { useEffect, useRef, useState } from "react";
 import SquareCanvas from "@/features/landing/SquareCanvas";
-import { jetBrainsMono } from "@/helpers/Fonts";
+import { jetBrainsMono } from "@/helpers/FontLoader";
 import { Tv } from "lucide-react";
 import SecondPage from "@/features/landing/SecondPage/SecondPage";
 import { AppUrl } from "@/types/UrlObject.type";
@@ -90,7 +90,7 @@ export default function Home() {
     <>
       <div
         className={`z-40 top-0 w-full sticky h-[70px]`}>
-        <NavBar minimize={scroll === "down"} />
+        <LandingNavBar minimize={scroll === "down"} />
       </div>
 
       <div>
@@ -166,7 +166,7 @@ export default function Home() {
 
             </div>
 
-            <div className="before:w-full bg-neutral-950 before:h-full before:-z-10 before:border before:border-0 before:absolute before:-right-3 before:-bottom-3 right-0 bottom-0 absolute border border-0">
+            <div className="before:w-full bg-neutral-950 before:h-full before:-z-10 before:border-0 before:absolute before:-right-3 before:-bottom-3 right-0 bottom-0 absolute border-0">
               {/* <div className="ml-auto text-base not-italic w-fit mr-1 bg-inherit">- x</div> */}
               {/* <div className="border-t font-normal border-0 text-center text-base not-italic">Are you ready?</div> */}
               <div className="py-3 flex text-base font-normal gap-6 px-8 bg-inherit">

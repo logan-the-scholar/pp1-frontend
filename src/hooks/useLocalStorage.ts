@@ -1,3 +1,4 @@
+"use client";
 import { useState, useEffect, Dispatch } from "react";
 
 export function useLocalStorage<S>(key: string, initialValue: any): [S, Dispatch<React.SetStateAction<S>>] {

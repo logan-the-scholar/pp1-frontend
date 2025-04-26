@@ -21,6 +21,11 @@ export const jetBrainsMono = localFont({
             path: "../../public/fonts/JetBrainsMono-ExtraBoldItalic.ttf",
             weight: "800",
             style: "italic"
+        },
+        {
+            path: "../../public/fonts/JetBrainsMono-ExtraLight.ttf",
+            weight: "300",
+            style: "normal",
         }
     ],
     variable: '--font-myfont',

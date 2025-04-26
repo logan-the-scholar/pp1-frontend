@@ -1,5 +1,5 @@
 "use client";
-import { jetBrainsMono } from "@/helpers/Fonts";
+import { jetBrainsMono } from "@/helpers/FontLoader";
 import { ChevronRight, ExternalLink } from "lucide-react";
 import { Dispatch, SetStateAction, useEffect, useRef, useState } from "react";
 
