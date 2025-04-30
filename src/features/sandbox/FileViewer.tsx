@@ -1,25 +1,35 @@
 "use client";
-import { getBackendOptions, MultiBackend, Tree } from "@minoru/react-dnd-treeview";
-import { Folder, FolderOpen } from "lucide-react";
+import { getBackendOptions, MultiBackend, NodeModel, Tree } from "@minoru/react-dnd-treeview";
 import React, { useState } from "react";
 import { DndProvider } from "react-dnd";
 import FileComponent from "./FileComponent";
-import { jetBrainsMono } from "@/helpers/FontLoader";
+import { useDispatch } from "react-redux";
+import { set } from "@/redux/fileSlice";
+
+export type FileMetaData = {
+    fileType: string, fullPath?: string, content?: string
+}
 
 const FileViewer: React.FC = () => {
-    const [treeData, setTreeData] = useState(
+
+    const [treeData, setTreeData] = useState<NodeModel<FileMetaData>[]>(
         [
             {
                 "id": 1,
                 "parent": 0,
                 "droppable": true,
-                "text": "common"
+                "text": "common",
+                "data": {
+                    "fileType": "folder"
+                }
             },
             {
                 "id": 2,
                 "parent": 1,
                 "text": "seed-data.json",
                 "data": {
+                    "fullPath": "common",
+                    "content": "none",
                     "fileType": "json"
                 }
             },
@@ -36,13 +46,19 @@ const FileViewer: React.FC = () => {
                 "id": 4,
                 "parent": 0,
                 "droppable": true,
-                "text": "root"
+                "text": "root",
+                "data": {
+                    "fileType": "folder"
+                }
             },
             {
                 "id": 5,
                 "parent": 4,
                 "droppable": true,
-                "text": "app"
+                "text": "app",
+                "data": {
+                    "fileType": "folder"
+                }
             },
             {
                 "id": 6,
@@ -55,6 +71,16 @@ const FileViewer: React.FC = () => {
         ]
     );
     const handleDrop = (newTreeData: any) => setTreeData(newTreeData);
+    const [selected, setSelected] = useState<NodeModel<FileMetaData> | null>(null);
+    const dispatch = useDispatch();
+
+    const select = (node: NodeModel<FileMetaData>) => {
+        setSelected(node);
+    };
+
+    const openFile = (node: NodeModel<FileMetaData>) => {
+        dispatch(set(node));
+    };
 
     return (
         <div className="select-none pt-2 w-[20%] relative min-w-[10%] max-w-[50%] h-full text-sm flex flex-col">
@@ -76,8 +102,12 @@ const FileViewer: React.FC = () => {
                         onDrop={handleDrop}
                         render={(node, { depth, isOpen, onToggle }) => (
                             <div
-                                className="w-full cursor-pointer hover:bg-[#ffffff10] flex"
-                                onClick={() => node.droppable ? onToggle() : null} style={{ paddingLeft: (depth * 22) + 16 }}
+                                className={`w-full cursor-pointer flex ${selected?.id === node.id ? "bg-[#ffffff1c]" : "hover:bg-[#ffffff10]"}`}
+                                onClick={() => {
+                                    node.droppable ? onToggle() : openFile(node);
+                                    select(node);
+                                }}
+                                style={{ paddingLeft: (depth * 22) + 16 }}
                             >
                                 <FileComponent isOpen={isOpen} node={node} />
                             </div>
