@@ -26,7 +26,9 @@ const CodeViewer = () => {
             </div>
 
             {/* PATH VIEW */}
-            <div className="px-4 py-1.5 border-x border-t border-neutral-400 cursor-pointer text-xs text-neutral-300 bg-[#1e1e1e] select-none">aa {">"} asdjaks {">"} asdsn</div>
+            <div className="px-4 py-1.5 border-x border-t border-neutral-400 cursor-pointer text-xs text-neutral-300 bg-[#1e1e1e] select-none">
+                aa {">"} asdjaks {">"} asdsn
+            </div>
 
             {/* EDITOR */}
             <Editor

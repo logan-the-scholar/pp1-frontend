@@ -3,73 +3,18 @@ import { getBackendOptions, MultiBackend, NodeModel, Tree } from "@minoru/react-
 import React, { useState } from "react";
 import { DndProvider } from "react-dnd";
 import FileComponent from "./FileComponent";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { set } from "@/redux/fileSlice";
+import { RootState } from "@/redux/store";
 
 export type FileMetaData = {
-    fileType: string, fullPath?: string, content?: string
+    fileType: string, fullPath?: string[] | number[], content?: string
 }
 
 const FileViewer: React.FC = () => {
 
-    const [treeData, setTreeData] = useState<NodeModel<FileMetaData>[]>(
-        [
-            {
-                "id": 1,
-                "parent": 0,
-                "droppable": true,
-                "text": "common",
-                "data": {
-                    "fileType": "folder"
-                }
-            },
-            {
-                "id": 2,
-                "parent": 1,
-                "text": "seed-data.json",
-                "data": {
-                    "fullPath": "common",
-                    "content": "none",
-                    "fileType": "json"
-                }
-            },
-            {
-                "id": 3,
-                "parent": 1,
-                "text": "config.ts",
-                "data": {
-                    "fileType": "ts"
-                }
+    const [treeData, setTreeData] = useState<NodeModel<FileMetaData>[]>(useSelector((state: RootState) => state.three));
 
-            },
-            {
-                "id": 4,
-                "parent": 0,
-                "droppable": true,
-                "text": "root",
-                "data": {
-                    "fileType": "folder"
-                }
-            },
-            {
-                "id": 5,
-                "parent": 4,
-                "droppable": true,
-                "text": "app",
-                "data": {
-                    "fileType": "folder"
-                }
-            },
-            {
-                "id": 6,
-                "parent": 5,
-                "text": "index.ts",
-                "data": {
-                    "fileType": "ts"
-                }
-            }
-        ]
-    );
     const handleDrop = (newTreeData: any) => setTreeData(newTreeData);
     const [selected, setSelected] = useState<NodeModel<FileMetaData> | null>(null);
     const dispatch = useDispatch();
@@ -82,8 +27,36 @@ const FileViewer: React.FC = () => {
         dispatch(set(node));
     };
 
+    const createNode = () => {
+
+    };
+
+    const [visibleMenu, setVisibleMenu] = useState(false);
+    const [positionMenu, setPositionMenu] = useState({ x: 0, y: 0 });
+
+    const handleContextMenu = (e: React.MouseEvent) => {
+        e.preventDefault();
+        setPositionMenu({ x: e.pageX, y: e.pageY });
+        setVisibleMenu(true);
+    };
+
+    const handleHideContextMenu = () => {
+        setVisibleMenu(false);
+    };
+
     return (
-        <div className="select-none pt-2 w-[20%] relative min-w-[10%] max-w-[50%] h-full text-sm flex flex-col">
+        <div onClick={handleHideContextMenu} className="select-none pt-2 w-[20%] relative min-w-[10%] max-w-[50%] h-full text-sm flex flex-col">
+
+            {/* CONTEXT MENU */}
+            {visibleMenu &&
+                <div
+                    style={{ top: positionMenu.y, left: positionMenu.x }}
+                    className="bg-[#1e1e1e] absolute w-fit text-nowrap z-20"
+                >
+                    context menu here
+                </div>
+            }
+
             <DndProvider backend={MultiBackend} options={getBackendOptions()}>
                 <div
                     className="z-50 left-[calc(100%-5px)] top-0 absolute w-1! h-[100vh] cursor-ew-resize transition-colors ease-in-out delay-300 hover:bg-[#ffffff44]"
@@ -96,23 +69,28 @@ const FileViewer: React.FC = () => {
                 <div className="bg-[#1e1e1e] px-2 py-1 font-bold w-full">Project name</div>
 
                 <div className="flex-1 font-light mt-2 max-w-full h-full w-full overflow-x-hidden overflow-y-scroll">
-                    <Tree
-                        tree={treeData}
-                        rootId={0}
-                        onDrop={handleDrop}
-                        render={(node, { depth, isOpen, onToggle }) => (
-                            <div
-                                className={`w-full cursor-pointer flex ${selected?.id === node.id ? "bg-[#ffffff1c]" : "hover:bg-[#ffffff10]"}`}
-                                onClick={() => {
-                                    node.droppable ? onToggle() : openFile(node);
-                                    select(node);
-                                }}
-                                style={{ paddingLeft: (depth * 22) + 16 }}
-                            >
-                                <FileComponent isOpen={isOpen} node={node} />
-                            </div>
-                        )}
-                    />
+                    {
+                        treeData !== undefined &&
+                        <Tree
+                            tree={treeData}
+                            rootId={0}
+                            onDrop={handleDrop}
+                            render={(node, { depth, isOpen, onToggle }) => (
+                                <div
+                                    className={`w-full cursor-pointer flex ${selected?.id === node.id ? "bg-[#ffffff1c]" : "hover:bg-[#ffffff10]"}`}
+                                    onContextMenu={handleContextMenu}
+                                    onClick={(e) => {
+                                        e.button
+                                        node.droppable ? onToggle() : openFile(node);
+                                        select(node);
+                                    }}
+                                    style={{ paddingLeft: (depth * 22) + 16 }}
+                                >
+                                    <FileComponent isOpen={isOpen} node={node} />
+                                </div>
+                            )}
+                        />
+                    }
                 </div>
             </DndProvider>
         </div>
