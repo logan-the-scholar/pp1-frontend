@@ -2,7 +2,7 @@ import { FileMetaData } from '@/features/sandbox/FileViewer';
 import { NodeModel } from '@minoru/react-dnd-treeview';
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 
-//TODO leer desde localStorage
+//TODO leer desde localStorage junto con un array de archivos abiertos, para permanencia de sesion
 const initialState: NodeModel<FileMetaData> = {
     id: '',
     parent: '',

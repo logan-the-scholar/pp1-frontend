@@ -1,4 +1,5 @@
 import { FileMetaData } from "@/features/sandbox/FileViewer";
+import FileType from "@/types/enum/FileType";
 import { NodeModel } from "@minoru/react-dnd-treeview";
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 
@@ -67,12 +68,12 @@ const threeSlice = createSlice({
     initialState,
     reducers: {
         getById(state, action: PayloadAction<string | number>) {
-
+            state.find((node) => node.id === action.payload);
         },
 
         createNode(state, action: PayloadAction<NodeModel<FileMetaData>>) {
             if (action.payload.parent !== 0) {
-                const newNode: NodeModel<FileMetaData> = action.payload;
+                // const newNode: NodeModel<FileMetaData> = action.payload;
                 const fullPath: number[] = [];
 
                 const findParent = (id: number) => {
@@ -90,8 +91,19 @@ const threeSlice = createSlice({
 
                 findParent(action.payload.parent as number);
 
-                newNode.data = { fullPath, fileType: action.payload.data?.fileType || "plain-text" };
+                // newNode.data = { fullPath, fileType: action.payload.data?.fileType || FileType.PLAIN_TEXT };
+
+                const newNode: NodeModel<FileMetaData> = {
+                    ...action.payload,
+                    droppable: action.payload.data?.fileType === FileType.FOLDER ? true : undefined,
+                    data: {
+                      fullPath,
+                      fileType: action.payload.data?.fileType || FileType.PLAIN_TEXT
+                    }
+                  };
+
                 state.push(newNode);
+
             } else {
                 state.push(action.payload);
 
@@ -100,5 +112,5 @@ const threeSlice = createSlice({
     },
 });
 
-export const { getById } = threeSlice.actions;
+export const { getById, createNode } = threeSlice.actions;
 export default threeSlice.reducer;
