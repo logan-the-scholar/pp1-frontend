@@ -63,13 +63,12 @@ const initialState: NodeModel<FileMetaData>[] = [
     }
 ];
 
+//TODO pasar todo esto a actions
+
 const threeSlice = createSlice({
     name: "three",
     initialState,
     reducers: {
-        getById(state, action: PayloadAction<string | number>) {
-            state.find((node) => node.id === action.payload);
-        },
 
         createNode(state, action: PayloadAction<NodeModel<FileMetaData>>) {
             if (action.payload.parent !== 0) {
@@ -97,10 +96,10 @@ const threeSlice = createSlice({
                     ...action.payload,
                     droppable: action.payload.data?.fileType === FileType.FOLDER ? true : undefined,
                     data: {
-                      fullPath,
-                      fileType: action.payload.data?.fileType || FileType.PLAIN_TEXT
+                        fullPath,
+                        fileType: action.payload.data?.fileType || FileType.PLAIN_TEXT
                     }
-                  };
+                };
 
                 state.push(newNode);
 
@@ -110,7 +109,7 @@ const threeSlice = createSlice({
             }
         }
     },
+
 });
 
-export const { getById, createNode } = threeSlice.actions;
-export default threeSlice.reducer;
+export default threeSlice;
