@@ -1,5 +1,5 @@
-import { FileMetaData } from '@/features/sandbox/FileViewer';
 import FileType from '@/types/enum/FileType';
+import { FileMetaData } from '@/types/FileMetadata.type';
 import { NodeModel } from '@minoru/react-dnd-treeview';
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 
@@ -10,8 +10,8 @@ const initialState: NodeModel<FileMetaData> = {
     text: ''
 };
 
-const fileSlice = createSlice({
-    name: 'actualFile',
+const openFilesSlice = createSlice({
+    name: 'OPEN_FILES',
     initialState,
     reducers: {
         set(state, action: PayloadAction<NodeModel<FileMetaData>>) {
@@ -31,4 +31,4 @@ const fileSlice = createSlice({
     },
 });
 
-export default fileSlice;
+export default openFilesSlice;

@@ -1,7 +1,6 @@
 import { Folder, FolderOpen } from "lucide-react";
 import FileType from "@/types/enum/FileType";
 import React from "react";
-import { NodeModel } from "@minoru/react-dnd-treeview";
 
 const FileIconMapper: React.FC<{ type: string, isOpen?: boolean | undefined }> = ({ type, isOpen }) => {
     const ICON_SIZE = 16;

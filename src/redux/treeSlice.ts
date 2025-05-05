@@ -1,5 +1,5 @@
-import { FileMetaData } from "@/features/sandbox/FileViewer";
 import FileType from "@/types/enum/FileType";
+import { FileMetaData } from "@/types/FileMetadata.type";
 import { NodeModel } from "@minoru/react-dnd-treeview";
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 
@@ -65,30 +65,15 @@ const initialState: NodeModel<FileMetaData>[] = [
 
 //TODO pasar todo esto a actions
 
-const threeSlice = createSlice({
-    name: "three",
+const treeSlice = createSlice({
+    name: "TREE",
     initialState,
     reducers: {
 
         createNode(state, action: PayloadAction<NodeModel<FileMetaData>>) {
             if (action.payload.parent !== 0) {
                 // const newNode: NodeModel<FileMetaData> = action.payload;
-                const fullPath: number[] = [];
 
-                const findParent = (id: number) => {
-
-                    const found: NodeModel<FileMetaData> | undefined = state.find((parentNode) => parentNode.id === id);
-
-                    if (found !== undefined) {
-                        fullPath.unshift(found.id as number);
-
-                        if (found.parent !== 0) {
-                            findParent(found.parent as number);
-                        }
-                    }
-                };
-
-                findParent(action.payload.parent as number);
 
                 // newNode.data = { fullPath, fileType: action.payload.data?.fileType || FileType.PLAIN_TEXT };
 
@@ -96,7 +81,7 @@ const threeSlice = createSlice({
                     ...action.payload,
                     droppable: action.payload.data?.fileType === FileType.FOLDER ? true : undefined,
                     data: {
-                        fullPath,
+                        ...action.payload.data,
                         fileType: action.payload.data?.fileType || FileType.PLAIN_TEXT
                     }
                 };
@@ -112,4 +97,4 @@ const threeSlice = createSlice({
 
 });
 
-export default threeSlice;
+export default treeSlice;

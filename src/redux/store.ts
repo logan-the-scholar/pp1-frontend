@@ -1,11 +1,11 @@
 import { Action, configureStore, ThunkAction } from '@reduxjs/toolkit';
-import fileReducer from './fileSlice';
-import threeReducer from "./threeSlice";
+import fileReducer from './openFilesSlice';
+import threeReducer from "./treeSlice";
 
 export const store = configureStore({
   reducer: {
-    file: fileReducer.reducer,
-    three: threeReducer.reducer,
+    OPEN_FILES: fileReducer.reducer,
+    TREE: threeReducer.reducer,
   }  
 });
 

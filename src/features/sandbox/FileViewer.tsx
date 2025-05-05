@@ -1,38 +1,34 @@
 "use client";
 import { getBackendOptions, MultiBackend, NodeModel, Tree } from "@minoru/react-dnd-treeview";
-import React, { RefObject, useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { DndProvider } from "react-dnd";
 import FileComponent from "./FileComponent";
-import { useDispatch, useSelector } from "react-redux";
-import { AppDispatch, RootState } from "@/redux/store";
+import { useSelector } from "react-redux";
+import { RootState } from "@/redux/store";
 import FileType from "@/types/enum/FileType";
-import threeSlice from "@/redux/threeSlice";
-import fileSlice from "@/redux/fileSlice";
-import { createAndOpenNode } from "@/redux/actions";
+import treeSlice from "@/redux/treeSlice";
+import openFilesSlice from "@/redux/openFilesSlice";
+import { createAndOpenNode } from "@/redux/treeActions";
 import { useAppDispatch } from "@/hooks/useTypedSelectors";
-
-export type FileMetaData = {
-    fileType: string,
-    fullPath?: string[] | number[],
-    content?: string,
-}
+import { FileMetaData } from "@/types/FileMetadata.type";
 
 const FileViewer: React.FC = () => {
 
-    const treeData: NodeModel<FileMetaData>[] = useSelector((state: RootState) => state.three);
+    const treeData: NodeModel<FileMetaData>[] = useSelector((state: RootState) => state.TREE);
 
     const handleDrop = (newTreeData: any) => { console.log("nothing") };
     const [selected, setSelected] = useState<NodeModel<FileMetaData> | null>(null);
     const [visibleMenu, setVisibleMenu] = useState(false);
     const [positionMenu, setPositionMenu] = useState({ x: 0, y: 0 });
-    const [contextSelected, setContextSelected] = useState<NodeModel<FileMetaData> | null>(null);
+    const [contextSelected, setContextSelected] = useState<{ node: NodeModel<FileMetaData>, onToggle?: () => void } | null>(null);
     const contextMenuRef = useRef<HTMLDivElement | null>(null);
     const mainThreeRef = useRef<HTMLDivElement | null>(null);
     const dispatch = useAppDispatch();
     const [creatingNode, setCreatingNode] = useState<{ parentId: string | number, type: FileType.PLAIN_TEXT | FileType.FOLDER } | null>(null);
 
+
     const openFile = (node: NodeModel<FileMetaData>) => {
-        dispatch(fileSlice.actions.set(node));
+        dispatch(openFilesSlice.actions.set(node));
     };
 
 
@@ -63,20 +59,23 @@ const FileViewer: React.FC = () => {
     }, []);
 
 
-    const handleContextMenu = (e: React.MouseEvent, node: NodeModel<FileMetaData>) => {
+    const handleContextMenu = (e: React.MouseEvent, node: NodeModel<FileMetaData>, onToggle?: () => void) => {
         e.preventDefault();
 
         setPositionMenu({ x: e.clientX, y: e.clientY >= window.innerHeight - 200 ? e.clientY - 200 : e.clientY });
         setVisibleMenu(true);
 
-        setContextSelected(node);
+        setContextSelected({ node, onToggle });
         e.stopPropagation();
     };
 
 
     const addNode = (fileType: FileType.PLAIN_TEXT | FileType.FOLDER) => {
-        if (contextSelected?.id !== undefined) {
-            setCreatingNode({ parentId: contextSelected.id, type: fileType });
+        if (contextSelected?.node.id !== undefined) {
+            contextSelected.onToggle && contextSelected.onToggle();
+            setCreatingNode({ parentId: contextSelected?.node.id, type: fileType });
+            setVisibleMenu(false);
+            setContextSelected(null);
         }
     };
 
@@ -101,8 +100,14 @@ const FileViewer: React.FC = () => {
 
             if (newNode.data?.fileType !== FileType.FOLDER) {
                 dispatch(createAndOpenNode(newNode));
+                const created = treeData.find((n) => n.id === newNode.id);
+                if (created) {
+
+                    setSelected(created);
+                }
+
             } else {
-                dispatch(threeSlice.actions.createNode(newNode));
+                dispatch(treeSlice.actions.createNode(newNode));
             }
 
             setCreatingNode(null);
@@ -118,9 +123,9 @@ const FileViewer: React.FC = () => {
             className="select-none pt-2 w-[20%] relative min-w-[10%] max-w-[50%] h-full text-sm flex flex-col"
         >
             {/*
-                //TODO cuando se crea un nuevo archivo se deberia dar solo 1 click para poder abrir otro archivo
-                //TODO mapear el arbol a dos arboles por cada carpeta, separando archivos de carpetas
-                //TODO cuando se hace click al arbol deberia desenfocarse ambos clicks 
+                //TODO mapear el arbol a dos arboles por cada carpeta, separando archivos de carpetas.
+                //TODO el click derecho al root -> crear nuevo archivo no funciona.
+                //TODO cuando se hace click al arbol deberia desenfocarse ambos clicks.
             */}
 
             {/* CONTEXT MENU */}
@@ -132,7 +137,7 @@ const FileViewer: React.FC = () => {
                     className="[&>div]:cursor-pointer overflow-hidden [&>div]:px-6 [&>div]:mx-1 [&>div]:pb-0.5 [&>div]:pt-1 [&>div]:hover:bg-[#ffffff1c] [&>div]:rounded-sm bg-[#1e1e1e] z-50 absolute w-fit text-nowrap flex flex-col py-1 rounded-md shadow-md shadow-black"
                 >
 
-                    {(contextSelected?.droppable && contextSelected.data?.fileType === "folder") || (contextSelected?.id === 0 && contextSelected.parent === -1) ?
+                    {(contextSelected?.node.droppable && contextSelected.node.data?.fileType === "folder") || (contextSelected?.node?.id === 0 && contextSelected.node.parent === -1) ?
                         <>
                             <div onClick={() => addNode(FileType.PLAIN_TEXT)}>
                                 New File...
@@ -146,14 +151,14 @@ const FileViewer: React.FC = () => {
                         null
                     }
 
-                    {(contextSelected?.droppable && contextSelected.data?.fileType === "folder") || (contextSelected?.id === 0 && contextSelected.parent === -1) ?
+                    {(contextSelected?.node.droppable && contextSelected.node.data?.fileType === "folder") || (contextSelected?.node.id === 0 && contextSelected.node.parent === -1) ?
                         <div>
                             Paste
                         </div>
                         :
                         null
                     }
-                    {contextSelected?.id !== 0 && contextSelected?.parent !== -1 &&
+                    {contextSelected?.node.id !== 0 && contextSelected?.node.parent !== -1 &&
                         <>
                             <div>
                                 Cut
@@ -168,7 +173,7 @@ const FileViewer: React.FC = () => {
                     <div>
                         Copy Relative Path
                     </div>
-                    {contextSelected?.id !== 0 && contextSelected?.parent !== -1 &&
+                    {contextSelected?.node.id !== 0 && contextSelected?.node.parent !== -1 &&
                         <>
                             <span className="w-full h-px bg-neutral-400 my-1"></span>
 
@@ -197,7 +202,7 @@ const FileViewer: React.FC = () => {
                 <div
                     ref={mainThreeRef}
                     onContextMenu={(e) => {
-                        handleContextMenu(e, { id: 0, parent: -1, text: "root" });
+                        handleContextMenu(e, { id: 0, parent: -1, text: "root" } );
                     }}
                     className="flex-1 relative font-light mt-2 max-w-full h-full w-full overflow-x-hidden overflow-y-scroll"
                 >
@@ -212,7 +217,9 @@ const FileViewer: React.FC = () => {
                                     className={`w-full flex-col 
 `}
                                     // ${creatingNode && creatingNode.parentId === node.id && "hover:bg-[#1e1e1e]!"}
-                                    onContextMenu={(e) => handleContextMenu(e, node)}
+                                    onContextMenu={(e) => {
+                                        handleContextMenu(e, node, onToggle);
+                                    }}
                                     onClick={(e) => {
                                         if (contextSelected !== null) {
                                             setContextSelected(null);
@@ -225,7 +232,7 @@ const FileViewer: React.FC = () => {
                                     }}
                                 >
                                     <div className={`flex w-full cursor-pointer
-${contextSelected?.id === node.id && !(creatingNode?.parentId === node.id) && "outline-1 outline-neutral-400 -outline-offset-1"} 
+${contextSelected?.node.id === node.id && !(creatingNode?.parentId === node.id) && "outline-1 outline-neutral-400 -outline-offset-1"} 
 ${selected?.id === node.id ? creatingNode?.parentId === node.id ? "bg-transparent!" : "bg-[#ffffff1c]" : "hover:bg-[#ffffff10]"} 
 `
                                         // ${creatingNode?.parentId === node.id && "bg-[#1e1e1e]!"}
