@@ -3,12 +3,11 @@ import { AppThunk } from "./store";
 import treeSlice from "./treeSlice";
 import openFilesSlice from "./openFilesSlice";
 import FileType from "@/types/enum/FileType";
-import { FileMetaData } from "@/types/FileMetadata.type";
+import { FileMetaData } from "@/types/state-types";
 
 export const createAndOpenNode = (node: NodeModel<FileMetaData>): AppThunk => (dispatch, getState) => {
     let pathNames: string[] = [node.text];
     const fullPath: number[] = [Number(node.id)];
-    // const state = getState();
 
     const findParent = (id: number) => {
 
@@ -42,7 +41,7 @@ export const createAndOpenNode = (node: NodeModel<FileMetaData>): AppThunk => (d
     const createdNode = getState().TREE.find((n) => n.id === node.id);
 
     if (createdNode && createdNode.data?.fileType !== FileType.FOLDER) {
-        dispatch(openFilesSlice.actions.set(createdNode));
+        dispatch(openFilesSlice.actions.select(createdNode));
     }
 };
 

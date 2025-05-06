@@ -10,17 +10,19 @@ import treeSlice from "@/redux/treeSlice";
 import openFilesSlice from "@/redux/openFilesSlice";
 import { createAndOpenNode } from "@/redux/treeActions";
 import { useAppDispatch } from "@/hooks/useTypedSelectors";
-import { FileMetaData } from "@/types/FileMetadata.type";
+import { FileMetaData } from "@/types/state-types";
+import { openFilesAction } from "@/redux/openFilesActions";
 
 const FileViewer: React.FC = () => {
 
     const treeData: NodeModel<FileMetaData>[] = useSelector((state: RootState) => state.TREE);
 
+    //TODO hay que actualizar el path despues de hacer esto
     const handleDrop = (newTreeData: any) => { console.log("nothing") };
     const [selected, setSelected] = useState<NodeModel<FileMetaData> | null>(null);
     const [visibleMenu, setVisibleMenu] = useState(false);
     const [positionMenu, setPositionMenu] = useState({ x: 0, y: 0 });
-    const [contextSelected, setContextSelected] = useState<{ node: NodeModel<FileMetaData>, onToggle?: () => void } | null>(null);
+    const [contextSelected, setContextSelected] = useState<{ node: NodeModel<FileMetaData>, onToggle?: () => void, isOpen?: boolean } | null>(null);
     const contextMenuRef = useRef<HTMLDivElement | null>(null);
     const mainThreeRef = useRef<HTMLDivElement | null>(null);
     const dispatch = useAppDispatch();
@@ -28,10 +30,11 @@ const FileViewer: React.FC = () => {
 
 
     const openFile = (node: NodeModel<FileMetaData>) => {
-        dispatch(openFilesSlice.actions.set(node));
+        dispatch(openFilesAction.open(node));
+        dispatch(openFilesSlice.actions.select({ ...node, data: { ...node.data as FileMetaData, saved: true, edited: true } }));
     };
 
-
+    
     useEffect(() => {
         const onMenuBlur = (e: MouseEvent) => {
             if (contextMenuRef.current && !contextMenuRef.current.contains(e.target as Node)) {
@@ -59,20 +62,20 @@ const FileViewer: React.FC = () => {
     }, []);
 
 
-    const handleContextMenu = (e: React.MouseEvent, node: NodeModel<FileMetaData>, onToggle?: () => void) => {
+    const handleContextMenu = (e: React.MouseEvent, node: NodeModel<FileMetaData>, onToggle?: () => void, isOpen?: boolean) => {
         e.preventDefault();
 
         setPositionMenu({ x: e.clientX, y: e.clientY >= window.innerHeight - 200 ? e.clientY - 200 : e.clientY });
         setVisibleMenu(true);
 
-        setContextSelected({ node, onToggle });
+        setContextSelected({ node, onToggle, isOpen });
         e.stopPropagation();
     };
 
 
     const addNode = (fileType: FileType.PLAIN_TEXT | FileType.FOLDER) => {
         if (contextSelected?.node.id !== undefined) {
-            contextSelected.onToggle && contextSelected.onToggle();
+            contextSelected.onToggle && !contextSelected.isOpen && contextSelected.onToggle();
             setCreatingNode({ parentId: contextSelected?.node.id, type: fileType });
             setVisibleMenu(false);
             setContextSelected(null);
@@ -170,7 +173,7 @@ const FileViewer: React.FC = () => {
                     }
                     <span className="w-full h-px bg-neutral-400 my-1"></span>
 
-                    <div>
+                    <div onClick={() => null}>
                         Copy Relative Path
                     </div>
                     {contextSelected?.node.id !== 0 && contextSelected?.node.parent !== -1 &&
@@ -202,7 +205,7 @@ const FileViewer: React.FC = () => {
                 <div
                     ref={mainThreeRef}
                     onContextMenu={(e) => {
-                        handleContextMenu(e, { id: 0, parent: -1, text: "root" } );
+                        handleContextMenu(e, { id: 0, parent: -1, text: "root" });
                     }}
                     className="flex-1 relative font-light mt-2 max-w-full h-full w-full overflow-x-hidden overflow-y-scroll"
                 >
@@ -214,16 +217,15 @@ const FileViewer: React.FC = () => {
                             onDrop={handleDrop}
                             render={(node, { depth, isOpen, onToggle, containerRef }) => (
                                 <div
-                                    className={`w-full flex-col 
-`}
-                                    // ${creatingNode && creatingNode.parentId === node.id && "hover:bg-[#1e1e1e]!"}
+                                    className={`w-full flex-col`}
                                     onContextMenu={(e) => {
-                                        handleContextMenu(e, node, onToggle);
+                                        handleContextMenu(e, node, onToggle, isOpen);
                                     }}
                                     onClick={(e) => {
                                         if (contextSelected !== null) {
                                             setContextSelected(null);
                                             setSelected(null);
+                                            
                                         } else {
                                             node.droppable ? onToggle() : openFile(node);
                                             setSelected(node);

@@ -1,4 +1,4 @@
-import { FileMetaData } from "@/types/FileMetadata.type";
+import { FileMetaData } from "@/types/state-types";
 import { NodeModel } from "@minoru/react-dnd-treeview";
 import { RefObject } from "react";
 

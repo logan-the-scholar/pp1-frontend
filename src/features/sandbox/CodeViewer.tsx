@@ -2,73 +2,104 @@
 import LoadingCircle from "@/components/LoadingCircle";
 import { RootState } from "@/redux/store";
 import { Editor } from "@monaco-editor/react";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import FileIconMapper from "./FileIconMapper";
 import FileType from "@/types/enum/FileType";
+import { openFilesAction } from "@/redux/openFilesActions";
+import { useAppDispatch } from "@/hooks/useTypedSelectors";
 
 const CodeViewer = () => {
-    const file = useSelector((state: RootState) => state.OPEN_FILES);
+    const dispatch = useAppDispatch();
+    const selectedFile = useSelector((state: RootState) => state.OPEN_FILES.selected);
+    const openFiles = useSelector((state: RootState) => state.OPEN_FILES.open);
 
     return (
         <div className="h-[100vh] w-full flex flex-col pt-2 overflow-hidden">
+            {openFiles.length > 0 ?
+                <>
+                    {/* WINDOW VIEW */}
+                    <div className="w-full flex select-none">
 
-            {/* WINDOW VIEW */}
-            <div className="w-full flex select-none">
-
-                {/* TITLE */}
-                <div className={`pl-3 py-1.5 border-x border-t border-neutral-400 bg-[#1e1e1e] cursor-pointer w-fit flex relative ${true && "hover:bg-[#ffffff1c]"}`}>
-                    <span className="mr-3 content-center">
-                        <FileIconMapper type={file.data?.fileType as string} />
-                    </span>
-                    {file.text}
-                    <span className="mx-2 px-1 hover:bg-[#ffffff21] content-center rounded-[4px]">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-x-icon lucide-x">
-                            <path d="M18 6 6 18" /><path d="m6 6 12 12" />
-                        </svg>
-                    </span>
-                    <div className="absolute left-0 h-0.5 w-full bg-[#1e1e1e] -bottom-[1px]"></div>
-                </div>
-            </div>
-
-            {/* PATH VIEW */}
-            <div className="px-4 py-1.5 flex border-x border-t border-neutral-400 cursor-pointer text-xs text-neutral-300 bg-[#1e1e1e] select-none">
-                {file.data?.pathNames ? file.data.pathNames.map((path, index) => {
-                    return (
-                        <span className="hover:text-neutral-100 cursor-pointer mr-1.5 flex" key={`${path}_${file.text}`}>
-                            {path === file.text && file.data?.fileType !== FileType.FOLDER && (index + 1) === file.data?.fullPath?.length &&
-                                <span className="mr-1">
-                                    <FileIconMapper type={file.data?.fileType as string} />
-                                </span>
-                            }
-                            {`${path} >`}
-                        </span>
-                    );
-                }) :
-                    <span>
-                        {file.parent}
-                    </span>
-                }
-            </div>
-
-            {/* EDITOR */}
-            <Editor
-                loading={(
-                    <div className="h-full w-full bg-[#1e1e1e]">
-                        <LoadingCircle size={80} stroke={8} />
+                        {/* TITLE */}
+                        {
+                            openFiles.map((file) => {
+                                return (
+                                    <div
+                                        onClick={() => dispatch(openFilesAction.open(file))}
+                                        key={`window_${file.id}`}
+                                        className={`hover:[&>span]:visible pl-3 py-1.5 bg-[#1e1e1e] cursor-pointer w-fit flex relative 
+${file.id === selectedFile?.id ? "border-x border-t border-neutral-400" : "border-x border-[#1e1e1e] bg-[#ffffff1c]"}
+${file.data}`}
+                                    >
+                                        <div className="mr-3 content-center">
+                                            <FileIconMapper type={file.data?.fileType as string} />
+                                        </div>
+                                        {file.text}
+                                        <span className={`mx-2 px-1 content-center rounded-[4px] ${file.id === selectedFile?.id ? "visible hover:bg-[#ffffff21]" : "invisible hover:bg-[#ffffff18]"}`}>
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-x-icon lucide-x">
+                                                <path d="M18 6 6 18" /><path d="m6 6 12 12" />
+                                            </svg>
+                                        </span>
+                                        {file.id === selectedFile?.id &&
+                                            <div className="absolute left-0 h-0.5 w-full bg-[#1e1e1e] -bottom-[1px]"></div>
+                                        }
+                                    </div>
+                                );
+                            })
+                        }
                     </div>
-                )}
-                options={{ minimap: { enabled: false } }}
-                className="w-full flex-1 border-x border-neutral-400"
-                language="javascript"
-                theme="vs-dark"
-            // onMount={(x) => editorMount(x)}
-            // value={code}
-            // onChange={(x) => {
-            //     setCode(x || "");
-            //     textSetter(x === initialCode ? undefined : x);
-            // }}
-            />
-        </div>
+
+                    {/* PATH VIEW */}
+                    <div className="px-4 py-1.5 flex border-x border-t border-neutral-400 cursor-pointer text-xs text-neutral-300 bg-[#1e1e1e] select-none">
+                        {
+                            selectedFile !== undefined ?
+                                selectedFile.data?.pathNames ?
+                                    selectedFile.data.pathNames.map((path, index) => {
+                                        return (
+                                            <span className="hover:text-neutral-100 cursor-pointer mr-1.5 flex" key={`${path}_${selectedFile.text}`}>
+                                                {path === selectedFile.text && selectedFile.data?.fileType !== FileType.FOLDER && (index + 1) === selectedFile.data?.fullPath?.length &&
+                                                    <span className="mr-1">
+                                                        <FileIconMapper type={selectedFile.data?.fileType as string} />
+                                                    </span>
+                                                }
+                                                {`${path} >`}
+                                            </span>
+                                        );
+                                    })
+                                    :
+                                    <span>
+                                        {selectedFile.parent}
+                                    </span>
+                                :
+                                null
+                        }
+                    </div>
+
+                    {/* EDITOR */}
+                    <Editor
+                        loading={(
+                            <div className="h-full w-full bg-[#1e1e1e]">
+                                <LoadingCircle size={80} stroke={8} />
+                            </div>
+                        )}
+                        options={{ minimap: { enabled: false } }}
+                        className="w-full flex-1 border-x border-neutral-400"
+                        language="javascript"
+                        theme="vs-dark"
+                        value={selectedFile?.data?.content}
+                        onChange={(x) => {
+
+                        }}
+                    />
+                </>
+                :
+                <div className="border-neutral-400 border bg-[#1e1e1e] flex-1 text-center content-center">
+                    Nothing here yet!
+                </div>
+
+            }
+
+        </div >
     );
 };
 

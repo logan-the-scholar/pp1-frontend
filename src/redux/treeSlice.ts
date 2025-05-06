@@ -1,5 +1,5 @@
 import FileType from "@/types/enum/FileType";
-import { FileMetaData } from "@/types/FileMetadata.type";
+import { FileMetaData } from "@/types/state-types";
 import { NodeModel } from "@minoru/react-dnd-treeview";
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 
@@ -63,8 +63,6 @@ const initialState: NodeModel<FileMetaData>[] = [
     }
 ];
 
-//TODO pasar todo esto a actions
-
 const treeSlice = createSlice({
     name: "TREE",
     initialState,
@@ -72,10 +70,6 @@ const treeSlice = createSlice({
 
         createNode(state, action: PayloadAction<NodeModel<FileMetaData>>) {
             if (action.payload.parent !== 0) {
-                // const newNode: NodeModel<FileMetaData> = action.payload;
-
-
-                // newNode.data = { fullPath, fileType: action.payload.data?.fileType || FileType.PLAIN_TEXT };
 
                 const newNode: NodeModel<FileMetaData> = {
                     ...action.payload,
