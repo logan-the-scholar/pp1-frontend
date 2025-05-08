@@ -6,20 +6,20 @@ import FileComponent from "./FileComponent";
 import { useSelector } from "react-redux";
 import { RootState } from "@/redux/store";
 import FileType from "@/types/enum/FileType";
-import treeSlice from "@/redux/treeSlice";
-import openFilesSlice from "@/redux/openFilesSlice";
-import { createAndOpenNode } from "@/redux/treeActions";
+import treeSlice from "@/redux/file-tree/treeSlice";
+import openFilesSlice from "@/redux/open-files/openFilesSlice";
+import { createAndOpenNode } from "@/redux/file-tree/treeActions";
 import { useAppDispatch } from "@/hooks/useTypedSelectors";
-import { FileMetaData } from "@/types/state-types";
-import { openFilesAction } from "@/redux/openFilesActions";
+import { DeclaredNodeModel, FileMetaData, OpenFileMetaData } from "@/types/state-types";
+import { openFilesAction } from "@/redux/open-files/openFilesActions";
 
 const FileViewer: React.FC = () => {
 
-    const treeData: NodeModel<FileMetaData>[] = useSelector((state: RootState) => state.TREE);
+    const treeData = useSelector((state: RootState) => state.FILE_TREE);
+    const openFileData: DeclaredNodeModel<OpenFileMetaData>[] = useSelector((state: RootState) => state.OPEN_FILES.open)
 
     //TODO hay que actualizar el path despues de hacer esto
     const handleDrop = (newTreeData: any) => { console.log("nothing") };
-    const [selected, setSelected] = useState<NodeModel<FileMetaData> | null>(null);
     const [visibleMenu, setVisibleMenu] = useState(false);
     const [positionMenu, setPositionMenu] = useState({ x: 0, y: 0 });
     const [contextSelected, setContextSelected] = useState<{ node: NodeModel<FileMetaData>, onToggle?: () => void, isOpen?: boolean } | null>(null);
@@ -30,11 +30,19 @@ const FileViewer: React.FC = () => {
 
 
     const openFile = (node: NodeModel<FileMetaData>) => {
-        dispatch(openFilesAction.open(node));
-        dispatch(openFilesSlice.actions.select({ ...node, data: { ...node.data as FileMetaData, saved: true, edited: true } }));
+        const alreadyOpenNode = openFileData.find((n) => n.id === node.id);
+        
+        if (alreadyOpenNode === undefined) {
+            dispatch(openFilesAction.open({...node, data: node.data as FileMetaData}));
+            dispatch(openFilesSlice.actions.select({ ...node, data: { ...node.data as FileMetaData, saved: true, edited: true } }));
+
+        } else {
+            dispatch(openFilesAction.open(alreadyOpenNode));
+
+        }
     };
 
-    
+
     useEffect(() => {
         const onMenuBlur = (e: MouseEvent) => {
             if (contextMenuRef.current && !contextMenuRef.current.contains(e.target as Node)) {
@@ -103,18 +111,19 @@ const FileViewer: React.FC = () => {
 
             if (newNode.data?.fileType !== FileType.FOLDER) {
                 dispatch(createAndOpenNode(newNode));
-                const created = treeData.find((n) => n.id === newNode.id);
-                if (created) {
+                const created = treeData.tree.find((n) => n.id === newNode.id);
 
-                    setSelected(created);
+                if (created) {
+                    dispatch(treeSlice.actions.select(created));
+
                 }
 
             } else {
-                dispatch(treeSlice.actions.createNode(newNode));
+                dispatch(treeSlice.actions.createNode({...newNode, data: newNode.data}));
+
             }
 
             setCreatingNode(null);
-
         }
 
     };
@@ -210,9 +219,9 @@ const FileViewer: React.FC = () => {
                     className="flex-1 relative font-light mt-2 max-w-full h-full w-full overflow-x-hidden overflow-y-scroll"
                 >
                     {
-                        treeData !== undefined &&
+                        treeData.tree !== undefined &&
                         <Tree
-                            tree={treeData}
+                            tree={treeData.tree}
                             rootId={0}
                             onDrop={handleDrop}
                             render={(node, { depth, isOpen, onToggle, containerRef }) => (
@@ -224,18 +233,18 @@ const FileViewer: React.FC = () => {
                                     onClick={(e) => {
                                         if (contextSelected !== null) {
                                             setContextSelected(null);
-                                            setSelected(null);
-                                            
+                                            dispatch(treeSlice.actions.select(undefined));
+
                                         } else {
                                             node.droppable ? onToggle() : openFile(node);
-                                            setSelected(node);
+                                            dispatch(treeSlice.actions.select({...node, data: node.data as FileMetaData}));
 
                                         }
                                     }}
                                 >
                                     <div className={`flex w-full cursor-pointer
 ${contextSelected?.node.id === node.id && !(creatingNode?.parentId === node.id) && "outline-1 outline-neutral-400 -outline-offset-1"} 
-${selected?.id === node.id ? creatingNode?.parentId === node.id ? "bg-transparent!" : "bg-[#ffffff1c]" : "hover:bg-[#ffffff10]"} 
+${treeData.selected?.id === node.id ? creatingNode?.parentId === node.id ? "bg-transparent!" : "bg-[#ffffff1c]" : "hover:bg-[#ffffff10]"} 
 `
                                         // ${creatingNode?.parentId === node.id && "bg-[#1e1e1e]!"}
                                     }

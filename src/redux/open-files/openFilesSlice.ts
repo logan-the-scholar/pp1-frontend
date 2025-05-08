@@ -1,13 +1,13 @@
 import FileType from '@/types/enum/FileType';
-import { FileMetaData, OpenFileMetaData } from '@/types/state-types';
+import { DeclaredNodeModel, FileMetaData, OpenFileMetaData } from '@/types/state-types';
 import { NodeModel } from '@minoru/react-dnd-treeview';
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 
-//TODO leer desde localStorage junto con un array de archivos abiertos, para permanencia de sesion, manejar un isEdited y un preview
+//TODO leer desde localStorage
 
 type openFilesType = {
-    selected: NodeModel<OpenFileMetaData> | undefined,
-    open: NodeModel<OpenFileMetaData>[]
+    selected: DeclaredNodeModel<OpenFileMetaData> | undefined,
+    open: DeclaredNodeModel<OpenFileMetaData>[]
 }
 
 const initialState: openFilesType = {
@@ -20,27 +20,27 @@ const openFilesSlice = createSlice({
     initialState,
     reducers: {
 
-        select(state, action: PayloadAction<NodeModel<OpenFileMetaData>>) {
+        select(state, action: PayloadAction<DeclaredNodeModel<OpenFileMetaData>>) {
             if (action.payload.data?.fileType !== FileType.FOLDER) {
-
                 if (action.payload.data?.edited === undefined && action.payload.data?.saved === undefined) {
                     state.selected = {
                         id: action.payload.id,
                         parent: action.payload.parent,
                         text: action.payload.text,
                         data: {
-                            ...action.payload.data as FileMetaData & { edited: boolean, saved: boolean },
+                            ...action.payload.data ,
                             edited: true,
                             saved: true
                         }
                     }
+
                 } else {
                     state.selected = {
                         id: action.payload.id,
                         parent: action.payload.parent,
                         text: action.payload.text,
                         data: {
-                            ...action.payload.data as FileMetaData & { edited: boolean, saved: boolean }
+                            ...action.payload.data
                         }
                     }
 
@@ -49,22 +49,37 @@ const openFilesSlice = createSlice({
             }
         },
 
-        addOrReplaceFile(state, action: PayloadAction<NodeModel<FileMetaData> | NodeModel<OpenFileMetaData>>) {
+        add(state, action: PayloadAction<DeclaredNodeModel<FileMetaData> | DeclaredNodeModel<OpenFileMetaData>>) {
+
             state.open.splice(state.open.findIndex((n) => n.id === state.selected?.id) + 1 || 0, 0, {
                 ...action.payload, data: {
                     edited: false,
                     saved: true,
-                    ...action.payload.data as FileMetaData
+                    ...action.payload.data 
                 }
             });
         },
 
-        close(state, action: PayloadAction<string>) {
+        close(state, action: PayloadAction<string | number>) {
+            const index = state.open.findIndex((n) => n.id === action.payload);
 
+            index >= 0 && state.open.splice(index, 1);
         },
 
-        setEdited(state, action: PayloadAction<{ id: string, edited: boolean }>) {
+        edit(state, action: PayloadAction<{ id: string | number, code: string, line: number, edited: boolean }>) {
+            const index = state.open.findIndex((n) => n.id === action.payload.id);
+            const editedData: OpenFileMetaData = {
+                ...state.open[index].data,
+                content: action.payload.code,
+                edited: action.payload.edited,
+                line: action.payload.line
+            };
 
+            state.open[index].data = editedData;
+
+            if (state.selected) {
+                state.selected.data = editedData;
+            }
         },
 
         setSaved(state, action: PayloadAction<{ id: string, edited: boolean } | Map<string, boolean>>) {

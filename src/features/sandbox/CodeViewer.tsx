@@ -5,13 +5,40 @@ import { Editor } from "@monaco-editor/react";
 import { useDispatch, useSelector } from "react-redux";
 import FileIconMapper from "./FileIconMapper";
 import FileType from "@/types/enum/FileType";
-import { openFilesAction } from "@/redux/openFilesActions";
+import { openFilesAction } from "@/redux/open-files/openFilesActions";
 import { useAppDispatch } from "@/hooks/useTypedSelectors";
+import LanguageMapper from "@/helpers/LanguageMapper";
+import openFilesSlice from "@/redux/open-files/openFilesSlice";
+import { useState } from "react";
+import { NodeModel } from "@minoru/react-dnd-treeview";
+import { FileMetaData, OpenFileMetaData } from "@/types/state-types";
+import treeSlice from "@/redux/file-tree/treeSlice";
 
 const CodeViewer = () => {
     const dispatch = useAppDispatch();
     const selectedFile = useSelector((state: RootState) => state.OPEN_FILES.selected);
     const openFiles = useSelector((state: RootState) => state.OPEN_FILES.open);
+    const [line, setLine] = useState<number>(0);
+
+    const handleChange = (code: string | undefined) => {
+        if (code && code !== selectedFile?.data?.content && selectedFile !== undefined) {
+            dispatch(openFilesSlice.actions.edit({
+                id: selectedFile.id,
+                code,
+                line,
+                edited: true
+            }));
+        }
+    };
+
+    const handleClose = (id: string | number) => {
+        dispatch(openFilesAction.closeAndChangeWindow(id));
+    };
+
+    const handleChangeWindow = (file: NodeModel<OpenFileMetaData>) => {
+        dispatch(openFilesAction.open({ ...file, data: file.data as FileMetaData }));
+        dispatch(treeSlice.actions.select({ ...file, data: file.data as FileMetaData }));
+    }
 
     return (
         <div className="h-[100vh] w-full flex flex-col pt-2 overflow-hidden">
@@ -25,17 +52,23 @@ const CodeViewer = () => {
                             openFiles.map((file) => {
                                 return (
                                     <div
-                                        onClick={() => dispatch(openFilesAction.open(file))}
+                                        onClick={() => handleChangeWindow(file)}
                                         key={`window_${file.id}`}
                                         className={`hover:[&>span]:visible pl-3 py-1.5 bg-[#1e1e1e] cursor-pointer w-fit flex relative 
 ${file.id === selectedFile?.id ? "border-x border-t border-neutral-400" : "border-x border-[#1e1e1e] bg-[#ffffff1c]"}
-${file.data}`}
+${!file.data?.edited && "italic"}`}
                                     >
                                         <div className="mr-3 content-center">
                                             <FileIconMapper type={file.data?.fileType as string} />
                                         </div>
                                         {file.text}
-                                        <span className={`mx-2 px-1 content-center rounded-[4px] ${file.id === selectedFile?.id ? "visible hover:bg-[#ffffff21]" : "invisible hover:bg-[#ffffff18]"}`}>
+                                        <span
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                handleClose(file.id);
+                                            }}
+                                            className={`mx-2 px-1 content-center rounded-[4px] 
+${file.id === selectedFile?.id ? "visible hover:bg-[#ffffff21]" : "invisible hover:bg-[#ffffff18]"}`}>
                                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-x-icon lucide-x">
                                                 <path d="M18 6 6 18" /><path d="m6 6 12 12" />
                                             </svg>
@@ -84,12 +117,11 @@ ${file.data}`}
                         )}
                         options={{ minimap: { enabled: false } }}
                         className="w-full flex-1 border-x border-neutral-400"
-                        language="javascript"
+                        language={LanguageMapper(selectedFile?.data?.fileType as string)}
                         theme="vs-dark"
-                        value={selectedFile?.data?.content}
-                        onChange={(x) => {
-
-                        }}
+                        path={selectedFile?.data?.pathNames?.join("/")}
+                        value={selectedFile?.data?.content || ""}
+                        onChange={(x) => handleChange(x)}
                     />
                 </>
                 :

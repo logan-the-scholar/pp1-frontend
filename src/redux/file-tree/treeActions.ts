@@ -1,7 +1,7 @@
 import { NodeModel } from "@minoru/react-dnd-treeview";
-import { AppThunk } from "./store";
+import { AppThunk } from "../store";
 import treeSlice from "./treeSlice";
-import openFilesSlice from "./openFilesSlice";
+import openFilesSlice from "../open-files/openFilesSlice";
 import FileType from "@/types/enum/FileType";
 import { FileMetaData } from "@/types/state-types";
 
@@ -11,7 +11,7 @@ export const createAndOpenNode = (node: NodeModel<FileMetaData>): AppThunk => (d
 
     const findParent = (id: number) => {
 
-        const found: NodeModel<FileMetaData> | undefined = getState().TREE.find((parentNode) => {
+        const found: NodeModel<FileMetaData> | undefined = getState().FILE_TREE.tree.find((parentNode) => {
             return parentNode.id === id;
         });
 
@@ -38,10 +38,17 @@ export const createAndOpenNode = (node: NodeModel<FileMetaData>): AppThunk => (d
         }
     ));
 
-    const createdNode = getState().TREE.find((n) => n.id === node.id);
+    const createdNode = getState().FILE_TREE.tree.find((n) => n.id === node.id);
 
     if (createdNode && createdNode.data?.fileType !== FileType.FOLDER) {
-        dispatch(openFilesSlice.actions.select(createdNode));
+        dispatch(openFilesSlice.actions.select({
+            ...createdNode,
+            data: {
+                ...createdNode.data as FileMetaData,
+                edited: true,
+                saved: true,
+            }
+        }));
     }
 };
 
