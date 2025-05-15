@@ -51,9 +51,10 @@ const createAndOpenNode = (node: NodeModel<FileMetaData>): AppThunk => (dispatch
             }
         }));
 
-        dispatch(treeSlice.actions.select());
+        dispatch(treeSlice.actions.select(createdNode.id));
 
-        dispatch(openFilesAction.open({
+        dispatch(openFilesAction.open(
+            {
             ...createdNode,
             data: {
                 ...createdNode.data as FileMetaData,

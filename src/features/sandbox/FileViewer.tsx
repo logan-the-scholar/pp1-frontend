@@ -10,23 +10,21 @@ import treeSlice from "@/redux/file-tree/treeSlice";
 import openFilesSlice from "@/redux/open-files/openFilesSlice";
 import { treeActions } from "@/redux/file-tree/treeActions";
 import { useAppDispatch } from "@/hooks/useTypedSelectors";
-import { FileMetaData, openFilesType } from "@/types/state-types";
+import { DeclaredNodeModel, FileMetaData, openFilesType } from "@/types/state-types";
 import { openFilesAction } from "@/redux/open-files/openFilesActions";
 
 const FileViewer: React.FC = () => {
 
     const treeContext = useTreeContext();
+    const dispatch = useAppDispatch();
     const treeData = useSelector((state: RootState) => state.FILE_TREE);
     const openFileData: openFilesType = useSelector((state: RootState) => state.OPEN_FILES);
-    const treeRef = useRef<TreeMethods>(null);
 
-    //TODO hay que actualizar el path despues de hacer esto
-    const handleDrop = (newTreeData: any) => { console.log("nothing") };
-    const [visibleMenu, setVisibleMenu] = useState(false);
-    const [positionMenu, setPositionMenu] = useState({ x: 0, y: 0, pos: "top" });
+    const treeRef = useRef<TreeMethods>(null);
     const contextMenuRef = useRef<HTMLDivElement | null>(null);
     const mainThreeRef = useRef<HTMLDivElement | null>(null);
-    const dispatch = useAppDispatch();
+    const [visibleMenu, setVisibleMenu] = useState(false);
+    const [positionMenu, setPositionMenu] = useState({ x: 0, y: 0, pos: "top" });
 
     const [contextSelected, setContextSelected] = useState<{
         node: NodeModel<FileMetaData>,
@@ -41,16 +39,13 @@ const FileViewer: React.FC = () => {
 
 
     const openFile = (node: NodeModel<FileMetaData>) => {
-        const alreadyOpenNode = openFileData.open.find((n) => n.id === node.id);
+        dispatch(openFilesAction.open({ ...node, data: node.data as FileMetaData }));
+    };
 
-        if (alreadyOpenNode === undefined) {
-            dispatch(openFilesAction.open({ ...node, data: node.data as FileMetaData }));
-            dispatch(openFilesSlice.actions.select({ ...node, data: { ...node.data as FileMetaData, saved: true, edited: true } }));
 
-        } else {
-            dispatch(openFilesAction.open(alreadyOpenNode));
-
-        }
+    //TODO hay que actualizar el path despues de hacer esto
+    const handleDrop = (newTreeData: any) => {
+        console.log("nothing");
     };
 
 
@@ -135,7 +130,7 @@ const FileViewer: React.FC = () => {
                 const created = treeData.tree.find((n) => n.id === newNode.id);
 
                 if (created) {
-                    dispatch(treeSlice.actions.select(created));
+                    dispatch(treeSlice.actions.select(created.id));
 
                 }
 
@@ -265,7 +260,7 @@ const FileViewer: React.FC = () => {
 
                                         } else {
                                             node.droppable ? onToggle() : openFile(node);
-                                            dispatch(treeSlice.actions.select({ ...node, data: node.data as FileMetaData }));
+                                            dispatch(treeSlice.actions.select(node.id));
 
                                         }
                                     }}
@@ -283,9 +278,10 @@ ${treeData.selected?.id === node.id ? creatingNode?.parentId === node.id ? "bg-t
                                                 </div>
                                             )
                                         })}
-                                        <FileComponent isOpen={isOpen} node={node} />
+                                        <FileComponent isOpen={isOpen} node={(node as DeclaredNodeModel<FileMetaData>)} />
                                     </div>
 
+                                    {/* NEW FILE/FOLDER INPUT */}
                                     {creatingNode?.parentId === node.id && node.droppable &&
                                         <div style={{ paddingLeft: "20px" }} className="cursor-pointer w-full hover:bg-[#ffffff10] flex">
                                             {Array.from({ length: depth }).map((v, i) =>

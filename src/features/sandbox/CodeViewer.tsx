@@ -11,7 +11,7 @@ import LanguageMapper from "@/helpers/LanguageMapper";
 import openFilesSlice from "@/redux/open-files/openFilesSlice";
 import { useState } from "react";
 import { NodeModel } from "@minoru/react-dnd-treeview";
-import { FileMetaData, OpenFileMetaData } from "@/types/state-types";
+import { DeclaredNodeModel, FileMetaData, OpenFileMetaData } from "@/types/state-types";
 import treeSlice from "@/redux/file-tree/treeSlice";
 
 const CodeViewer = () => {
@@ -35,9 +35,9 @@ const CodeViewer = () => {
         dispatch(openFilesAction.closeAndChangeWindow(id));
     };
 
-    const handleChangeWindow = (file: NodeModel<OpenFileMetaData>) => {
-        dispatch(openFilesAction.open({ ...file, data: file.data as FileMetaData }));
-        dispatch(treeSlice.actions.select({ ...file, data: file.data as FileMetaData }));
+    const handleChangeWindow = (file: DeclaredNodeModel<OpenFileMetaData>) => {
+        dispatch(openFilesAction.open({ ...file, data: file.data }));
+        dispatch(treeSlice.actions.select(file.id));
     }
 
     return (

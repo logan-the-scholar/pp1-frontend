@@ -96,34 +96,34 @@ const treeSlice = createSlice({
             }
         },
 
-        select(state, action: PayloadAction<DeclaredNodeModel<FileMetaData> | undefined>) {
+        /**Highlights visually the provided node and saves it as a state*/
+        select(state, action: PayloadAction<string | number | undefined>) {
+            const foundNode = state.tree.find((n) => n.id === action.payload);
 
-            if (action.payload !== undefined && action.payload.data?.fileType !== FileType.FOLDER) {
+            if (action.payload === undefined || foundNode === undefined) {
+                state.selected = undefined;
+
+            } else {
+
                 state.selected = {
-                    id: action.payload.id,
-                    parent: action.payload.parent,
-                    text: action.payload.text,
+                    id: foundNode.id,
+                    parent: foundNode.parent,
+                    text: foundNode.text,
                     data: {
-                        ...action.payload.data
+                        ...foundNode.data
                     }
                 }
 
-            } else if (action.payload === undefined) {
-                state.selected = undefined;
+                foundNode.data?.fullPath?.forEach((x) => {
+                    const parentIndex = state.tree.findIndex((node) => node.id === x);
+
+                    if (parentIndex >= 0 && state.tree.at(parentIndex)?.droppable) {
+                        state.tree[parentIndex].data.isDropped = true;
+                    }
+                });
+
             }
 
-            action.payload?.data?.fullPath?.forEach((x) => {
-                const parentIndex = state.tree.findIndex((node) => node.id === x);
-
-                if (parentIndex >= 0 && state.tree.at(parentIndex)?.droppable) {
-                    state.tree[parentIndex].data.isDropped = true;
-                }
-            });
-
-            // if (nodeParents) {
-            //     nodeParents.forEach((node) => state.tree)
-            // }
-            // state.tree.filter((node) => action.payload?.data?.fullPath?.includes((state.tree.find((n) => n.id === node.id) as NodeModel<FileMetaData>)));
         },
 
     },
