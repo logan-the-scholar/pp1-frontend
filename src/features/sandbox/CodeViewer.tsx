@@ -41,7 +41,7 @@ const CodeViewer = () => {
     }
 
     return (
-        <div className="h-[100vh] w-full flex flex-col pt-2 overflow-hidden">
+        <div className="h-full w-full flex flex-col overflow-hidden">
             {openFiles.length > 0 ?
                 <>
                     {/* WINDOW VIEW */}
@@ -55,7 +55,7 @@ const CodeViewer = () => {
                                         onClick={() => handleChangeWindow(file)}
                                         key={`window_${file.id}`}
                                         className={`hover:[&>span]:visible pl-3 py-1.5 bg-[#1e1e1e] cursor-pointer w-fit flex relative 
-${file.id === selectedFile?.id ? "border-x border-t border-neutral-400" : "border-x border-[#1e1e1e] bg-[#ffffff1c]"}
+${file.id === selectedFile?.id ? "border-x border-neutral-600" : "border-x border-[#1e1e1e] bg-neutral-900"}
 ${!file.data?.edited && "italic"}`}
                                     >
                                         <div className="mr-3 content-center">
@@ -83,7 +83,7 @@ ${file.id === selectedFile?.id ? "visible hover:bg-[#ffffff21]" : "invisible hov
                     </div>
 
                     {/* PATH VIEW */}
-                    <div className="px-4 py-1.5 flex border-x border-t border-neutral-400 cursor-pointer text-xs text-neutral-300 bg-[#1e1e1e] select-none">
+                    <div className="px-4 py-1.5 flex border-x border-t border-neutral-600 cursor-pointer text-xs text-neutral-300 bg-[#1e1e1e] select-none">
                         {
                             selectedFile !== undefined ?
                                 selectedFile.data?.pathNames ?
@@ -111,12 +111,12 @@ ${file.id === selectedFile?.id ? "visible hover:bg-[#ffffff21]" : "invisible hov
                     {/* EDITOR */}
                     <Editor
                         loading={(
-                            <div className="h-full w-full bg-[#1e1e1e]">
+                            <div className="h-full w-full bg-[#1e1e1e] border-x border-neutral-600">
                                 <LoadingCircle size={80} stroke={8} />
                             </div>
                         )}
                         options={{ minimap: { enabled: false } }}
-                        className="w-full flex-1 border-x border-neutral-400"
+                        className="w-full flex-1 border-x border-neutral-600"
                         language={LanguageMapper(selectedFile?.data?.fileType as string)}
                         theme="vs-dark"
                         path={selectedFile?.data?.pathNames?.join("/")}
@@ -125,7 +125,7 @@ ${file.id === selectedFile?.id ? "visible hover:bg-[#ffffff21]" : "invisible hov
                     />
                 </>
                 :
-                <div className="border-neutral-400 border bg-[#1e1e1e] flex-1 text-center content-center">
+                <div className="border-neutral-600 border-x bg-[#1e1e1e] flex-1 text-center content-center">
                     Nothing here yet!
                 </div>
 

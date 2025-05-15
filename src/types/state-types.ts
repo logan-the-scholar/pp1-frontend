@@ -16,4 +16,9 @@ export type OpenFileMetaData = FileMetaData & {
 
 export type DeclaredNodeModel<T> = NodeModel & {
     data: T
-};
+}
+
+export type openFilesType = {
+    selected: DeclaredNodeModel<OpenFileMetaData> | undefined,
+    open: DeclaredNodeModel<OpenFileMetaData>[]
+}

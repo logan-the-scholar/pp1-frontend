@@ -4,8 +4,9 @@ import treeSlice from "./treeSlice";
 import openFilesSlice from "../open-files/openFilesSlice";
 import FileType from "@/types/enum/FileType";
 import { FileMetaData } from "@/types/state-types";
+import { openFilesAction } from "../open-files/openFilesActions";
 
-export const createAndOpenNode = (node: NodeModel<FileMetaData>): AppThunk => (dispatch, getState) => {
+const createAndOpenNode = (node: NodeModel<FileMetaData>): AppThunk => (dispatch, getState) => {
     let pathNames: string[] = [node.text];
     const fullPath: number[] = [Number(node.id)];
 
@@ -41,7 +42,18 @@ export const createAndOpenNode = (node: NodeModel<FileMetaData>): AppThunk => (d
     const createdNode = getState().FILE_TREE.tree.find((n) => n.id === node.id);
 
     if (createdNode && createdNode.data?.fileType !== FileType.FOLDER) {
-        dispatch(openFilesSlice.actions.select({
+        dispatch(openFilesSlice.actions.add({
+            ...createdNode,
+            data: {
+                ...createdNode.data as FileMetaData,
+                edited: true,
+                saved: true,
+            }
+        }));
+
+        dispatch(treeSlice.actions.select());
+
+        dispatch(openFilesAction.open({
             ...createdNode,
             data: {
                 ...createdNode.data as FileMetaData,
@@ -52,16 +64,4 @@ export const createAndOpenNode = (node: NodeModel<FileMetaData>): AppThunk => (d
     }
 };
 
-// export const createNodeAndOpen = createAsyncThunk("three/createAndOpenNode",
-//     async (payload: NodeModel<FileMetaData>, { dispatch, getState }) => {
-//         dispatch(treeSlice.actions.createNode(payload));
-
-//         const state = getState() as RootState;
-
-//         const createdNode = state.tree.find((node) => node.id === payload.id);
-
-//         if (createdNode && payload.data?.fileType !== FileType.FOLDER) {
-//             dispatch(openFilesSlice.actions.set(createdNode));
-//         }
-//     }
-// );
+export const treeActions = { createAndOpenNode };

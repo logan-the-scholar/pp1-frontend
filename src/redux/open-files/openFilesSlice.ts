@@ -1,14 +1,9 @@
 import FileType from '@/types/enum/FileType';
-import { DeclaredNodeModel, FileMetaData, OpenFileMetaData } from '@/types/state-types';
+import { DeclaredNodeModel, FileMetaData, OpenFileMetaData, openFilesType } from '@/types/state-types';
 import { NodeModel } from '@minoru/react-dnd-treeview';
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 
 //TODO leer desde localStorage
-
-type openFilesType = {
-    selected: DeclaredNodeModel<OpenFileMetaData> | undefined,
-    open: DeclaredNodeModel<OpenFileMetaData>[]
-}
 
 const initialState: openFilesType = {
     selected: undefined,

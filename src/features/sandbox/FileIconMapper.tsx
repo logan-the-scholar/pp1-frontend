@@ -9,7 +9,7 @@ const FileIconMapper: React.FC<{ type: string, isOpen?: boolean | undefined }> =
         <>
             {
                 (() => {
-                    switch (type) {
+                    switch (type.toLowerCase()) {
                         case FileType.TYPESCRIPT:
                             return (
                                 <svg xmlns="http://www.w3.org/2000/svg" width={ICON_SIZE - 2} height={ICON_SIZE - 2} viewBox="0 0 128 128" fill="#007acc" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="text-blue-600">

@@ -97,6 +97,7 @@ const treeSlice = createSlice({
         },
 
         select(state, action: PayloadAction<DeclaredNodeModel<FileMetaData> | undefined>) {
+
             if (action.payload !== undefined && action.payload.data?.fileType !== FileType.FOLDER) {
                 state.selected = {
                     id: action.payload.id,
@@ -112,14 +113,19 @@ const treeSlice = createSlice({
             }
 
             action.payload?.data?.fullPath?.forEach((x) => {
-                ((state.tree.find((node) => node.id === x) as DeclaredNodeModel<FileMetaData>).data).isDropped = true;
+                const parentIndex = state.tree.findIndex((node) => node.id === x);
+
+                if (parentIndex >= 0 && state.tree.at(parentIndex)?.droppable) {
+                    state.tree[parentIndex].data.isDropped = true;
+                }
             });
 
             // if (nodeParents) {
             //     nodeParents.forEach((node) => state.tree)
             // }
             // state.tree.filter((node) => action.payload?.data?.fullPath?.includes((state.tree.find((n) => n.id === node.id) as NodeModel<FileMetaData>)));
-        }
+        },
+
     },
 
 });
