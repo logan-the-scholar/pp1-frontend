@@ -3,6 +3,7 @@ import CodeViewer from "@/features/sandbox/CodeViewer";
 import ContentSideBar from "@/features/sandbox/ContentSideBar";
 import EditorNavBar from "@/features/sandbox/EditorNavBar";
 import FileViewer from "@/features/sandbox/FileViewer";
+import Preview from "@/features/sandbox/Preview";
 import { store } from "@/redux/store";
 import { Provider } from "react-redux";
 
@@ -16,9 +17,10 @@ export default function Sandbox() {
                     </div>
                     <div className="w-full flex-1 flex bg-neutral-900">
                         {/* <div className="w-full flex bg-neutral-900"> */}
-                            <ContentSideBar />
-                            <FileViewer />
-                            <CodeViewer />
+                        <ContentSideBar />
+                        <FileViewer />
+                        <Preview />
+                        {/* <CodeViewer /> */}
                         {/* </div> */}
                     </div>
                 </div>

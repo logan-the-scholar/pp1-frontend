@@ -9,6 +9,7 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@codesandbox/sandpack-react": "^2.20.0",
     "@minoru/react-dnd-treeview": "^3.5.2",
     "@monaco-editor/react": "^4.7.0-rc.0",
     "@react-three/drei": "^10.0.4",

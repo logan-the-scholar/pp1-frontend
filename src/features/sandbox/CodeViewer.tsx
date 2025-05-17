@@ -10,8 +10,7 @@ import { useAppDispatch } from "@/hooks/useTypedSelectors";
 import LanguageMapper from "@/helpers/LanguageMapper";
 import openFilesSlice from "@/redux/open-files/openFilesSlice";
 import { useState } from "react";
-import { NodeModel } from "@minoru/react-dnd-treeview";
-import { DeclaredNodeModel, FileMetaData, OpenFileMetaData } from "@/types/state-types";
+import { DeclaredNodeModel, OpenFileMetaData } from "@/types/state-types";
 import treeSlice from "@/redux/file-tree/treeSlice";
 
 const CodeViewer = () => {
@@ -41,7 +40,7 @@ const CodeViewer = () => {
     }
 
     return (
-        <div className="h-full w-full flex flex-col overflow-hidden">
+        <div className="w-full h-full flex flex-col">
             {openFiles.length > 0 ?
                 <>
                     {/* WINDOW VIEW */}
@@ -131,7 +130,7 @@ ${file.id === selectedFile?.id ? "visible hover:bg-[#ffffff21]" : "invisible hov
 
             }
 
-        </div >
+        </div>
     );
 };
 
