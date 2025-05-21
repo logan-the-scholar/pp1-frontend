@@ -2,17 +2,17 @@
 import LoadingCircle from "@/components/LoadingCircle";
 import { RootState } from "@/redux/store";
 import { Editor } from "@monaco-editor/react";
-import { useDispatch, useSelector } from "react-redux";
+import { useSelector } from "react-redux";
 import FileIconMapper from "./FileIconMapper";
 import FileType from "@/types/enum/FileType";
 import { openFilesAction } from "@/redux/open-files/openFilesActions";
 import { useAppDispatch } from "@/hooks/useTypedSelectors";
 import LanguageMapper from "@/helpers/LanguageMapper";
 import openFilesSlice from "@/redux/open-files/openFilesSlice";
-import { useState } from "react";
-import { NodeModel } from "@minoru/react-dnd-treeview";
-import { FileMetaData, OpenFileMetaData } from "@/types/state-types";
+import { useCallback, useState } from "react";
+import { DeclaredNodeModel, OpenFileMetaData } from "@/types/state-types";
 import treeSlice from "@/redux/file-tree/treeSlice";
+import debounce from "lodash.debounce";
 
 const CodeViewer = () => {
     const dispatch = useAppDispatch();
@@ -20,14 +20,19 @@ const CodeViewer = () => {
     const openFiles = useSelector((state: RootState) => state.OPEN_FILES.open);
     const [line, setLine] = useState<number>(0);
 
+    const debounceSaveCode = useCallback(debounce((code: string, id: number | string) => {
+        dispatch(openFilesSlice.actions.edit({
+            id: id,
+            code: code,
+            line,
+            edited: true
+        }));
+
+    }, 1000), []);
+
     const handleChange = (code: string | undefined) => {
         if (code && code !== selectedFile?.data?.content && selectedFile !== undefined) {
-            dispatch(openFilesSlice.actions.edit({
-                id: selectedFile.id,
-                code,
-                line,
-                edited: true
-            }));
+            debounceSaveCode(code, selectedFile.id);
         }
     };
 
@@ -35,13 +40,13 @@ const CodeViewer = () => {
         dispatch(openFilesAction.closeAndChangeWindow(id));
     };
 
-    const handleChangeWindow = (file: NodeModel<OpenFileMetaData>) => {
-        dispatch(openFilesAction.open({ ...file, data: file.data as FileMetaData }));
-        dispatch(treeSlice.actions.select({ ...file, data: file.data as FileMetaData }));
+    const handleChangeWindow = (file: DeclaredNodeModel<OpenFileMetaData>) => {
+        dispatch(openFilesAction.open({ ...file, data: file.data }));
+        dispatch(treeSlice.actions.select(file.id));
     }
 
     return (
-        <div className="h-full w-full flex flex-col overflow-hidden">
+        <div className="w-full h-full flex flex-col">
             {openFiles.length > 0 ?
                 <>
                     {/* WINDOW VIEW */}
@@ -131,7 +136,7 @@ ${file.id === selectedFile?.id ? "visible hover:bg-[#ffffff21]" : "invisible hov
 
             }
 
-        </div >
+        </div>
     );
 };
 
