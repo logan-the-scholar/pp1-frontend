@@ -42,7 +42,7 @@ root.render(<App />);
         >
             <div className="w-full text-white flex h-full overflow-hidden">
                 <CodeViewer />
-                <SandpackPreview showOpenInCodeSandbox={false} />
+                <SandpackPreview showNavigator={true} showOpenInCodeSandbox={false} />
             </div>
         </SandpackProvider>
     );
