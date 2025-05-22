@@ -71,11 +71,12 @@ const openFilesSlice = createSlice({
             index >= 0 && state.open.splice(index, 1);
         },
 
-        edit(state, action: PayloadAction<{ id: string | number, code: string, line: number, edited: boolean }>) {
+        edit(state, action: PayloadAction<{ id: string | number, code: string | undefined, line: number, edited: boolean }>) {
             const index = state.open.findIndex((n) => n.id === action.payload.id);
             const editedData: OpenFileMetaData = {
                 ...state.open[index].data,
                 content: action.payload.code,
+                saved: false,
                 edited: action.payload.edited,
                 line: action.payload.line
             };
@@ -87,8 +88,15 @@ const openFilesSlice = createSlice({
             }
         },
 
-        setSaved(state, action: PayloadAction<{ id: string, edited: boolean } | Map<string, boolean>>) {
+        changeSaved(state, action: PayloadAction<{ one?: { id: string | number, saved: boolean }, two?: Map<string, boolean> }>) {
 
+            if (action.payload.one) {
+                const index = state.open.findIndex((n) => n.id === action.payload.one?.id);
+                state.open[index].data.saved = action.payload.one.saved;
+
+            } else if (action.payload.two) {
+
+            }
         }
     }
 
