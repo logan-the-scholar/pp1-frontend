@@ -9,29 +9,54 @@ import { openFilesAction } from "@/redux/open-files/openFilesActions";
 import { useAppDispatch } from "@/hooks/useTypedSelectors";
 import LanguageMapper from "@/helpers/LanguageMapper";
 import openFilesSlice from "@/redux/open-files/openFilesSlice";
-import { useCallback, useState } from "react";
+import { useCallback, useRef, useState } from "react";
 import { DeclaredNodeModel, OpenFileMetaData } from "@/types/state-types";
 import treeSlice from "@/redux/file-tree/treeSlice";
 import debounce from "lodash.debounce";
+import { useSaveShortcut } from "@/hooks/shortcut/useSaveShortcut";
 
 const CodeViewer = () => {
     const dispatch = useAppDispatch();
     const selectedFile = useSelector((state: RootState) => state.OPEN_FILES.selected);
     const openFiles = useSelector((state: RootState) => state.OPEN_FILES.open);
-    const [line, setLine] = useState<number>(0);
+    // const [line, setLine] = useState<number>(0);
+    const timeoutRef = useRef<NodeJS.Timeout | null>(null);
 
-    const debounceSaveCode = useCallback(debounce((code: string, id: number | string) => {
-        dispatch(openFilesSlice.actions.edit({
-            id: id,
-            code: code,
-            line,
-            edited: true
-        }));
+    useSaveShortcut(() => {
+        if (selectedFile) {
+            if (timeoutRef.current) clearTimeout(timeoutRef.current);
 
-    }, 1000), []);
+            dispatch(openFilesSlice.actions.changeSaved({ one: { id: selectedFile.id, saved: true } }));
+        }
+    });
+
+    // const debounceSaveCode = useCallback(
+    //     debounce((code: string | undefined, id: number | string) => {
+    //         dispatch(openFilesSlice.actions.edit({
+    //             id: id,
+    //             code: code,
+    //             line: 0,
+    //             edited: true
+    //         }));
+
+    //     }, 1000), []);
+
+
+    const debounceSaveCode = (code: string | undefined, id: string | number) => {
+        if (timeoutRef.current) clearTimeout(timeoutRef.current);
+
+        timeoutRef.current = setTimeout(() => {
+            dispatch(openFilesSlice.actions.edit({
+                id: id,
+                code: code,
+                line: 0,
+                edited: true
+            }));
+        }, 1000);
+    };
 
     const handleChange = (code: string | undefined) => {
-        if (code && code !== selectedFile?.data?.content && selectedFile !== undefined) {
+        if (selectedFile !== undefined) {
             debounceSaveCode(code, selectedFile.id);
         }
     };
@@ -61,7 +86,7 @@ const CodeViewer = () => {
                                         key={`window_${file.id}`}
                                         className={`hover:[&>span]:visible pl-3 py-1.5 bg-[#1e1e1e] cursor-pointer w-fit flex relative 
 ${file.id === selectedFile?.id ? "border-x border-neutral-600" : "border-x border-[#1e1e1e] bg-neutral-900"}
-${!file.data?.edited && "italic"}`}
+${!file.data.edited && "italic"}`}
                                     >
                                         <div className="mr-3 content-center">
                                             <FileIconMapper type={file.data?.fileType as string} />
@@ -72,13 +97,33 @@ ${!file.data?.edited && "italic"}`}
                                                 e.stopPropagation();
                                                 handleClose(file.id);
                                             }}
-                                            className={`mx-2 px-1 content-center rounded-[4px] 
-${file.id === selectedFile?.id ? "visible hover:bg-[#ffffff21]" : "invisible hover:bg-[#ffffff18]"}`}>
-                                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-x-icon lucide-x">
-                                                <path d="M18 6 6 18" /><path d="m6 6 12 12" />
-                                            </svg>
+                                            className={`mx-2 px-0.5 -my-0.5 py-0.5 content-center rounded-[4px] 
+${file.id === selectedFile?.id || file.data.edited ? "visible hover:bg-[#ffffff13]" : "invisible hover:bg-[#ffffff18]"}`}>
+                                            {
+                                                file.data.edited && !file.data.saved ?
+                                                    // {/* EDITED CIRCLE */}
+                                                    <svg xmlns="http://www.w3.org/2000/svg"
+                                                        width="10" height="10"
+                                                        viewBox="0 0 24 24"
+                                                        fill="currentColor"
+                                                        stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round"
+                                                        className={`lucide lucide-circle-icon lucide-circle`}>
+                                                        <circle cx="12" cy="12" r="10" />
+                                                    </svg>
+                                                    :
+                                                    // {/* NOT EDITED OR HOVER TO CLOSE CROSS */}
+                                                    <svg xmlns="http://www.w3.org/2000/svg"
+                                                        width="16" height="16"
+                                                        viewBox="0 0 24 24"
+                                                        fill="none"
+                                                        stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"
+                                                        className={`lucide lucide-x-icon lucide-x`}>
+                                                        <path d="M18 6 6 18" /><path d="m6 6 12 12" />
+                                                    </svg>
+                                            }
                                         </span>
-                                        {file.id === selectedFile?.id &&
+                                        {
+                                            file.id === selectedFile?.id &&
                                             <div className="absolute left-0 h-0.5 w-full bg-[#1e1e1e] -bottom-[1px]"></div>
                                         }
                                     </div>

@@ -12,6 +12,7 @@ import { treeActions } from "@/redux/file-tree/treeActions";
 import { useAppDispatch } from "@/hooks/useTypedSelectors";
 import { DeclaredNodeModel, FileMetaData, openFilesType } from "@/types/state-types";
 import { openFilesAction } from "@/redux/open-files/openFilesActions";
+import { jetBrainsMono } from "@/helpers/FontLoader";
 
 const FileViewer: React.FC = () => {
 
@@ -148,7 +149,7 @@ const FileViewer: React.FC = () => {
     return (
         <div onContextMenu={(e) => e.preventDefault()}
             onClick={() => setVisibleMenu(false)}
-            className="select-none pt-2 w-[20%] relative min-w-[10%] max-w-[50%] h-full text-sm flex flex-col"
+            className={`select-none pt-2 w-[20%] relative min-w-[10%] max-w-[50%] h-full text-sm flex flex-col ${jetBrainsMono.className}`}
         >
             {/*
                 //TODO el click derecho al root -> crear nuevo archivo no funciona.
@@ -187,6 +188,7 @@ const FileViewer: React.FC = () => {
                                 :
                                 null
                             }
+                            
                             {contextSelected?.node.id !== 0 && contextSelected?.node.parent !== -1 &&
                                 <>
                                     <div>

@@ -2,7 +2,6 @@ import FileType from "@/types/enum/FileType";
 import { DeclaredNodeModel, FileMetaData } from "@/types/state-types";
 import { NodeModel } from "@minoru/react-dnd-treeview";
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
-import { Satellite } from "lucide-react";
 
 type treeType = {
     tree: DeclaredNodeModel<FileMetaData>[],
