@@ -1,9 +1,9 @@
 "use client";
 import { useLocalStorage } from "@/hooks/useLocalStorage";
-import { ApiResponse } from "@/types/ApiResponse.type";
+import { ApiType } from "@/types/ApiResponse.type";
 
 const NavBar: React.FC = () => {
-    const [data,] = useLocalStorage<ApiResponse.Login>("session", null);
+    const [data,] = useLocalStorage<ApiType.Login>("session", null);
 
     return (
         <nav>

@@ -1,5 +1,5 @@
 import NavBar from "@/components/NavBar";
-import ProjectsSection from "@/features/dashboard/ProjectsSection";
+import Projects from "@/features/dashboard/Projects";
 
 export default function Dashboard() {
     return (
@@ -10,7 +10,7 @@ export default function Dashboard() {
 
             <div className="w-full h-full overflow-hidden">
                 <div className="w-full h-full relative">
-                    <ProjectsSection />
+                    <Projects />
                 </div>
             </div>
         </>

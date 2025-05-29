@@ -1,5 +1,5 @@
 import { ErrorHelper } from "@/helpers/ErrorHelper";
-import { fetchCatch } from "./fetch-error";
+import { fetchCatch } from "./fetch-catch";
 import { ApiStatusEnum } from "@/types/enum/ApiStatus.enum";
 
 /** Fetch a backend request, including the authentication token, as Bearer header token, from the local storage */

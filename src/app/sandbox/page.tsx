@@ -1,5 +1,4 @@
 "use client";
-import CodeViewer from "@/features/sandbox/CodeViewer";
 import ContentSideBar from "@/features/sandbox/ContentSideBar";
 import EditorNavBar from "@/features/sandbox/EditorNavBar";
 import FileViewer from "@/features/sandbox/FileViewer";

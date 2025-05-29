@@ -1,6 +1,6 @@
 import { API_SERVER } from "@/helpers/env-variable-normalizator";
-import { ApiResponse } from "@/types/ApiResponse.type";
-import { fetchCatch } from "./fetch-error";
+import { ApiType } from "@/types/ApiResponse.type";
+import { fetchCatch } from "./fetch-catch";
 import { ErrorHelper } from "@/helpers/ErrorHelper";
 import { ApiError } from "next/dist/server/api-utils";
 import { ApiStatusEnum } from "@/types/enum/ApiStatus.enum";
@@ -16,11 +16,11 @@ export class UserAuth {
 
     }
 
-    static async githubSignIn(code: string): Promise<ApiResponse.Login | ErrorHelper> {
+    static async githubSignIn(code: string): Promise<ApiType.Login | ErrorHelper> {
 
         try {
 
-            const response: ApiResponse.Login = await fetchCatch(`${API_SERVER}/demo/api/v0/user/github/sign-in`, {
+            const response: ApiType.Login = await fetchCatch(`${API_SERVER}/demo/api/v0/user/github/sign-in`, {
                 method: "POST",
                 headers: {
                     "X-Code": code

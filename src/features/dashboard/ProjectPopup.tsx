@@ -1,14 +1,11 @@
-"use client";
 import { createProject } from "@/services/projectManagment";
 import { IProjectCreation } from "@/types/zTypes";
 import { ArrowDownFromLine, Eye, FolderPen } from "lucide-react";
-import React, { useState } from "react";
+import { FormEvent, useState } from "react";
 
-const ProjectsSection = () => {
-    const [showPopup, setShowPopup] = useState<boolean>(false);
-    const [projects, setProjects] = useState<string[] | null>(null);
-    const [projectInfo, setProjectInfo] = useState<IProjectCreation>({ name: undefined, visibility: "private" });
+const ProjectPopup: React.FC<{ setShowPopup: React.Dispatch<React.SetStateAction<boolean>>, showPopup: boolean }> = ({ setShowPopup, showPopup }) => {
     const [isDropDown, setIsDropDown] = useState<boolean>(false);
+    const [projectInfo, setProjectInfo] = useState<IProjectCreation>({ name: undefined, visibility: "private" });
     const visibilityMessage: Map<string, string> = new Map([
         ["public", "Public (Anyone can see the project)"],
         ["private", "Private (Only members with invitation)"]
@@ -29,7 +26,18 @@ const ProjectsSection = () => {
             });
 
         }
-    }
+    };
+
+    const handleCreate = (e: FormEvent<HTMLFormElement>) => {
+        e.preventDefault();
+
+        createProject({
+            name: projectInfo.name,
+            visibility: projectInfo.visibility,
+            owner: "usertest1"
+        });
+        
+    };
 
     const handlePopupView = (isOpen: boolean) => {
         setShowPopup(isOpen);
@@ -38,52 +46,11 @@ const ProjectsSection = () => {
         }
     };
 
-    const handleCreate = () => {
-        createProject({
-            name: projectInfo.name,
-            visibility: projectInfo.visibility,
-            owner: "usertest1"
-        });
-    }
-
     return (
         <>
-            <div className="w-ful h-full">
-                <button
-                    className="p-1 bg-amber-200 text-neutral-700 cursor-pointer"
-                    onClick={() => handlePopupView(true)}
-                >
-                    New Project
-                </button>
-                <div>
-                    <div className="text-4xl">
-                        Projects
-                    </div>
+            {showPopup &&
 
-                    <div>
-                        {projects !== null && projects.length > 0 ?
-                            projects.map((x) =>
-                                <div className="cursor-pointer" key={`p_${x}`}>{x}</div>
-                            )
-                            :
-                            <div>
-                                <div>
-                                    Nothing here Yet! create a project to start
-                                </div>
-                                <button
-                                    className="p-1 bg-amber-200 text-neutral-700 cursor-pointer"
-                                    onClick={() => handlePopupView(true)}
-                                >
-                                    New +
-                                </button>
-                            </div>
-                        }
-                    </div>
-                </div>
-            </div>
-            {
-                showPopup &&
-                <div
+                < div
                     onClick={(e) => handlePopupView(false)}
                     className="w-full h-full fixed inset-0 z-30 bg-[#0e0e0e70] flex items-center justify-center"
                 >
@@ -111,12 +78,13 @@ const ProjectsSection = () => {
 
                             <form autoComplete="off"
                                 className='flex-row m-4'
-                                onSubmit={() => handleCreate()}
+                                onSubmit={(e) => handleCreate(e)}
                             >
                                 <div className="text-xl">
                                     Project Configuration
                                 </div>
 
+                                {/* NAME SECTION */}
                                 <div className='flex-row mb-5'>
                                     <label className='w-full text-xs ml-2' htmlFor="name">
                                         Project name
@@ -132,12 +100,13 @@ const ProjectsSection = () => {
                                     </div>
                                 </div>
 
+                                {/* DROPDOWN SECTION */}
                                 <div className='flex-row mb-10'>
                                     <label className='w-full text-xs ml-2' htmlFor="visibility">
                                         Visibility
                                     </label>
 
-                                    {/* DROPDOWN SECTION */}
+                                    {/* DROPDOWN */}
                                     <div
                                         onClick={() => setIsDropDown(!isDropDown)}
                                         className='relative flex-col text-sm py-0.5 ml-2 outline-1 bg-neutral-800 select-none cursor-pointer'
@@ -188,10 +157,10 @@ const ProjectsSection = () => {
                             </form>
                         </div>
                     </div>
-                </div>
+                </div >
             }
         </>
     );
-}
+};
 
-export default ProjectsSection;
+export default ProjectPopup;

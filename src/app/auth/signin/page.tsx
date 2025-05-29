@@ -6,8 +6,8 @@ import { IUserCredentials } from '@/types/zTypes';
 import { openGithubPopup } from '@/services/openGithubPopup';
 import { ErrorHelper } from '@/helpers/ErrorHelper';
 import { ApiStatusEnum } from '@/types/enum/ApiStatus.enum';
-import { UserAuth } from '@/services/userAuth';
-import { ApiResponse } from '@/types/ApiResponse.type';
+import { UserAuth } from '@/services/authentication';
+import { ApiType } from '@/types/ApiResponse.type';
 import { AppUrl } from '@/types/UrlObject.type';
 import { useLocalStorage } from '@/hooks/useLocalStorage';
 
@@ -18,7 +18,7 @@ const Login = () => {
     const [loading, setLoading] = useState<boolean>(false);
     const [windowError, setWindowError] = useState<string | null>(null);
     const [openError, setOpenError] = useState<boolean>(false);
-    const [data, setData] = useLocalStorage<ApiResponse.Login>("session", null);
+    const [data, setData] = useLocalStorage<ApiType.Login>("session", null);
 
     const login = (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
@@ -29,7 +29,7 @@ const Login = () => {
             if (event.origin !== window.origin && !event.data.code) return;
 
             if (event.data.type === "session-success") {
-                const response: ApiResponse.Login | ErrorHelper = await UserAuth.githubSignIn(event.data.code);
+                const response: ApiType.Login | ErrorHelper = await UserAuth.githubSignIn(event.data.code);
 
                 if (response instanceof ErrorHelper) {
                     setWindowError(response.message);

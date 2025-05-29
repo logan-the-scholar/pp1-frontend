@@ -1,6 +1,5 @@
 import { ErrorHelper } from "@/helpers/ErrorHelper";
 import { ApiStatusEnum } from "@/types/enum/ApiStatus.enum";
-import { error } from "console";
 
 export const openGithubPopup = (redirect_uri?: string | undefined) => {
     return new Promise<void>((resolve, reject) => {
