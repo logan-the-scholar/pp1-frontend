@@ -1,11 +1,16 @@
+import { zodValidate } from "@/helpers/zod/ZodValidate";
+import { useLocalStorage } from "@/hooks/useLocalStorage";
 import { createProject } from "@/services/projectManagment";
+import { ApiType } from "@/types/ApiResponse.type";
+import { ProjectCreation } from "@/types/ProjectCreation.type";
 import { IProjectCreation } from "@/types/zTypes";
 import { ArrowDownFromLine, Eye, FolderPen } from "lucide-react";
 import { FormEvent, useState } from "react";
 
 const ProjectPopup: React.FC<{ setShowPopup: React.Dispatch<React.SetStateAction<boolean>>, showPopup: boolean }> = ({ setShowPopup, showPopup }) => {
     const [isDropDown, setIsDropDown] = useState<boolean>(false);
-    const [projectInfo, setProjectInfo] = useState<IProjectCreation>({ name: undefined, visibility: "private" });
+    const [projectInfo, setProjectInfo] = useState<IProjectCreation>({ name: "", visibility: "private", workspaceId: "" });
+    const [selectedWorkspace] = useLocalStorage<ApiType.Workspace>("selected_workspace", null);
     const visibilityMessage: Map<string, string> = new Map([
         ["public", "Public (Anyone can see the project)"],
         ["private", "Private (Only members with invitation)"]
@@ -14,43 +19,58 @@ const ProjectPopup: React.FC<{ setShowPopup: React.Dispatch<React.SetStateAction
     const handleChange = (e: React.ChangeEvent<HTMLInputElement> | React.MouseEvent<HTMLDivElement, MouseEvent>) => {
 
         if ('target' in e && e.target instanceof HTMLInputElement) {
-            setProjectInfo({
-                ...projectInfo,
-                name: (e as React.ChangeEvent<HTMLInputElement>).currentTarget.value
+            setProjectInfo((prev) => {
+                return {
+                    ...prev,
+                    name: (e as React.ChangeEvent<HTMLInputElement>).target.value
+                }
             });
 
-        } else {
-            setProjectInfo({
-                ...projectInfo,
-                visibility: e.currentTarget.id as "public" | "private"
+        } else if (e.target instanceof HTMLDivElement) {
+            const currentVisibility = e.currentTarget.id;
+
+            setProjectInfo((prev) => {
+                return {
+                    ...prev,
+                    visibility: currentVisibility as "public" | "private"
+                }
             });
 
         }
     };
 
+
     const handleCreate = (e: FormEvent<HTMLFormElement>) => {
         e.preventDefault();
-
-        createProject({
-            name: projectInfo.name,
-            visibility: projectInfo.visibility,
-            owner: "usertest1"
-        });
+        const [success, data] = zodValidate<IProjectCreation>({ ...projectInfo, workspaceId: selectedWorkspace.id }, ProjectCreation);
         
+        if (!success) {
+            console.error(data.errors);
+            return;
+        }
+
+        createProject(data.data);
+
+        setShowPopup(false);
     };
+
 
     const handlePopupView = (isOpen: boolean) => {
         setShowPopup(isOpen);
         if (!isOpen) {
             setIsDropDown(false);
+            setProjectInfo((prev) => {
+                return { ...prev, name: "", visibility: "private" }
+            });
         }
     };
+
 
     return (
         <>
             {showPopup &&
 
-                < div
+                <div
                     onClick={(e) => handlePopupView(false)}
                     className="w-full h-full fixed inset-0 z-30 bg-[#0e0e0e70] flex items-center justify-center"
                 >
@@ -62,7 +82,7 @@ const ProjectPopup: React.FC<{ setShowPopup: React.Dispatch<React.SetStateAction
                             <div className="w-full border-b border-neutral-400 content-end flex">
                                 <div
                                     onClick={() => handlePopupView(false)}
-                                    className="ml-auto cursor-pointer hover:bg-neutral-700 px-1"
+                                    className="ml-auto cursor-pointer hover:bg-red-700 px-1"
                                 >
                                     <svg xmlns="http://www.w3.org/2000/svg"
                                         className="lucide lucide-x-icon lucide-x"
