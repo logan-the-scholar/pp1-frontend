@@ -1,11 +1,11 @@
 import { API_SERVER } from "@/helpers/env-config";
 import { IProjectCreation } from "@/types/zTypes";
-import { fetchCatch } from "./fetch-catch";
+import { fetchCatch } from "../wrapper/fetch-catch";
 import { ErrorHelper } from "@/helpers/ErrorHelper";
 import { ApiStatusEnum } from "@/types/enum/ApiStatus.enum";
 import { ApiType } from "@/types/ApiResponse.type";
 
-export async function createProject(data: IProjectCreation) {
+async function create(data: IProjectCreation) {
     try {
         await fetchCatch(`${API_SERVER}/demo/api/v0/project`, {
             method: "POST",
@@ -20,7 +20,7 @@ export async function createProject(data: IProjectCreation) {
     }
 }
 
-export async function fetchProjects(id: string): Promise<ErrorHelper | ApiType.Project[]> {
+async function getAll(id: string): Promise<ErrorHelper | ApiType.Project[]> {
     try {
         return await fetchCatch(`${API_SERVER}/demo/api/v0/project/all/${id}`, {
             method: "GET"
@@ -31,3 +31,5 @@ export async function fetchProjects(id: string): Promise<ErrorHelper | ApiType.P
 
     }
 }
+
+export const ApiProject = { getAll, create };

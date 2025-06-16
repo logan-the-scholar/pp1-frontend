@@ -1,9 +1,9 @@
 import { ErrorHelper } from "@/helpers/ErrorHelper";
-import { fetchCatch } from "./fetch-catch";
 import { ApiStatusEnum } from "@/types/enum/ApiStatus.enum";
+import { fetchCatch } from "./fetch-catch";
 
 /** Fetch a backend request, including the authentication token, as Bearer header token, from the local storage */
-export async function fetchWrap(url: string | URL | globalThis.Request, options: RequestInit) {
+export async function fetchAuth(url: string | URL | globalThis.Request, options: RequestInit) {
 
     const userSession = localStorage.getItem("userSession");
     const token = userSession ? JSON.parse(userSession).token : null;

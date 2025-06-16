@@ -6,10 +6,10 @@ import { IUserCredentials } from '@/types/zTypes';
 import { openGithubPopup } from '@/services/openGithubPopup';
 import { ErrorHelper } from '@/helpers/ErrorHelper';
 import { ApiStatusEnum } from '@/types/enum/ApiStatus.enum';
-import { UserAuth } from '@/services/authentication';
 import { ApiType } from '@/types/ApiResponse.type';
 import { AppUrl } from '@/types/UrlObject.type';
 import { useLocalStorage } from '@/hooks/useLocalStorage';
+import { ApiUser } from '@/services/api';
 
 const Login = () => {
     const initial: IUserCredentials = { mail: "", password: "" }
@@ -29,7 +29,7 @@ const Login = () => {
             if (event.origin !== window.origin && !event.data.code) return;
 
             if (event.data.type === "session-success") {
-                const response: ApiType.Login | ErrorHelper = await UserAuth.githubSignIn(event.data.code);
+                const response: ApiType.Login | ErrorHelper = await ApiUser.githubSignIn(event.data.code);
 
                 if (response instanceof ErrorHelper) {
                     setWindowError(response.message);

@@ -1,9 +1,9 @@
 import { API_SERVER } from "@/helpers/env-config";
 import { ErrorHelper } from "@/helpers/ErrorHelper";
 import { ApiStatusEnum } from "@/types/enum/ApiStatus.enum";
-import { fetchCatch } from "./fetch-catch";
+import { fetchCatch } from "../wrapper/fetch-catch";
 
-export async function fetchWorkspaces(userId: string): Promise<any | ErrorHelper> {
+async function getAll(userId: string): Promise<any | ErrorHelper> {
 
     try {
         const response = await fetchCatch(`${API_SERVER}/demo/api/v0/workspace/${userId}`, {
@@ -17,3 +17,5 @@ export async function fetchWorkspaces(userId: string): Promise<any | ErrorHelper
 
     }
 }
+
+export const ApiWorkspace = { getAll };

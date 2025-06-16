@@ -1,6 +1,6 @@
 import { zodValidate } from "@/helpers/zod/ZodValidate";
 import { useLocalStorage } from "@/hooks/useLocalStorage";
-import { createProject } from "@/services/projects";
+import { ApiProject } from "@/services/api";
 import { ApiType } from "@/types/ApiResponse.type";
 import { ProjectCreation } from "@/types/ProjectCreation.type";
 import { IProjectCreation } from "@/types/zTypes";
@@ -49,7 +49,7 @@ const ProjectPopup: React.FC<{ setShowPopup: React.Dispatch<React.SetStateAction
             return;
         }
 
-        createProject(data.data);
+        ApiProject.create(data.data);
 
         setShowPopup(false);
     };

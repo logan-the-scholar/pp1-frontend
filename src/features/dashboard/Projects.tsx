@@ -1,13 +1,12 @@
 "use client";
 import React, { useEffect, useState } from "react";
 import ProjectPopup from "./ProjectPopup";
-import { fetchWorkspaces } from "@/services/workspace";
 import { useLocalStorage } from "@/hooks/useLocalStorage";
 import { ApiType } from "@/types/ApiResponse.type";
 import { ErrorHelper } from "@/helpers/ErrorHelper";
 import LoadingCircle from "@/components/LoadingCircle";
-import { fetchProjects } from "@/services/projects";
 import ProjectCard from "./ProjectCard";
+import { ApiProject, ApiWorkspace } from "@/services/api";
 
 const Projects: React.FC<{ showPopup: boolean, setShowPopup: React.Dispatch<React.SetStateAction<boolean>> }> = ({
     showPopup, setShowPopup }) => {
@@ -25,7 +24,7 @@ const Projects: React.FC<{ showPopup: boolean, setShowPopup: React.Dispatch<Reac
         //TODO en un futuro guardar todo esto en indexedDB
         //TODO tokens de autenticacion (de muy corta duracion) y refresh token en cookies
         const fetch = async () => {
-            const response: ApiType.Workspace[] | ErrorHelper = await fetchWorkspaces(user.id);
+            const response: ApiType.Workspace[] | ErrorHelper = await ApiWorkspace.getAll(user.id);
 
             if (response instanceof ErrorHelper) {
                 console.error(response);
@@ -49,7 +48,7 @@ const Projects: React.FC<{ showPopup: boolean, setShowPopup: React.Dispatch<Reac
 
         if (selectedWorkspace !== null) {
             const fetch = async () => {
-                const response: ApiType.Project[] | ErrorHelper = await fetchProjects(selectedWorkspace.id);
+                const response: ApiType.Project[] | ErrorHelper = await ApiProject.getAll(selectedWorkspace.id);
 
                 if (response instanceof ErrorHelper) {
                     console.error(response);
