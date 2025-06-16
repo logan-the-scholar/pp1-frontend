@@ -1,4 +1,4 @@
-import { API_SERVER } from "@/helpers/env-variable-normalizator";
+import { API_SERVER } from "@/helpers/env-config";
 import { ApiType } from "@/types/ApiResponse.type";
 import { fetchCatch } from "./fetch-catch";
 import { ErrorHelper } from "@/helpers/ErrorHelper";

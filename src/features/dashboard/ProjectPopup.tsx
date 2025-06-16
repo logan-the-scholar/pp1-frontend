@@ -1,6 +1,6 @@
 import { zodValidate } from "@/helpers/zod/ZodValidate";
 import { useLocalStorage } from "@/hooks/useLocalStorage";
-import { createProject } from "@/services/projectManagment";
+import { createProject } from "@/services/projects";
 import { ApiType } from "@/types/ApiResponse.type";
 import { ProjectCreation } from "@/types/ProjectCreation.type";
 import { IProjectCreation } from "@/types/zTypes";

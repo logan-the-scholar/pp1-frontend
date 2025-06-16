@@ -14,7 +14,7 @@ import { DeclaredNodeModel, FileMetaData, openFilesType } from "@/types/state-ty
 import { openFilesAction } from "@/redux/open-files/openFilesActions";
 import { jetBrainsMono } from "@/helpers/FontLoader";
 
-const FileViewer: React.FC = () => {
+const FileViewer: React.FC<{ name: string | null }> = ({ name }) => {
 
     const treeContext = useTreeContext();
     const dispatch = useAppDispatch();
@@ -188,7 +188,7 @@ const FileViewer: React.FC = () => {
                                 :
                                 null
                             }
-                            
+
                             {contextSelected?.node.id !== 0 && contextSelected?.node.parent !== -1 &&
                                 <>
                                     <div>
@@ -231,7 +231,7 @@ const FileViewer: React.FC = () => {
                     FILE EXPLORER
                 </div>
 
-                <div className="bg-[#1e1e1e] px-2 py-1 font-bold w-full">Project name</div>
+                <div className="bg-[#1e1e1e] px-2 py-1 font-bold w-full">{name}</div>
 
                 <div
                     ref={mainThreeRef}
