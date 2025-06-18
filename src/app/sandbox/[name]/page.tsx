@@ -18,12 +18,9 @@ export default function Sandbox({ params }: {params: Promise<{ name: string }>})
                         <EditorNavBar/>
                     </div>
                     <div className="w-full flex-1 flex bg-neutral-900">
-                        {/* <div className="w-full flex bg-neutral-900"> */}
                         <ContentSideBar/>
                         <FileViewer name={data.name}/>
                         <Preview/>
-                        {/* <CodeViewer /> */}
-                        {/* </div> */}
                     </div>
                 </div>
             </Provider>

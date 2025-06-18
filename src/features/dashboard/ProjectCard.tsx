@@ -6,7 +6,7 @@ import React from 'react'
 
 export default function ProjectCard(project: ApiType.Project) {
     return (
-        <div className='w-64 h-32 bg-neutral-900'>
+        <div className='w-64 h-32 bg-neutral-800 border border-neutral-700 shadow-lg hover:shadow-xl transition-all shadow-neutral-950'>
             <Link href={`${API_BASE}/sandbox/${project.name}`}>
                 <div className='h-full w-full border-neutral-300 pr-2 pl-4 p-3.5 cursor-pointer flex flex-col place-content-between'>
                     <div className='relative'>

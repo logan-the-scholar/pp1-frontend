@@ -1,9 +1,11 @@
 "use client";
+import { useDashboardContext } from "@/context/DashboardProvider";
 import { useLocalStorage } from "@/hooks/useLocalStorage";
 import { ApiType } from "@/types/ApiResponse.type";
 import { useEffect, useState } from "react";
 
-const NavBar: React.FC<{ setShowPopup: React.Dispatch<React.SetStateAction<boolean>> }> = ({ setShowPopup }) => {
+const NavBar: React.FC = () => {
+    const [, setShowPopup] = useDashboardContext();
     const [userData,] = useLocalStorage<ApiType.Login>("session", null);
     const [loading, setLoading] = useState<boolean>(true);
     const [userDataState, setUserDataState] = useState<ApiType.Login | null>(null);
@@ -30,7 +32,7 @@ const NavBar: React.FC<{ setShowPopup: React.Dispatch<React.SetStateAction<boole
     }, [selectedWorkspace]);
 
     return (
-        <nav className="flex justify-around w-full">
+        <nav className="h-full flex justify-around w-full border-b border-neutral-600 grid-cols-3">
             {selectedWorkspaceState !== null &&
                 <div className="h-full">
                     <div className="bg-amber-400">
@@ -48,7 +50,7 @@ const NavBar: React.FC<{ setShowPopup: React.Dispatch<React.SetStateAction<boole
 
             {
                 userDataState !== null &&
-                <div className="h-full w-10">
+                <div className="h-8 w-8">
                     <img
                         className="rounded-full cursor-pointer h-full w-full"
                         src={userDataState.profileImage} alt="profile image"

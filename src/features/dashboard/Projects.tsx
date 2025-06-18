@@ -74,13 +74,12 @@ const Projects: React.FC<{ showPopup: boolean, setShowPopup: React.Dispatch<Reac
 
                         <div className="h-full w-full">
                             <div className="text-4xl">
-                                Projects
                             </div>
 
                             {!loadingProjects ?
                                 <div className="w-full h-full">
                                     {projects !== null && projects.length > 0 ?
-                                        <div className="grid grid-cols-4 gap-3 w-full h-full">
+                                        <div className="p-8 grid grid-cols-4 gap-3 w-full h-full">
                                             {projects.map((x) =>
                                                 <ProjectCard key={x.id} {...x} />
                                             )}
