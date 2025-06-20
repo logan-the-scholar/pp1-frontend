@@ -6,15 +6,12 @@ import React from 'react'
 
 export default function ProjectCard(project: ApiType.Project) {
     return (
-        <div className='w-64 h-32 bg-neutral-800 border border-neutral-700 shadow-lg hover:shadow-xl transition-all shadow-neutral-950'>
+        <div className='relative w-64 h-32 bg-neutral-800 border border-neutral-700 shadow-lg hover:shadow-xl transition-all shadow-neutral-950'>
             <Link href={`${API_BASE}/sandbox/${project.name}`}>
                 <div className='h-full w-full border-neutral-300 pr-2 pl-4 p-3.5 cursor-pointer flex flex-col place-content-between'>
-                    <div className='relative'>
+                    <div className=''>
                         <div>{project.name}</div>
-                        <div className='absolute hover:bg-neutral-800 rounded-[3px] right-0 top-0'>
-                            {/* <ChevronRight className="text-neutral-200 mx-1 my-0.5 origin-right" width={18} height={18} /> */}
-                            <Settings className="text-neutral-200 mx-1 my-1 origin-right" width={18} height={18} />
-                        </div>
+
                     </div>
                     <div className='flex mb-1'>
                         <div>
@@ -27,6 +24,10 @@ export default function ProjectCard(project: ApiType.Project) {
                     </div>
                 </div>
             </Link>
+            <div className='absolute z-20 hover:bg-neutral-700 rounded-[3px] right-2 top-3.5 cursor-pointer'>
+                {/* <ChevronRight className="text-neutral-200 mx-1 my-0.5 origin-right" width={18} height={18} /> */}
+                <Settings className="text-neutral-200 mx-1 my-1 origin-right" width={18} height={18} />
+            </div>
         </div>
     );
 }

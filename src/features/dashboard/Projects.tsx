@@ -7,6 +7,7 @@ import { ErrorHelper } from "@/helpers/ErrorHelper";
 import LoadingCircle from "@/components/LoadingCircle";
 import ProjectCard from "./ProjectCard";
 import { ApiProject, ApiWorkspace } from "@/services/api";
+import { useAppDispatch } from "@/hooks/useTypedSelectors";
 
 const Projects: React.FC<{ showPopup: boolean, setShowPopup: React.Dispatch<React.SetStateAction<boolean>> }> = ({
     showPopup, setShowPopup }) => {
@@ -21,6 +22,7 @@ const Projects: React.FC<{ showPopup: boolean, setShowPopup: React.Dispatch<Reac
 
     useEffect(() => {
         setLoading(true);
+
         //TODO en un futuro guardar todo esto en indexedDB
         //TODO tokens de autenticacion (de muy corta duracion) y refresh token en cookies
         const fetch = async () => {

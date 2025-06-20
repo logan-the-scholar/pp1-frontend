@@ -18,7 +18,15 @@ export type DeclaredNodeModel<T> = NodeModel & {
     data: T
 }
 
-export type openFilesType = {
+export type OpenFilesType = {
     selected: DeclaredNodeModel<OpenFileMetaData> | undefined,
     open: DeclaredNodeModel<OpenFileMetaData>[]
+}
+
+export enum ProjecLoadStatusEnum {
+    NOTHING = "nothing",
+    CREATING = "creating",
+    CREATED = "created",
+    LOADING = "loaded",
+    LOADED = "loaded"
 }

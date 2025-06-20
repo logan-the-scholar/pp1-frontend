@@ -6,20 +6,20 @@ import FileComponent from "./FileComponent";
 import { useSelector } from "react-redux";
 import { RootState } from "@/redux/store";
 import FileType from "@/types/enum/FileType";
-import treeSlice from "@/redux/file-tree/treeSlice";
-import openFilesSlice from "@/redux/open-files/openFilesSlice";
-import { treeActions } from "@/redux/file-tree/treeActions";
+import openFilesSlice from "@/redux/sandbox/open-files/openFilesSlice";
 import { useAppDispatch } from "@/hooks/useTypedSelectors";
-import { DeclaredNodeModel, FileMetaData, openFilesType } from "@/types/state-types";
-import { openFilesAction } from "@/redux/open-files/openFilesActions";
+import { DeclaredNodeModel, FileMetaData, OpenFilesType } from "@/types/state-types";
+import { openFilesAction } from "@/redux/sandbox/open-files/openFilesActions";
 import { jetBrainsMono } from "@/helpers/FontLoader";
+import treeSlice from "@/redux/sandbox/file-tree/treeSlice";
+import { treeActions } from "@/redux/sandbox/file-tree/treeActions";
 
 const FileViewer: React.FC<{ name: string | null }> = ({ name }) => {
 
     const treeContext = useTreeContext();
     const dispatch = useAppDispatch();
     const treeData = useSelector((state: RootState) => state.FILE_TREE);
-    const openFileData: openFilesType = useSelector((state: RootState) => state.OPEN_FILES);
+    const openFileData: OpenFilesType = useSelector((state: RootState) => state.OPEN_FILES);
 
     const treeRef = useRef<TreeMethods>(null);
     const contextMenuRef = useRef<HTMLDivElement | null>(null);

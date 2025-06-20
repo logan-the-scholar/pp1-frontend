@@ -1,13 +1,18 @@
+import { ErrorHelper } from "@/helpers/ErrorHelper";
 import { zodValidate } from "@/helpers/zod/ZodValidate";
 import { useLocalStorage } from "@/hooks/useLocalStorage";
+import { useAppDispatch } from "@/hooks/useTypedSelectors";
+import projectLoadStatusSlice from "@/redux/dashboard/projectLoadStatusSlice";
 import { ApiProject } from "@/services/api";
 import { ApiType } from "@/types/ApiResponse.type";
 import { ProjectCreation } from "@/types/ProjectCreation.type";
+import { ProjecLoadStatusEnum as ProjectLoadStatusEnum } from "@/types/state-types";
 import { IProjectCreation } from "@/types/zTypes";
 import { ArrowDownFromLine, Eye, FolderPen } from "lucide-react";
 import { FormEvent, useState } from "react";
 
 const ProjectPopup: React.FC<{ setShowPopup: React.Dispatch<React.SetStateAction<boolean>>, showPopup: boolean }> = ({ setShowPopup, showPopup }) => {
+    const dispatch = useAppDispatch();
     const [isDropDown, setIsDropDown] = useState<boolean>(false);
     const [projectInfo, setProjectInfo] = useState<IProjectCreation>({ name: "", visibility: "private", workspaceId: "" });
     const [selectedWorkspace] = useLocalStorage<ApiType.Workspace>("selected_workspace", null);
@@ -40,17 +45,25 @@ const ProjectPopup: React.FC<{ setShowPopup: React.Dispatch<React.SetStateAction
     };
 
 
-    const handleCreate = (e: FormEvent<HTMLFormElement>) => {
+    const handleCreate = async (e: FormEvent<HTMLFormElement>) => {
         e.preventDefault();
         const [success, data] = zodValidate<IProjectCreation>({ ...projectInfo, workspaceId: selectedWorkspace.id }, ProjectCreation);
-        
+
         if (!success) {
             console.error(data.errors);
             return;
         }
 
-        ApiProject.create(data.data);
+        dispatch(projectLoadStatusSlice.actions.updated(ProjectLoadStatusEnum.CREATING));
+        const response = await ApiProject.create(data.data);
 
+        if (response instanceof ErrorHelper) {
+            console.error(response);
+        dispatch(projectLoadStatusSlice.actions.updated(ProjectLoadStatusEnum.NOTHING));
+            return;
+        }
+
+        dispatch(projectLoadStatusSlice.actions.updated(ProjectLoadStatusEnum.CREATED));
         setShowPopup(false);
     };
 

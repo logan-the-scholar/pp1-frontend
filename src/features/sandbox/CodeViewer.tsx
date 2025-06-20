@@ -5,15 +5,15 @@ import { Editor } from "@monaco-editor/react";
 import { useSelector } from "react-redux";
 import FileIconMapper from "./FileIconMapper";
 import FileType from "@/types/enum/FileType";
-import { openFilesAction } from "@/redux/open-files/openFilesActions";
+import { openFilesAction } from "@/redux/sandbox/open-files/openFilesActions";
 import { useAppDispatch } from "@/hooks/useTypedSelectors";
 import LanguageMapper from "@/helpers/LanguageMapper";
-import openFilesSlice from "@/redux/open-files/openFilesSlice";
+import openFilesSlice from "@/redux/sandbox/open-files/openFilesSlice";
 import { useCallback, useRef, useState } from "react";
 import { DeclaredNodeModel, OpenFileMetaData } from "@/types/state-types";
-import treeSlice from "@/redux/file-tree/treeSlice";
 import debounce from "lodash.debounce";
 import { useSaveShortcut } from "@/hooks/shortcut/useSaveShortcut";
+import treeSlice from "@/redux/sandbox/file-tree/treeSlice";
 
 const CodeViewer = () => {
     const dispatch = useAppDispatch();

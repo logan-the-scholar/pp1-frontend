@@ -1,4 +1,4 @@
-import { AppThunk } from "../store";
+import { AppThunk } from "../../store";
 import openFilesSlice from "./openFilesSlice";
 import { DeclaredNodeModel, FileMetaData, OpenFileMetaData } from "@/types/state-types";
 import treeSlice from "../file-tree/treeSlice";
