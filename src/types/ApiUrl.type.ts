@@ -1,9 +1,8 @@
-export const AppUrl = {
+export const ApiUrl = {
     api: {
         auth: {
             /** /api/auth */
             _: "/api/auth",
-
             /** /api/auth/logout */
             logout: "/api/auth/logout"
         },
@@ -12,14 +11,19 @@ export const AppUrl = {
     auth: {
         /** /auth */
         _: "/auth",
-        
         /** /auth/signin */
         signin: "/auth/signin"
     },
 
-    dashboard: {
-        /** /dashboard */
-        _: "/dashboard",
+    Dashboard: {
+        /** /dashboard/projects */
+        projects: "projects",
     },
+    /** /dashboard */
+    dashboard: "/dashboard",
+
+    Sandbox: {
+    },
+    sandbox: "/sandbox",
 
 };

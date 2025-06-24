@@ -1,7 +1,7 @@
 import { useEffect } from "react";
 
 const GithubCallback = () => {
-
+//TODO arreglar esto o cambiarlo a app
   useEffect(() => {
     const queryParams = new URLSearchParams(window.location.search);
     const code = queryParams.get('code');

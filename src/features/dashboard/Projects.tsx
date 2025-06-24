@@ -7,7 +7,6 @@ import { ErrorHelper } from "@/helpers/ErrorHelper";
 import LoadingCircle from "@/components/LoadingCircle";
 import ProjectCard from "./ProjectCard";
 import { ApiProject, ApiWorkspace } from "@/services/api";
-import { useAppDispatch } from "@/hooks/useTypedSelectors";
 
 const Projects: React.FC<{ showPopup: boolean, setShowPopup: React.Dispatch<React.SetStateAction<boolean>> }> = ({
     showPopup, setShowPopup }) => {
@@ -28,13 +27,12 @@ const Projects: React.FC<{ showPopup: boolean, setShowPopup: React.Dispatch<Reac
         const fetch = async () => {
             const response: ApiType.Workspace[] | ErrorHelper = await ApiWorkspace.getAll(user.id);
 
-            if (response instanceof ErrorHelper) {
-                console.error(response);
-
-            } else {
+            if (response instanceof Array) {
                 setWorkspace(response);
+
                 if (selectedWorkspace === null && response.length > 0) {
-                    setSelectedWorkspace(response.at(0) as ApiType.Workspace);
+                    setSelectedWorkspace(response[0]);
+                    console.log(response[0]);
                 }
 
             }
@@ -42,27 +40,30 @@ const Projects: React.FC<{ showPopup: boolean, setShowPopup: React.Dispatch<Reac
             setLoading(false);
         };
 
-        fetch();
+        if (typeof window !== undefined && user !== null && user.id !== undefined) {
+            fetch();
+        }
+
     }, []);
 
 
     useEffect(() => {
 
+        const fetch = async () => {
+            const response: ApiType.Project[] | ErrorHelper = await ApiProject.getAll(selectedWorkspace.id);
+
+            if (response instanceof ErrorHelper) {
+                console.error(response);
+
+            } else {
+                setProjects(response);
+
+            }
+
+            setLoadingProjects(false);
+        };
+
         if (selectedWorkspace !== null) {
-            const fetch = async () => {
-                const response: ApiType.Project[] | ErrorHelper = await ApiProject.getAll(selectedWorkspace.id);
-
-                if (response instanceof ErrorHelper) {
-                    console.error(response);
-
-                } else {
-                    setProjects(response);
-
-                }
-
-                setLoadingProjects(false);
-            };
-
             fetch();
         }
     }, [selectedWorkspace]);
@@ -114,7 +115,6 @@ const Projects: React.FC<{ showPopup: boolean, setShowPopup: React.Dispatch<Reac
                     <LoadingCircle size={78} />
                 </div>
             }
-
         </>
     );
 }

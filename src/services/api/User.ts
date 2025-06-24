@@ -14,7 +14,7 @@ async function login(email: string, password: string): Promise<ApiType.Login | E
 
     try {
 
-        const response: ApiType.Login = await fetchCatch(`${API_SERVER}/demo/api/v0/user/login`, {
+        const response: Response = await fetchCatch(`${API_SERVER}/demo/api/v0/user/login`, {
             method: "POST",
             headers: {
                 "X-Mail": email,
@@ -22,7 +22,7 @@ async function login(email: string, password: string): Promise<ApiType.Login | E
             }
         });
 
-        return response;
+        return await response.json() as ApiType.Login;
 
     } catch (error: any) {
 
@@ -34,14 +34,14 @@ async function githubSignIn(code: string): Promise<ApiType.Login | ErrorHelper> 
 
     try {
 
-        const response: ApiType.Login = await fetchCatch(`${API_SERVER}/demo/api/v0/user/github/sign-in`, {
+        const response: Response = await fetchCatch(`${API_SERVER}/demo/api/v0/user/github/sign-in`, {
             method: "POST",
             headers: {
                 "X-Code": code
             }
         });
 
-        return response;
+        return await response.json() as ApiType.Login;
 
     } catch (error: any) {
 

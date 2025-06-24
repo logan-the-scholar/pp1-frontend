@@ -9,14 +9,8 @@ export class ErrorHelper extends Error {
         this.error = exception;
     }
 
-    verifyOrThrow(message: string): ErrorHelper {
-        const is_status = Object.values(ApiStatusEnum).includes(this.message as ApiStatusEnum);
-            
-        if (!is_status) {
-            this.message = message;
-        } 
-        
-        return this;
+    isValid(): boolean {
+        return Object.values(ApiStatusEnum).includes(this.message as ApiStatusEnum);
     }
 }
 

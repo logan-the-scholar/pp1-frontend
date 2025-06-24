@@ -8,7 +8,6 @@ import { URL } from "url";
 
 async function create(data: IProjectCreation) {
     try {
-
         const response = await fetchCatch(`${API_SERVER}/demo/api/v0/project`, {
             method: "POST",
             headers: {
@@ -17,16 +16,9 @@ async function create(data: IProjectCreation) {
             body: JSON.stringify({ ...data })
         });
 
-        const created = response.headers.get("location");
-
-        if (created === null) {
-            throw new ErrorHelper(ApiStatusEnum.SERVER_ERROR, "501: Generated url can't be read. Reading: " + created);
-        }
-
-        return new URL(created);
+        return await response.json() as { name: string, id: string };
 
     } catch (error: any) {
-        console.error(error);
         return error instanceof ErrorHelper ? error : new ErrorHelper(ApiStatusEnum.UNKNOWN, error.message);
 
     }
@@ -46,7 +38,7 @@ async function getAll(id: string): Promise<ErrorHelper | ApiType.Project[]> {
     }
 }
 
-async function deleteBy(id: string): Promise<ErrorHelper | { message: string }> {
+async function delete_(id: string): Promise<ErrorHelper | { message: string }> {
     try {
         const response = await fetchCatch(`${API_SERVER}/demo/api/v0/project/${id}`, {
             method: "DELETE"
@@ -60,4 +52,18 @@ async function deleteBy(id: string): Promise<ErrorHelper | { message: string }> 
     }
 }
 
-export const ApiProject = { getAll, create, deleteBy };
+async function get(id: string): Promise<ErrorHelper | ApiType.Project> {
+    try {
+        const response = await fetchCatch(`${API_SERVER}/demo/api/v0/project/${id}`, {
+            method: "GET"
+        });
+
+        return await response.json();
+
+    } catch (error: any) {
+        return error instanceof ErrorHelper ? error : new ErrorHelper(ApiStatusEnum.UNKNOWN, error.message);
+
+    }
+}
+
+export const ApiProject = { getAll, create, delete_, get };

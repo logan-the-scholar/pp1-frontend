@@ -1,13 +1,12 @@
 "use client";
 import { Eye, EyeClosed, Key, Mail } from 'lucide-react';
 import React, { useEffect, useState } from 'react'
-import Link from 'next/link';
 import { IUserCredentials } from '@/types/zTypes';
 import { openGithubPopup } from '@/services/openGithubPopup';
 import { ErrorHelper } from '@/helpers/ErrorHelper';
 import { ApiStatusEnum } from '@/types/enum/ApiStatus.enum';
 import { ApiType } from '@/types/ApiResponse.type';
-import { AppUrl } from '@/types/UrlObject.type';
+import { ApiUrl } from '@/types/ApiUrl.type';
 import { useLocalStorage } from '@/hooks/useLocalStorage';
 import { ApiUser } from '@/services/api';
 
@@ -30,6 +29,7 @@ const Login = () => {
 
             if (event.data.type === "session-success") {
                 const response: ApiType.Login | ErrorHelper = await ApiUser.githubSignIn(event.data.code);
+                console.log(response);
 
                 if (response instanceof ErrorHelper) {
                     setWindowError(response.message);
@@ -37,8 +37,9 @@ const Login = () => {
                     setOpenError(true);
 
                 } else {
+                    console.log("here");
                     setData(response);
-                    window.location.href = AppUrl.dashboard._;
+                    window.location.href = ApiUrl.dashboard;
                 }
             }
         }

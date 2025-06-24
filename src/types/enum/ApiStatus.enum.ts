@@ -9,4 +9,6 @@ export enum ApiStatusEnum {
 
     NETWORK_ERROR = "Network error try again in a few minutes",
     SERVER_ERROR = "A fatal server error ocurred",
+
+    NO_PROJECTS_FOUND = "No projects found in this workspace",
 }

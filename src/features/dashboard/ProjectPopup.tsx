@@ -1,25 +1,24 @@
 import { ErrorHelper } from "@/helpers/ErrorHelper";
 import { zodValidate } from "@/helpers/zod/ZodValidate";
 import { useLocalStorage } from "@/hooks/useLocalStorage";
-import { useAppDispatch } from "@/hooks/useTypedSelectors";
-import projectLoadStatusSlice from "@/redux/dashboard/projectLoadStatusSlice";
 import { ApiProject } from "@/services/api";
 import { ApiType } from "@/types/ApiResponse.type";
 import { ProjectCreation } from "@/types/ProjectCreation.type";
-import { ProjecLoadStatusEnum as ProjectLoadStatusEnum } from "@/types/state-types";
+import { ApiUrl } from "@/types/ApiUrl.type";
 import { IProjectCreation } from "@/types/zTypes";
 import { ArrowDownFromLine, Eye, FolderPen } from "lucide-react";
 import { FormEvent, useState } from "react";
 
 const ProjectPopup: React.FC<{ setShowPopup: React.Dispatch<React.SetStateAction<boolean>>, showPopup: boolean }> = ({ setShowPopup, showPopup }) => {
-    const dispatch = useAppDispatch();
     const [isDropDown, setIsDropDown] = useState<boolean>(false);
     const [projectInfo, setProjectInfo] = useState<IProjectCreation>({ name: "", visibility: "private", workspaceId: "" });
     const [selectedWorkspace] = useLocalStorage<ApiType.Workspace>("selected_workspace", null);
+    const [isLoading, setIsLoading] = useState<boolean>(false);
     const visibilityMessage: Map<string, string> = new Map([
         ["public", "Public (Anyone can see the project)"],
         ["private", "Private (Only members with invitation)"]
     ]);
+
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement> | React.MouseEvent<HTMLDivElement, MouseEvent>) => {
 
@@ -47,6 +46,8 @@ const ProjectPopup: React.FC<{ setShowPopup: React.Dispatch<React.SetStateAction
 
     const handleCreate = async (e: FormEvent<HTMLFormElement>) => {
         e.preventDefault();
+        if (isLoading) return;
+
         const [success, data] = zodValidate<IProjectCreation>({ ...projectInfo, workspaceId: selectedWorkspace.id }, ProjectCreation);
 
         if (!success) {
@@ -54,21 +55,26 @@ const ProjectPopup: React.FC<{ setShowPopup: React.Dispatch<React.SetStateAction
             return;
         }
 
-        dispatch(projectLoadStatusSlice.actions.updated(ProjectLoadStatusEnum.CREATING));
+        setIsLoading(true);
+        // dispatch(projectLoadStatusSlice.actions.updated(ProjectLoadStatusEnum.CREATING));
         const response = await ApiProject.create(data.data);
 
         if (response instanceof ErrorHelper) {
             console.error(response);
-        dispatch(projectLoadStatusSlice.actions.updated(ProjectLoadStatusEnum.NOTHING));
+            // dispatch(projectLoadStatusSlice.actions.updated(ProjectLoadStatusEnum.NOTHING));
             return;
         }
 
-        dispatch(projectLoadStatusSlice.actions.updated(ProjectLoadStatusEnum.CREATED));
+        // dispatch(projectLoadStatusSlice.actions.updated(ProjectLoadStatusEnum.CREATED));
+        window.location.href = `${ApiUrl.sandbox._}/${response.name}`;
+        setIsLoading(false);
         setShowPopup(false);
     };
 
 
     const handlePopupView = (isOpen: boolean) => {
+        if (isLoading) return;
+
         setShowPopup(isOpen);
         if (!isOpen) {
             setIsDropDown(false);
@@ -179,12 +185,21 @@ const ProjectPopup: React.FC<{ setShowPopup: React.Dispatch<React.SetStateAction
                                 </div>
 
                                 <div className="w-full flex justify-end">
-                                    <button
-                                        className="p-1 bg-amber-500 cursor-pointer"
-                                        type="submit"
-                                    >
-                                        Create
-                                    </button>
+                                    {
+                                        isLoading ?
+                                            <>
+                                                <span className="font-extrabold animate-bounce [animation-delay:0ms] pl-3 py-2">.</span>
+                                                <span className="font-extrabold animate-bounce [animation-delay:200ms] py-2">.</span>
+                                                <span className="font-extrabold animate-bounce [animation-delay:400ms] pr-3 py-2">.</span>
+                                            </>
+                                            :
+                                            <button
+                                                className="p-1 bg-amber-500 cursor-pointer"
+                                                type="submit"
+                                            >
+                                                Create
+                                            </button>
+                                    }
                                 </div>
 
                             </form>

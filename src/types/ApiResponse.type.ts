@@ -18,13 +18,19 @@ export namespace ApiType {
         owner: string
     }
 
+    export interface File {
+
+    }
+
     export interface Project {
         id: string,
         name: string,
         visibility: "PUBLIC" | "PRIVATE",
-        last_edited?: number | undefined,
+        //last_edited?: number | undefined,
         //TODO agregar creador del proyecto si es que se va a usar la invitacion a workspaces...
         //created_by?: string | undefined
+        files?: File[];
+        members?: any
     }
 
 }

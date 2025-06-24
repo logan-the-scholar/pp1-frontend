@@ -10,15 +10,22 @@ export async function fetchCatch(url: string | URL | globalThis.Request, options
             throw new ErrorHelper(ApiStatusEnum.TOKEN_EXPIRED, "401");
         } else if (!response.ok) {
             const data = await response.json()
-            throw new ErrorHelper(data.message, data.status).verifyOrThrow(ApiStatusEnum.UNKNOWN);
+            const error = new ErrorHelper(data.message, response.status.toString());
+
+            if (error.isValid()) {
+                throw error;
+            } else {
+                console.error();
+                throw new Error(error.message, { cause: error.cause });
+            }
+
         }
 
         return response;
-        
+
     } catch (error: any) {
 
-        if(error.message !== null && (error.message as string).includes("NetworkError")) {
-            console.error(error);
+        if (error.message !== null && (error.message as string).includes("NetworkError")) {
             throw new ErrorHelper(ApiStatusEnum.NETWORK_ERROR, "500");
         }
 
