@@ -1,22 +1,31 @@
-// import { openDB } from 'idb';
+import { ApiType } from '@/types/ApiResponse.type';
+import { openDB } from 'idb';
 
-// const dbPromise = openDB('my-db', 1, {
-//   upgrade(db) {
-//     db.createObjectStore('userStore', { keyPath: 'id' });
-//   },
-// });
+const fileStore = "fileStore"
 
-// export const saveUser = async (user) => {
-//   const db = await dbPromise;
-//   await db.put('userStore', user);
-// };
+const dbPromise = openDB('pp1', 1, {
+    upgrade(db) {
+        db.createObjectStore(fileStore, { keyPath: 'id' });
+    },
+});
 
-// export const getUser = async (id) => {
-//   const db = await dbPromise;
-//   return await db.get('userStore', id);
-// };
+async function save(file: ApiType.File) {
+    const db = await dbPromise;
+    await db.put(fileStore, file);
+}
 
-// export const deleteUser = async (id) => {
-//   const db = await dbPromise;
-//   await db.delete('userStore', id);
-// };
+async function clear() {
+
+}
+
+async function get(id: string) {
+    const db = await dbPromise;
+    return await db.get(fileStore, id);
+}
+
+async function remove(id: string) {
+    const db = await dbPromise;
+    await db.delete(fileStore, id);
+}
+
+export const Files = { save, get, remove, clear };
