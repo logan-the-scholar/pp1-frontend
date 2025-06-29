@@ -17,7 +17,7 @@ export const ApiUrl = {
 
     Dashboard: {
         /** /dashboard/projects */
-        projects: "projects",
+        projects: "/dashboard/projects",
     },
     /** /dashboard */
     dashboard: "/dashboard",

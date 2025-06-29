@@ -1,6 +1,5 @@
 import FileType from "@/types/enum/FileType";
 import { DeclaredNodeModel, FileMetaData } from "@/types/state-types";
-import { NodeModel } from "@minoru/react-dnd-treeview";
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 
 type treeType = {
@@ -11,58 +10,67 @@ type treeType = {
 const treeState: treeType = {
     tree: [
         {
-            "id": 1,
-            "parent": 0,
+            "id": "0",
+            "parent": "-1",
+            "droppable": true,
+            "text": "projectName",
+            "data": {
+                "extension": "folder"
+            }
+        },
+        {
+            "id": "1",
+            "parent": "0",
             "droppable": true,
             "text": "common",
             "data": {
-                "fileType": "folder"
+                "extension": "folder"
             }
         },
         {
-            "id": 2,
-            "parent": 1,
+            "id": "2",
+            "parent": "1",
             "text": "seed-data.json",
             "data": {
-                "fullPath": [1],
-                "fileType": "json"
+                "fullPath": ["1"],
+                "extension": "json"
             }
         },
         {
-            "id": 3,
-            "parent": 1,
+            "id": "3",
+            "parent": "1",
             "text": "config.ts",
             "data": {
-                "fullPath": [1],
-                "fileType": "ts"
+                "fullPath": ["1"],
+                "extension": "ts"
             }
         },
         {
-            "id": 4,
-            "parent": 0,
+            "id": "4",
+            "parent": "0",
             "droppable": true,
             "text": "root",
             "data": {
-                "fileType": "folder"
+                "extension": "folder"
             }
         },
         {
-            "id": 5,
-            "parent": 4,
+            "id": "5",
+            "parent": "4",
             "droppable": true,
             "text": "app",
             "data": {
-                "fullPath": [4],
-                "fileType": "folder"
+                "fullPath": ["4"],
+                "extension": "folder"
             }
         },
         {
-            "id": 6,
-            "parent": 5,
+            "id": "6",
+            "parent": "5",
             "text": "index.ts",
             "data": {
-                "fullPath": [4, 5],
-                "fileType": "ts"
+                "fullPath": ["4", "5"],
+                "extension": "ts"
             }
         }
     ],
@@ -75,15 +83,20 @@ const treeSlice = createSlice({
     initialState: treeState,
     reducers: {
 
+        createStore(state, action: PayloadAction<DeclaredNodeModel<FileMetaData>[]>) {
+            console.log(action.payload);
+            state.tree = [...action.payload];
+        },
+
         createNode(state, action: PayloadAction<DeclaredNodeModel<FileMetaData>>) {
             if (action.payload.parent !== 0) {
 
                 const newNode: DeclaredNodeModel<FileMetaData> = {
                     ...action.payload,
-                    droppable: action.payload.data?.fileType === FileType.FOLDER ? true : undefined,
+                    droppable: action.payload.data?.extension === FileType.FOLDER ? true : undefined,
                     data: {
                         ...action.payload.data,
-                        fileType: action.payload.data?.fileType || FileType.PLAIN_TEXT
+                        extension: action.payload.data?.extension || FileType.PLAIN_TEXT
                     }
                 };
 

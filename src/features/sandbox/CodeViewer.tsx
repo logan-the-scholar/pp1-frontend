@@ -89,7 +89,7 @@ ${file.id === selectedFile?.id ? "border-x border-neutral-600" : "border-x borde
 ${!file.data.edited && "italic"}`}
                                     >
                                         <div className="mr-3 content-center">
-                                            <FileIconMapper type={file.data?.fileType as string} />
+                                            <FileIconMapper type={file.data?.extension as string} />
                                         </div>
                                         {file.text}
                                         <span
@@ -140,9 +140,9 @@ ${file.id === selectedFile?.id || file.data.edited ? "visible hover:bg-[#ffffff1
                                     selectedFile.data.pathNames.map((path, index) => {
                                         return (
                                             <span className="hover:text-neutral-100 cursor-pointer mr-1.5 flex" key={`${path}_${selectedFile.text}`}>
-                                                {path === selectedFile.text && selectedFile.data?.fileType !== FileType.FOLDER && (index + 1) === selectedFile.data?.fullPath?.length &&
+                                                {path === selectedFile.text && selectedFile.data?.extension !== FileType.FOLDER && (index + 1) === selectedFile.data?.fullPath?.length &&
                                                     <span className="mr-1">
-                                                        <FileIconMapper type={selectedFile.data?.fileType as string} />
+                                                        <FileIconMapper type={selectedFile.data?.extension as string} />
                                                     </span>
                                                 }
                                                 {`${path} >`}
@@ -167,7 +167,7 @@ ${file.id === selectedFile?.id || file.data.edited ? "visible hover:bg-[#ffffff1
                         )}
                         options={{ minimap: { enabled: false } }}
                         className="w-full flex-1 border-x border-neutral-600"
-                        language={LanguageMapper(selectedFile?.data?.fileType as string)}
+                        language={LanguageMapper(selectedFile?.data?.extension as string)}
                         theme="vs-dark"
                         path={selectedFile?.data?.pathNames?.join("/")}
                         value={selectedFile?.data?.content || ""}

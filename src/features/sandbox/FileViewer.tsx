@@ -6,7 +6,6 @@ import FileComponent from "./FileComponent";
 import { useSelector } from "react-redux";
 import { RootState } from "@/redux/store";
 import FileType from "@/types/enum/FileType";
-import openFilesSlice from "@/redux/sandbox/open-files/openFilesSlice";
 import { useAppDispatch } from "@/hooks/useTypedSelectors";
 import { DeclaredNodeModel, FileMetaData, OpenFilesType } from "@/types/state-types";
 import { openFilesAction } from "@/redux/sandbox/open-files/openFilesActions";
@@ -37,6 +36,11 @@ const FileViewer: React.FC<{ name: string | null }> = ({ name }) => {
         parentId: string | number,
         type: FileType.PLAIN_TEXT | FileType.FOLDER
     } | null>(null);
+
+
+    useEffect(() => {
+        console.log(creatingNode);
+    }, [creatingNode]);
 
 
     const openFile = (node: NodeModel<FileMetaData>) => {
@@ -91,20 +95,26 @@ const FileViewer: React.FC<{ name: string | null }> = ({ name }) => {
         setVisibleMenu(true);
 
         setContextSelected({ node, onToggle, isOpen });
+
         e.stopPropagation();
     };
 
 
     const addNode = (fileType: FileType.PLAIN_TEXT | FileType.FOLDER) => {
         if (contextSelected?.node.id !== undefined) {
-            contextSelected.onToggle && !contextSelected.isOpen && contextSelected.onToggle();
+
+            if (contextSelected.onToggle && !contextSelected.isOpen) {
+                contextSelected.onToggle();
+            }
+
             setCreatingNode({ parentId: contextSelected?.node.id, type: fileType });
             setVisibleMenu(false);
             setContextSelected(null);
+
         }
     };
 
-
+    //TODO esto puede causar un error si se intenta agregar un . a una carpeta
     const handleCreateNode = (name: string) => {
         if (!name.trim() || creatingNode === null) {
             return setCreatingNode(null);
@@ -118,15 +128,15 @@ const FileViewer: React.FC<{ name: string | null }> = ({ name }) => {
                 parent: creatingNode.parentId,
                 text: name,
                 data: {
-                    fileType: creatingNode.type === FileType.FOLDER ?
+                    extension: creatingNode.type === FileType.FOLDER ?
                         FileType.FOLDER
                         :
                         name.trim().substring(name.lastIndexOf(".") + 1).toLowerCase(),
-                    fullPath: [0],
+                    fullPath: ["0"],
                 }
             };
 
-            if (newNode.data?.fileType !== FileType.FOLDER) {
+            if (newNode.data?.extension !== FileType.FOLDER) {
                 dispatch(treeActions.createAndOpenNode(newNode));
                 const created = treeData.tree.find((n) => n.id === newNode.id);
 
@@ -167,7 +177,7 @@ const FileViewer: React.FC<{ name: string | null }> = ({ name }) => {
                             className="[&>div]:cursor-pointer overflow-hidden [&>div]:px-6 [&>div]:mx-1 [&>div]:pb-0.5 [&>div]:pt-1 [&>div]:hover:bg-[#ffffff1c] [&>div]:rounded-sm bg-[#1e1e1e] z-50 absolute w-fit text-nowrap flex flex-col py-1 rounded-md shadow-md shadow-black"
                         >
 
-                            {(contextSelected?.node.droppable && contextSelected.node.data?.fileType === "folder") || (contextSelected?.node?.id === 0 && contextSelected.node.parent === -1) ?
+                            {(contextSelected?.node.droppable && contextSelected.node.data?.extension === "folder") ?
                                 <>
                                     <div onClick={() => addNode(FileType.PLAIN_TEXT)}>
                                         New File...
@@ -181,7 +191,7 @@ const FileViewer: React.FC<{ name: string | null }> = ({ name }) => {
                                 null
                             }
 
-                            {(contextSelected?.node.droppable && contextSelected.node.data?.fileType === "folder") || (contextSelected?.node.id === 0 && contextSelected.node.parent === -1) ?
+                            {(contextSelected?.node.droppable && contextSelected.node.data?.extension === "folder") ?
                                 <div>
                                     Paste
                                 </div>
@@ -189,7 +199,7 @@ const FileViewer: React.FC<{ name: string | null }> = ({ name }) => {
                                 null
                             }
 
-                            {contextSelected?.node.id !== 0 && contextSelected?.node.parent !== -1 &&
+                            {contextSelected?.node.id !== "0" && contextSelected?.node.parent !== "-1" &&
                                 <>
                                     <div>
                                         Cut
@@ -204,7 +214,7 @@ const FileViewer: React.FC<{ name: string | null }> = ({ name }) => {
                             <div onClick={() => null}>
                                 Copy Relative Path
                             </div>
-                            {contextSelected?.node.id !== 0 && contextSelected?.node.parent !== -1 &&
+                            {contextSelected?.node.id !== "0" && contextSelected?.node.parent !== "-1" &&
                                 <>
                                     <span className="w-full h-px bg-neutral-400 my-1"></span>
 
@@ -231,24 +241,27 @@ const FileViewer: React.FC<{ name: string | null }> = ({ name }) => {
                     FILE EXPLORER
                 </div>
 
-                <div className="bg-[#1e1e1e] px-2 py-1 font-bold w-full">{name}</div>
+                {/* <div className="bg-[#1e1e1e] px-2 py-1 font-bold w-full">{name}</div> */}
 
                 <div
                     ref={mainThreeRef}
                     onContextMenu={(e) => {
-                        handleContextMenu(e, { id: 0, parent: -1, text: "root" });
+                        handleContextMenu(e, {
+                            id: "0", parent: "-1", text: "root", droppable: true, data: { extension: "folder" }
+                        });
                     }}
                     className="flex-1 relative font-light mt-2 max-w-full h-full w-full overflow-x-hidden overflow-y-scroll"
                 >
                     {
-                        treeData.tree !== undefined &&
+                        treeData.tree !== undefined && treeData.tree.length > 0 &&
                         <Tree
                             tree={treeData.tree}
-                            rootId={0}
+                            rootId={"-1"}
                             ref={treeRef}
                             onDrop={handleDrop}
                             insertDroppableFirst
                             render={(node, { depth, isOpen, onToggle }) => {
+
                                 return <div
                                     className={`w-full flex-col`}
                                     onContextMenu={(e) => {
@@ -267,33 +280,61 @@ const FileViewer: React.FC<{ name: string | null }> = ({ name }) => {
                                         }
                                     }}
                                 >
-                                    <div className={`flex w-full cursor-pointer
+                                    {node.id === "0" ?
+                                        <div className="bg-[#1e1e1e] px-2 py-1 font-bold w-full flex cursor-pointer"
+                                        >
+                                            {/* {Array.from({ length: depth }).map((v, i) => {
+                                                return (
+                                                    <div key={i} style={{ paddingLeft: "20px" }} className="border-l border-neutral-600">
+                                                    </div>
+                                                )
+                                            })} */}
+                                            {/* <FileComponent isOpen={isOpen} node={(node as DeclaredNodeModel<FileMetaData>)} /> */}
+                                            <span className="mr-1.5 flex mt-[2px]">
+                                                {isOpen ?
+                                                    <>
+                                                        <svg xmlns="http://www.w3.org/2000/svg" width={16} height={16} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-chevron-down-icon lucide-chevron-down">
+                                                            <path d="m6 9 6 6 6-6" />
+                                                        </svg>
+                                                    </>
+                                                    :
+                                                    <>
+                                                        <svg xmlns="http://www.w3.org/2000/svg" width={16} height={16} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-chevron-right-icon lucide-chevron-right">
+                                                            <path d="m9 18 6-6-6-6" />
+                                                        </svg>
+                                                    </>}
+                                            </span>
+                                            {node.text}
+                                        </div>
+                                        :
+                                        <div className={`flex w-full cursor-pointer
 ${contextSelected?.node.id === node.id && !(creatingNode?.parentId === node.id) && "outline-1 outline-neutral-400 -outline-offset-1"} 
 ${treeData.selected?.id === node.id ? creatingNode?.parentId === node.id ? "bg-transparent!" : "bg-[#ffffff1c]" : "hover:bg-[#ffffff10]"}`
-                                        // ${creatingNode?.parentId === node.id && "bg-[#1e1e1e]!"}
+                                            // ${creatingNode?.parentId === node.id && "bg-[#1e1e1e]!"}
+                                        }
+                                            style={{ paddingLeft: "10px" }}
+                                        >
+                                            {Array.from({ length: depth }).map((v, i) => {
+                                                return i === 0 ?
+                                                    <div key={i} style={{ paddingLeft: "15px" }}></div>
+                                                    :
+                                                    <div key={i} style={{ paddingLeft: "20px" }} className="border-l border-neutral-600"></div>
+                                            })}
+                                            <FileComponent isOpen={isOpen} node={(node as DeclaredNodeModel<FileMetaData>)} />
+                                        </div>
                                     }
-                                        style={{ paddingLeft: "20px" }}
-                                    >
-                                        {Array.from({ length: depth }).map((v, i) => {
-                                            return (
-                                                <div key={i} style={{ paddingLeft: "20px" }} className="border-l border-neutral-600">
-                                                </div>
-                                            )
-                                        })}
-                                        <FileComponent isOpen={isOpen} node={(node as DeclaredNodeModel<FileMetaData>)} />
-                                    </div>
 
                                     {/* NEW FILE/FOLDER INPUT */}
-                                    {creatingNode?.parentId === node.id && node.droppable &&
-                                        <div style={{ paddingLeft: "20px" }} className="cursor-pointer w-full hover:bg-[#ffffff10] flex">
-                                            {Array.from({ length: depth }).map((v, i) =>
-                                                <div
-                                                    key={i}
-                                                    style={{ paddingLeft: "20px" }}
-                                                    className="border-l border-neutral-600">
-                                                </div>
+                                    {(creatingNode?.parentId === node.id && node.droppable) &&
+                                        <div style={{ paddingLeft: "10px" }} className="cursor-pointer w-full hover:bg-[#ffffff10] flex">
+                                            {Array.from({ length: depth + 1 }).map((v, i) => {
+                                                return i === 0 ?
+                                                    <div key={i} style={{ paddingLeft: "15px" }}></div>
+                                                    :
+                                                    <div key={i} style={{ paddingLeft: "20px" }} className="border-l border-neutral-600"></div>
+                                            }
                                             )}
-                                            <FileComponent isOpen={false} node={{ id: "???", parent: -1, text: "", data: { fileType: creatingNode.type } }} />
+                                            <FileComponent isOpen={false} node={{ id: "???", parent: -1, text: "", data: { extension: creatingNode.type } }} />
                                             <input
                                                 autoFocus
                                                 className="w-full outline-0 border border-neutral-400"

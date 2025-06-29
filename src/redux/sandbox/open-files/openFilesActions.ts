@@ -10,11 +10,11 @@ const open = (node: DeclaredNodeModel<FileMetaData> | DeclaredNodeModel<OpenFile
     if (alreadyOpenNode === undefined) {
         const previousEditedFile = state.OPEN_FILES.open.find((n) => n.data?.edited === false);
 
-        
         dispatch(openFilesSlice.actions.add(node));
         if (previousEditedFile !== undefined) {
             dispatch(openFilesSlice.actions.close(previousEditedFile.id));
         }
+        
         dispatch(openFilesSlice.actions.select({ id: node.id, saved: true, edited: true }));
 
     } else {

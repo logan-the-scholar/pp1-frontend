@@ -26,7 +26,7 @@ const openFilesSlice = createSlice({
 
             } else {
 
-                if (foundNode.data.fileType !== FileType.FOLDER) {
+                if (foundNode.data.extension !== FileType.FOLDER) {
                     if (action.payload.edited === undefined && action.payload.saved === undefined) {
                         state.selected = {
                             ...foundNode,

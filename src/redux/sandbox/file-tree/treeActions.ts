@@ -1,14 +1,14 @@
 import { NodeModel } from "@minoru/react-dnd-treeview";
-import { AppThunk } from "../store";
 import treeSlice from "./treeSlice";
 import openFilesSlice from "../open-files/openFilesSlice";
 import FileType from "@/types/enum/FileType";
 import { FileMetaData } from "@/types/state-types";
 import { openFilesAction } from "../open-files/openFilesActions";
+import { AppThunk } from "@/redux/store";
 
 const createAndOpenNode = (node: NodeModel<FileMetaData>): AppThunk => (dispatch, getState) => {
     let pathNames: string[] = [node.text];
-    const fullPath: number[] = [Number(node.id)];
+    const fullPath: string[] = [node.id.toString()];
 
     const findParent = (id: number) => {
 
@@ -17,7 +17,7 @@ const createAndOpenNode = (node: NodeModel<FileMetaData>): AppThunk => (dispatch
         });
 
         if (found !== undefined) {
-            fullPath.unshift(found.id as number);
+            fullPath.unshift(found.id.toString());
             pathNames.unshift(found.text);
 
             if (found.parent !== 0) {
@@ -34,14 +34,14 @@ const createAndOpenNode = (node: NodeModel<FileMetaData>): AppThunk => (dispatch
             data: {
                 pathNames,
                 fullPath,
-                fileType: node.data?.fileType as string
+                extension: node.data?.extension as string
             }
         }
     ));
 
     const createdNode = getState().FILE_TREE.tree.find((n) => n.id === node.id);
 
-    if (createdNode && createdNode.data?.fileType !== FileType.FOLDER) {
+    if (createdNode && createdNode.data?.extension !== FileType.FOLDER) {
         dispatch(openFilesSlice.actions.add({
             ...createdNode,
             data: {
@@ -55,13 +55,13 @@ const createAndOpenNode = (node: NodeModel<FileMetaData>): AppThunk => (dispatch
 
         dispatch(openFilesAction.open(
             {
-            ...createdNode,
-            data: {
-                ...createdNode.data as FileMetaData,
-                edited: true,
-                saved: true,
-            }
-        }));
+                ...createdNode,
+                data: {
+                    ...createdNode.data as FileMetaData,
+                    edited: true,
+                    saved: true,
+                }
+            }));
     }
 };
 
