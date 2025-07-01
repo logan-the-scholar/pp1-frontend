@@ -21,6 +21,7 @@ export namespace ApiType {
     export interface File {
         id: string;
         name: string;
+        author: string;
         path: string[];
         pathNames: string[];
         parent: string;
@@ -36,7 +37,7 @@ export namespace ApiType {
         //TODO agregar creador del proyecto si es que se va a usar la invitacion a workspaces...
         //created_by?: string | undefined;
         files: File[] | null;
-        members: any | null;
+        members?: any;
     }
 
 }

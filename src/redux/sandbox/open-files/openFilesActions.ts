@@ -1,7 +1,7 @@
 import { AppThunk } from "../../store";
 import openFilesSlice from "./openFilesSlice";
 import { DeclaredNodeModel, FileMetaData, OpenFileMetaData } from "@/types/state-types";
-import treeSlice from "../file-tree/treeSlice";
+import FileTreeSlice from "../file-tree/FileTreeSlice";
 
 const open = (node: DeclaredNodeModel<FileMetaData> | DeclaredNodeModel<OpenFileMetaData>): AppThunk => (dispatch, getState) => {
     const state = getState();
@@ -35,14 +35,14 @@ const closeAndChangeWindow = (id: string | number): AppThunk => (dispatch, getSt
         const otherNode = state.OPEN_FILES.open.at(index - 1);
         if (otherNode) {
             dispatch(openFilesSlice.actions.select({ id: otherNode.id }));
-            dispatch(treeSlice.actions.select(otherNode.id));
+            dispatch(FileTreeSlice.actions.select(otherNode.id));
 
         }
 
         const tryOtherNode = state.OPEN_FILES.open.at(index);
         if (tryOtherNode) {
             dispatch(openFilesSlice.actions.select({ id: tryOtherNode.id }));
-            dispatch(treeSlice.actions.select(tryOtherNode.id));
+            dispatch(FileTreeSlice.actions.select(tryOtherNode.id));
 
         }
     }

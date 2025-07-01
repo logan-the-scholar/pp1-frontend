@@ -10,8 +10,8 @@ import { useAppDispatch } from "@/hooks/useTypedSelectors";
 import { DeclaredNodeModel, FileMetaData, OpenFilesType } from "@/types/state-types";
 import { openFilesAction } from "@/redux/sandbox/open-files/openFilesActions";
 import { jetBrainsMono } from "@/helpers/FontLoader";
-import treeSlice from "@/redux/sandbox/file-tree/treeSlice";
-import { treeActions } from "@/redux/sandbox/file-tree/treeActions";
+import { FileTreeActions } from "@/redux/sandbox/file-tree/FileTreeActions";
+import FileTreeSlice from "@/redux/sandbox/file-tree/FiletreeSlice";
 
 const FileViewer: React.FC<{ name: string | null }> = ({ name }) => {
 
@@ -137,16 +137,16 @@ const FileViewer: React.FC<{ name: string | null }> = ({ name }) => {
             };
 
             if (newNode.data?.extension !== FileType.FOLDER) {
-                dispatch(treeActions.createAndOpenNode(newNode));
+                dispatch(FileTreeActions.createAndOpenNode(newNode));
                 const created = treeData.tree.find((n) => n.id === newNode.id);
 
                 if (created) {
-                    dispatch(treeSlice.actions.select(created.id));
+                    dispatch(FileTreeSlice.actions.select(created.id));
 
                 }
 
             } else {
-                dispatch(treeSlice.actions.createNode({ ...newNode, data: newNode.data }));
+                dispatch(FileTreeSlice.actions.createNode({ ...newNode, data: newNode.data }));
 
             }
 
@@ -241,8 +241,6 @@ const FileViewer: React.FC<{ name: string | null }> = ({ name }) => {
                     FILE EXPLORER
                 </div>
 
-                {/* <div className="bg-[#1e1e1e] px-2 py-1 font-bold w-full">{name}</div> */}
-
                 <div
                     ref={mainThreeRef}
                     onContextMenu={(e) => {
@@ -271,11 +269,11 @@ const FileViewer: React.FC<{ name: string | null }> = ({ name }) => {
 
                                         if (contextSelected !== null) {
                                             setContextSelected(null);
-                                            dispatch(treeSlice.actions.select(undefined));
+                                            dispatch(FileTreeSlice.actions.select(undefined));
 
                                         } else {
                                             node.droppable ? onToggle() : openFile(node);
-                                            dispatch(treeSlice.actions.select(node.id));
+                                            dispatch(FileTreeSlice.actions.select(node.id));
 
                                         }
                                     }}
@@ -283,23 +281,16 @@ const FileViewer: React.FC<{ name: string | null }> = ({ name }) => {
                                     {node.id === "0" ?
                                         <div className="bg-[#1e1e1e] px-2 py-1 font-bold w-full flex cursor-pointer"
                                         >
-                                            {/* {Array.from({ length: depth }).map((v, i) => {
-                                                return (
-                                                    <div key={i} style={{ paddingLeft: "20px" }} className="border-l border-neutral-600">
-                                                    </div>
-                                                )
-                                            })} */}
-                                            {/* <FileComponent isOpen={isOpen} node={(node as DeclaredNodeModel<FileMetaData>)} /> */}
                                             <span className="mr-1.5 flex mt-[2px]">
                                                 {isOpen ?
                                                     <>
-                                                        <svg xmlns="http://www.w3.org/2000/svg" width={16} height={16} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-chevron-down-icon lucide-chevron-down">
+                                                        <svg xmlns="http://www.w3.org/2000/svg" width={16} height={16} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-chevron-down-icon lucide-chevron-down">
                                                             <path d="m6 9 6 6 6-6" />
                                                         </svg>
                                                     </>
                                                     :
                                                     <>
-                                                        <svg xmlns="http://www.w3.org/2000/svg" width={16} height={16} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-chevron-right-icon lucide-chevron-right">
+                                                        <svg xmlns="http://www.w3.org/2000/svg" width={16} height={16} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-chevron-right-icon lucide-chevron-right">
                                                             <path d="m9 18 6-6-6-6" />
                                                         </svg>
                                                     </>}
@@ -310,9 +301,8 @@ const FileViewer: React.FC<{ name: string | null }> = ({ name }) => {
                                         <div className={`flex w-full cursor-pointer
 ${contextSelected?.node.id === node.id && !(creatingNode?.parentId === node.id) && "outline-1 outline-neutral-400 -outline-offset-1"} 
 ${treeData.selected?.id === node.id ? creatingNode?.parentId === node.id ? "bg-transparent!" : "bg-[#ffffff1c]" : "hover:bg-[#ffffff10]"}`
-                                            // ${creatingNode?.parentId === node.id && "bg-[#1e1e1e]!"}
                                         }
-                                            style={{ paddingLeft: "10px" }}
+                                            style={{ paddingLeft: node.data?.extension === "folder" ? "10px" : "15px" }}
                                         >
                                             {Array.from({ length: depth }).map((v, i) => {
                                                 return i === 0 ?
@@ -326,7 +316,10 @@ ${treeData.selected?.id === node.id ? creatingNode?.parentId === node.id ? "bg-t
 
                                     {/* NEW FILE/FOLDER INPUT */}
                                     {(creatingNode?.parentId === node.id && node.droppable) &&
-                                        <div style={{ paddingLeft: "10px" }} className="cursor-pointer w-full hover:bg-[#ffffff10] flex">
+                                        <div
+                                            style={{ paddingLeft: node.data?.extension === "folder" ? "10px" : "15px" }}
+                                            className="cursor-pointer w-full hover:bg-[#ffffff10] flex"
+                                        >
                                             {Array.from({ length: depth + 1 }).map((v, i) => {
                                                 return i === 0 ?
                                                     <div key={i} style={{ paddingLeft: "15px" }}></div>

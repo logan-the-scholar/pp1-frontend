@@ -9,76 +9,76 @@ type treeType = {
 
 const treeState: treeType = {
     tree: [
-        {
-            "id": "0",
-            "parent": "-1",
-            "droppable": true,
-            "text": "projectName",
-            "data": {
-                "extension": "folder"
-            }
-        },
-        {
-            "id": "1",
-            "parent": "0",
-            "droppable": true,
-            "text": "common",
-            "data": {
-                "extension": "folder"
-            }
-        },
-        {
-            "id": "2",
-            "parent": "1",
-            "text": "seed-data.json",
-            "data": {
-                "fullPath": ["1"],
-                "extension": "json"
-            }
-        },
-        {
-            "id": "3",
-            "parent": "1",
-            "text": "config.ts",
-            "data": {
-                "fullPath": ["1"],
-                "extension": "ts"
-            }
-        },
-        {
-            "id": "4",
-            "parent": "0",
-            "droppable": true,
-            "text": "root",
-            "data": {
-                "extension": "folder"
-            }
-        },
-        {
-            "id": "5",
-            "parent": "4",
-            "droppable": true,
-            "text": "app",
-            "data": {
-                "fullPath": ["4"],
-                "extension": "folder"
-            }
-        },
-        {
-            "id": "6",
-            "parent": "5",
-            "text": "index.ts",
-            "data": {
-                "fullPath": ["4", "5"],
-                "extension": "ts"
-            }
-        }
+        // {
+        //     "id": "0",
+        //     "parent": "-1",
+        //     "droppable": true,
+        //     "text": "projectName",
+        //     "data": {
+        //         "extension": "folder"
+        //     }
+        // },
+        // {
+        //     "id": "1",
+        //     "parent": "0",
+        //     "droppable": true,
+        //     "text": "common",
+        //     "data": {
+        //         "extension": "folder"
+        //     }
+        // },
+        // {
+        //     "id": "2",
+        //     "parent": "1",
+        //     "text": "seed-data.json",
+        //     "data": {
+        //         "fullPath": ["1"],
+        //         "extension": "json"
+        //     }
+        // },
+        // {
+        //     "id": "3",
+        //     "parent": "1",
+        //     "text": "config.ts",
+        //     "data": {
+        //         "fullPath": ["1"],
+        //         "extension": "ts"
+        //     }
+        // },
+        // {
+        //     "id": "4",
+        //     "parent": "0",
+        //     "droppable": true,
+        //     "text": "root",
+        //     "data": {
+        //         "extension": "folder"
+        //     }
+        // },
+        // {
+        //     "id": "5",
+        //     "parent": "4",
+        //     "droppable": true,
+        //     "text": "app",
+        //     "data": {
+        //         "fullPath": ["4"],
+        //         "extension": "folder"
+        //     }
+        // },
+        // {
+        //     "id": "6",
+        //     "parent": "5",
+        //     "text": "index.ts",
+        //     "data": {
+        //         "fullPath": ["4", "5"],
+        //         "extension": "ts"
+        //     }
+        // }
     ],
 
     selected: undefined
 };
 
-const treeSlice = createSlice({
+const FileTreeSlice = createSlice({
     name: "TREE",
     initialState: treeState,
     reducers: {
@@ -142,4 +142,4 @@ const treeSlice = createSlice({
 
 });
 
-export default treeSlice;
+export default FileTreeSlice;

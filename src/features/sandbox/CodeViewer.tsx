@@ -13,7 +13,7 @@ import { useCallback, useRef, useState } from "react";
 import { DeclaredNodeModel, OpenFileMetaData } from "@/types/state-types";
 import debounce from "lodash.debounce";
 import { useSaveShortcut } from "@/hooks/shortcut/useSaveShortcut";
-import treeSlice from "@/redux/sandbox/file-tree/treeSlice";
+import FileTreeSlice from "@/redux/sandbox/file-tree/FileTreeSlice";
 
 const CodeViewer = () => {
     const dispatch = useAppDispatch();
@@ -67,7 +67,7 @@ const CodeViewer = () => {
 
     const handleChangeWindow = (file: DeclaredNodeModel<OpenFileMetaData>) => {
         dispatch(openFilesAction.open({ ...file, data: file.data }));
-        dispatch(treeSlice.actions.select(file.id));
+        dispatch(FileTreeSlice.actions.select(file.id));
     }
 
     return (

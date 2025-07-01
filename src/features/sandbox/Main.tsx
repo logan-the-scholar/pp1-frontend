@@ -8,29 +8,41 @@ import { ApiProject } from "@/services/api";
 import { z } from "zod";
 import LoadingCircle from "@/components/LoadingCircle";
 import { ErrorHelper } from "@/helpers/ErrorHelper";
-import { StateAndDatabase } from "@/services/files/StateAndDatabase";
 import { useAppDispatch } from "@/hooks/useTypedSelectors";
+import { ApiUrl } from "@/types/ApiUrl.type";
+import { FileTreeActions } from "@/redux/sandbox/file-tree/FileTreeActions";
 
 const Main: React.FC<{ id: string }> = ({ id }) => {
     const dispatch = useAppDispatch();
-    const [isLoading, setIsloading] = useState<boolean>(false);
+    const [isLoading, setIsloading] = useState<boolean>(true);
     const [basicInfo, setBasicInfo] = useState<{ name: string } | null>(null);
 
     useEffect(() => {
-        if (z.string().uuid().safeParse(id).success) {
+        // if (z.string().uuid().safeParse(id).success) {
+        if (true) {
 
             const fetch = async () => {
-                // const response = await ApiProject.get(id);
+                const response = await ApiProject.get(id);
 
-                // if (response instanceof ErrorHelper) {
-                //     return;
-                // }
+                if (response instanceof ErrorHelper) {
+                    window.location.href = `${ApiUrl.dashboard}?from=error`;
+                    return;
+                }
 
-                // setBasicInfo({ name: response.name });
+                setBasicInfo({ name: response.name });
 
-                // if (response.files !== null) {
-                //     dispatch(StateAndDatabase.createStore(response.files));
-                // }
+                if (response.files !== null) {
+                    dispatch(FileTreeActions.createStore([
+                        {
+                            id: "0",
+                            parent: "-1",
+                            name: response.name,
+                            author: "none",
+                            extension: "FOLDER",
+                            path: [],
+                            pathNames: []
+                        }, ...response.files]));
+                }
                 setIsloading(false);
             };
 
@@ -39,7 +51,7 @@ const Main: React.FC<{ id: string }> = ({ id }) => {
             }
         }
 
-    }, [id]);
+    }, []);
 
     return (
         <>
@@ -50,14 +62,14 @@ const Main: React.FC<{ id: string }> = ({ id }) => {
                 :
                 <>
                     {/* //TODO AGREGAR ERROR HANDLING AQUI */}
-                    {"basicInfo" !== null &&
+                    {basicInfo !== null &&
                         <div className="flex flex-col w-full h-[100vh]">
                             <div className="w-full h-10 bg-neutral-900">
                                 <EditorNavBar />
                             </div>
                             <div className="w-full flex-1 flex bg-neutral-900">
                                 <ContentSideBar />
-                                <FileViewer name={"basicInfo.name"} />
+                                <FileViewer name={basicInfo.name} />
                                 <Preview />
                             </div>
                         </div>

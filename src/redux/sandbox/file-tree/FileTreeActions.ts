@@ -1,10 +1,12 @@
 import { NodeModel } from "@minoru/react-dnd-treeview";
-import treeSlice from "./treeSlice";
 import openFilesSlice from "../open-files/openFilesSlice";
 import FileType from "@/types/enum/FileType";
-import { FileMetaData } from "@/types/state-types";
+import { DeclaredNodeModel, FileMetaData } from "@/types/state-types";
 import { openFilesAction } from "../open-files/openFilesActions";
 import { AppThunk } from "@/redux/store";
+import { FileRepository } from "@/services/database/FileRepository";
+import { ApiType } from "@/types/ApiResponse.type";
+import FileTreeSlice from "./FiletreeSlice";
 
 const createAndOpenNode = (node: NodeModel<FileMetaData>): AppThunk => (dispatch, getState) => {
     let pathNames: string[] = [node.text];
@@ -28,7 +30,7 @@ const createAndOpenNode = (node: NodeModel<FileMetaData>): AppThunk => (dispatch
 
     findParent(node.parent as number);
 
-    dispatch(treeSlice.actions.createNode(
+    dispatch(FileTreeSlice.actions.createNode(
         {
             ...node,
             data: {
@@ -51,7 +53,7 @@ const createAndOpenNode = (node: NodeModel<FileMetaData>): AppThunk => (dispatch
             }
         }));
 
-        dispatch(treeSlice.actions.select(createdNode.id));
+        dispatch(FileTreeSlice.actions.select(createdNode.id));
 
         dispatch(openFilesAction.open(
             {
@@ -65,4 +67,36 @@ const createAndOpenNode = (node: NodeModel<FileMetaData>): AppThunk => (dispatch
     }
 };
 
-export const treeActions = { createAndOpenNode };
+function createStore(files: ApiType.File[]): AppThunk {
+    return (async (dispatch, getState) => {
+        try {
+
+            await new FileRepository().createStore(files);
+
+            dispatch(FileTreeSlice.actions.createStore(
+                files.map<DeclaredNodeModel<FileMetaData>>((file) => {
+                    return {
+                        id: file.id,
+                        parent: file.parent,
+                        text: file.name,
+                        droppable: file.extension.toUpperCase() === "FOLDER",
+                        data: {
+                            extension: file.extension,
+                            fullPath: file.path,
+                            pathNames: file.pathNames,
+                            content: file.content,
+                            line: undefined,
+                            isDropped: undefined
+                        }
+                    }
+                })
+            ));
+
+        } catch (error: any) {
+            console.error(error);
+            throw error;
+        }
+    });
+}
+
+export const FileTreeActions = { createAndOpenNode, createStore };
