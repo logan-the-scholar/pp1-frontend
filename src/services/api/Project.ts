@@ -4,7 +4,6 @@ import { fetchCatch } from "../wrapper/fetch-catch";
 import { ErrorHelper } from "@/helpers/ErrorHelper";
 import { ApiStatusEnum } from "@/types/enum/ApiStatus.enum";
 import { ApiType } from "@/types/ApiResponse.type";
-import { URL } from "url";
 
 async function create(data: IProjectCreation) {
     try {

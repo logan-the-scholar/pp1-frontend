@@ -18,10 +18,9 @@ const Main: React.FC<{ id: string }> = ({ id }) => {
     const [basicInfo, setBasicInfo] = useState<{ name: string } | null>(null);
 
     useEffect(() => {
-        // if (z.string().uuid().safeParse(id).success) {
-        if (true) {
 
-            const fetch = async () => {
+        const fetch = async () => {
+            if (z.string().uuid().safeParse(id).success) {
                 const response = await ApiProject.get(id);
 
                 if (response instanceof ErrorHelper) {
@@ -44,18 +43,21 @@ const Main: React.FC<{ id: string }> = ({ id }) => {
                         }, ...response.files]));
                 }
                 setIsloading(false);
-            };
+            } else {
+                window.location.href = `${ApiUrl.dashboard}?from=invalid-id`;
 
-            if (typeof window !== "undefined") {
-                fetch();
             }
+        };
+
+        if (typeof window !== "undefined") {
+            fetch();
         }
 
     }, []);
 
     return (
         <>
-            {isLoading ?
+            {isLoading || id === undefined ?
                 <div className="w-full h-[100vh]">
                     <LoadingCircle size={78} />
                 </div >
@@ -69,7 +71,7 @@ const Main: React.FC<{ id: string }> = ({ id }) => {
                             </div>
                             <div className="w-full flex-1 flex bg-neutral-900">
                                 <ContentSideBar />
-                                <FileViewer name={basicInfo.name} />
+                                <FileViewer info={{ name: basicInfo.name, id }} />
                                 <Preview />
                             </div>
                         </div>

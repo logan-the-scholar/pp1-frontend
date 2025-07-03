@@ -66,7 +66,7 @@ const ProjectPopup: React.FC<{ setShowPopup: React.Dispatch<React.SetStateAction
         }
 
         // dispatch(projectLoadStatusSlice.actions.updated(ProjectLoadStatusEnum.CREATED));
-        window.location.href = `${ApiUrl.sandbox._}/${response.name}`;
+        window.location.href = `${ApiUrl.sandbox}/${response.name}`;
         setIsLoading(false);
         setShowPopup(false);
     };

@@ -1,5 +1,5 @@
 import { ApiType } from '@/types/ApiResponse.type';
-import DBType from '@/types/Database.type';
+import { DBType } from '@/types/Database.type';
 import { IDBPDatabase, openDB } from 'idb';
 
 export class FileRepository {
@@ -39,5 +39,3 @@ export class FileRepository {
         await (await this.dbPromise).delete("files", id);
     }
 }
-
-// export const FilesRepository = { save, get, remove, clear, createStore };

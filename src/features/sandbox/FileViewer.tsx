@@ -11,9 +11,9 @@ import { DeclaredNodeModel, FileMetaData, OpenFilesType } from "@/types/state-ty
 import { openFilesAction } from "@/redux/sandbox/open-files/openFilesActions";
 import { jetBrainsMono } from "@/helpers/FontLoader";
 import { FileTreeActions } from "@/redux/sandbox/file-tree/FileTreeActions";
-import FileTreeSlice from "@/redux/sandbox/file-tree/FiletreeSlice";
+import FileTreeSlice from "@/redux/sandbox/file-tree/FileTreeSlice";
 
-const FileViewer: React.FC<{ name: string | null }> = ({ name }) => {
+const FileViewer: React.FC<{ info: { name: string; id: string; } }> = ({ info }) => {
 
     const treeContext = useTreeContext();
     const dispatch = useAppDispatch();
@@ -123,11 +123,12 @@ const FileViewer: React.FC<{ name: string | null }> = ({ name }) => {
 
             const tempId = Date.now();
 
-            const newNode: NodeModel<FileMetaData> = {
+            const newNode: DeclaredNodeModel<FileMetaData> = {
                 id: tempId,
                 parent: creatingNode.parentId,
                 text: name,
                 data: {
+                    author: "none",
                     extension: creatingNode.type === FileType.FOLDER ?
                         FileType.FOLDER
                         :
@@ -136,19 +137,19 @@ const FileViewer: React.FC<{ name: string | null }> = ({ name }) => {
                 }
             };
 
-            if (newNode.data?.extension !== FileType.FOLDER) {
-                dispatch(FileTreeActions.createAndOpenNode(newNode));
-                const created = treeData.tree.find((n) => n.id === newNode.id);
+            // if (newNode.data?.extension !== FileType.FOLDER) {
+            dispatch(FileTreeActions.createAndOpenNode(newNode, info.id));
+            //     const created = treeData.tree.find((n) => n.id === newNode.id);
 
-                if (created) {
-                    dispatch(FileTreeSlice.actions.select(created.id));
+            //     if (created) {
+            //         dispatch(FileTreeSlice.actions.select(created.id));
 
-                }
+            //     }
 
-            } else {
-                dispatch(FileTreeSlice.actions.createNode({ ...newNode, data: newNode.data }));
+            // } else {
+            //     dispatch(FileTreeSlice.actions.createNode({ ...newNode, data: newNode.data }));
 
-            }
+            // }
 
             setCreatingNode(null);
         }
@@ -245,7 +246,11 @@ const FileViewer: React.FC<{ name: string | null }> = ({ name }) => {
                     ref={mainThreeRef}
                     onContextMenu={(e) => {
                         handleContextMenu(e, {
-                            id: "0", parent: "-1", text: "root", droppable: true, data: { extension: "folder" }
+                            id: "0", parent: "-1", text: "root", droppable: true, data: {
+                                extension: "folder",
+                                author: "none",
+                                fullPath: null
+                            }
                         });
                     }}
                     className="flex-1 relative font-light mt-2 max-w-full h-full w-full overflow-x-hidden overflow-y-scroll"
@@ -258,6 +263,7 @@ const FileViewer: React.FC<{ name: string | null }> = ({ name }) => {
                             ref={treeRef}
                             onDrop={handleDrop}
                             insertDroppableFirst
+                            initialOpen={treeData.tree.flatMap((node) => node.data.isDropped ? node.id as string : undefined).filter((node) => node !== undefined)}
                             render={(node, { depth, isOpen, onToggle }) => {
 
                                 return <div

@@ -2,11 +2,17 @@ import { NodeModel } from "@minoru/react-dnd-treeview"
 
 export type FileMetaData = {
     extension: string,
-    fullPath?: string[],
+    fullPath: string[] | null,
     pathNames?: string[],
     content?: string,
     line?: number,
     isDropped?: boolean,
+    author: string,
+}
+
+export type TreeType = {
+    tree: DeclaredNodeModel<FileMetaData>[],
+    selected: DeclaredNodeModel<FileMetaData> | undefined
 }
 
 export type OpenFileMetaData = FileMetaData & {

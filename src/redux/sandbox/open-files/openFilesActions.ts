@@ -1,7 +1,7 @@
 import { AppThunk } from "../../store";
+import FileTreeSlice from "../file-tree/FileTreeSlice";
 import openFilesSlice from "./openFilesSlice";
 import { DeclaredNodeModel, FileMetaData, OpenFileMetaData } from "@/types/state-types";
-import FileTreeSlice from "../file-tree/FileTreeSlice";
 
 const open = (node: DeclaredNodeModel<FileMetaData> | DeclaredNodeModel<OpenFileMetaData>): AppThunk => (dispatch, getState) => {
     const state = getState();

@@ -1,14 +1,32 @@
 import { DBSchema } from "idb";
 import { ApiType } from "./ApiResponse.type";
+import { FileModifStatus } from "./enum/FileModifStatus.enum";
 
-export default interface DBType extends DBSchema {
-//   'favourite-number': {
-//     key: string;
-//     value: number;
-//   };
+export type FileStatus = {
+  status: FileModifStatus;
+  isDropped?: boolean;
+
+}
+
+export type SelectedFileData = {
+  line: number;
+  column: number;
+  isSaved: boolean;
+}
+
+export interface DBType extends DBSchema {
   files: {
     value: ApiType.File;
     key: string;
-    // indexes: { 'by-price': number };
   };
+
+  status: {
+    value: FileStatus;
+    key: string;
+  };
+
+  selected: {
+    value: SelectedFileData;
+    key: string;
+  }
 }

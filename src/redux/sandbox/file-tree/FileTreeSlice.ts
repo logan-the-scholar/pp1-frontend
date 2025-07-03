@@ -1,13 +1,8 @@
 import FileType from "@/types/enum/FileType";
-import { DeclaredNodeModel, FileMetaData } from "@/types/state-types";
+import { DeclaredNodeModel, FileMetaData, TreeType } from "@/types/state-types";
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 
-type treeType = {
-    tree: DeclaredNodeModel<FileMetaData>[],
-    selected: DeclaredNodeModel<FileMetaData> | undefined
-}
-
-const treeState: treeType = {
+const treeState: TreeType = {
     tree: [
         // {
         //     "id": "0",
