@@ -11,5 +11,6 @@ export const FileCreation = () => z.object({
 
     isFolder: z.boolean({ message: "isFolder status must can't be empty" }),
 
-    path: z.array(z.string().uuid("path reference must be a valid uuid"), { message: "idk" }).nullable(),
+    path: z.array(z.any())
+    //.array(z.string().uuid("path reference must be a valid uuid"), { message: "idk" }).nullable(),
 });

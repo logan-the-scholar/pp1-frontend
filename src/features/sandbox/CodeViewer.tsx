@@ -5,7 +5,7 @@ import { Editor } from "@monaco-editor/react";
 import { useSelector } from "react-redux";
 import FileIconMapper from "./FileIconMapper";
 import FileType from "@/types/enum/FileType";
-import { openFilesAction } from "@/redux/sandbox/open-files/openFilesActions";
+import { OpenFilesAction } from "@/redux/sandbox/open-files/OpenFilesActions";
 import { useAppDispatch } from "@/hooks/useTypedSelectors";
 import LanguageMapper from "@/helpers/LanguageMapper";
 import openFilesSlice from "@/redux/sandbox/open-files/openFilesSlice";
@@ -62,11 +62,11 @@ const CodeViewer = () => {
     };
 
     const handleClose = (id: string | number) => {
-        dispatch(openFilesAction.closeAndChangeWindow(id));
+        dispatch(OpenFilesAction.closeAndChangeWindow(id));
     };
 
     const handleChangeWindow = (file: DeclaredNodeModel<OpenFileMetaData>) => {
-        dispatch(openFilesAction.open({ ...file, data: file.data }));
+        dispatch(OpenFilesAction.open({ ...file, data: file.data }));
         dispatch(FileTreeSlice.actions.select(file.id));
     }
 

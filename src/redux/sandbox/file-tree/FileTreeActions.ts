@@ -2,9 +2,7 @@ import { NodeModel } from "@minoru/react-dnd-treeview";
 import openFilesSlice from "../open-files/openFilesSlice";
 import FileType from "@/types/enum/FileType";
 import { DeclaredNodeModel, FileMetaData, OpenFilesType, TreeType } from "@/types/state-types";
-import { openFilesAction } from "../open-files/openFilesActions";
 import { AppThunk } from "@/redux/store";
-import { FileRepository } from "@/services/database/FileRepository";
 import { ApiType } from "@/types/ApiResponse.type";
 import FileTreeSlice from "./FileTreeSlice";
 import { zodValidate } from "@/helpers/zod/ZodValidate";
@@ -12,19 +10,19 @@ import { IFileCreation } from "@/types/zTypes";
 import { ErrorHelper } from "@/helpers/ErrorHelper";
 import { ApiFile } from "@/services/api/File";
 import { FileCreation } from "@/types/FileCreation.type";
+import { Repository } from "@/services/database/FileRepository";
+import { OpenFilesAction } from "../open-files/OpenFilesActions";
 
 function createAndOpenNode(node: DeclaredNodeModel<FileMetaData>, projectId: string): AppThunk {
     return (async (dispatch, getState) => {
-
         const { pathNames, fullPath } = findParent(node, getState);
         const created = await pushNode({ ...node, data: { ...node.data, pathNames, fullPath } }, projectId);
-
-        await new FileRepository().save(created);
+        await new Repository().save(created);
 
         dispatch(FileTreeSlice.actions.createNode({
             id: created.id,
             text: created.name,
-            parent: created.parent,
+            parent: created.parent === null ? created.parent : "0",
             data: {
                 extension: created.extension,
                 fullPath: created.path,
@@ -48,9 +46,9 @@ function createAndOpenNode(node: DeclaredNodeModel<FileMetaData>, projectId: str
                 }
             }));
 
-            dispatch(FileTreeSlice.actions.select(createdNode.id));
+            dispatch(FileTreeSlice.actions.select({ id: createdNode.id }));
 
-            dispatch(openFilesAction.open(
+            dispatch(OpenFilesAction.open(
                 {
                     ...createdNode,
                     data: {
@@ -67,14 +65,14 @@ function createAndOpenNode(node: DeclaredNodeModel<FileMetaData>, projectId: str
 function createStore(files: ApiType.File[]): AppThunk {
     return (async (dispatch, getState) => {
         try {
-
-            await new FileRepository().createStore(files);
+            await new Repository().clear();
+            await new Repository().createStore(files);
 
             dispatch(FileTreeSlice.actions.createStore(
                 files.map<DeclaredNodeModel<FileMetaData>>((file) => {
                     return {
                         id: file.id,
-                        parent: file.parent,
+                        parent: file.parent || "0",
                         text: file.name,
                         droppable: file.extension.toUpperCase() === "FOLDER",
                         data: {
@@ -100,12 +98,14 @@ function createStore(files: ApiType.File[]): AppThunk {
 
 function findParent(node: NodeModel<FileMetaData>, getState: () => { OPEN_FILES: OpenFilesType, FILE_TREE: TreeType }) {
 
-    let pathNames: string[] = [node.text];
-    const fullPath: string[] = [node.id.toString()];
+    const pathNames: string[] = [];
+    const fullPath: string[] = [];
+
+    pathNames.push(node.text);
 
     const find = (id: string) => {
         const found: NodeModel<FileMetaData> | undefined = getState().FILE_TREE.tree.find((parentNode) => {
-            return parentNode.id === id;
+            return parentNode.id === id && id !== "0";
         });
 
         if (found !== undefined) {
@@ -118,21 +118,20 @@ function findParent(node: NodeModel<FileMetaData>, getState: () => { OPEN_FILES:
         }
     };
 
-    find(node.id as string);
+    find(node.parent as string);
 
     return { pathNames, fullPath };
-};
+}
 
 
 async function pushNode(node: DeclaredNodeModel<FileMetaData>, projectId: string) {
-
     const [success, data] = zodValidate<IFileCreation>({
         projectId,
         name: node.text,
         author: node.data.author,
         extension: node.data.extension,
-        isFolder: node.droppable === undefined ? false : node.droppable,
-        path: node.data.fullPath
+        isFolder: node.droppable as boolean,
+        path: node.data.fullPath?.filter((p) => p !== node.id.toString()) || []
     }, FileCreation);
 
     if (!success) {
@@ -151,154 +150,32 @@ async function pushNode(node: DeclaredNodeModel<FileMetaData>, projectId: string
 
 }
 
-export const FileTreeActions = { createAndOpenNode, createStore };
+function deleteAndChilds(node: DeclaredNodeModel<FileMetaData>): AppThunk {
+    return (async (dispatch, getState) => {
 
+        const response = await ApiFile.remove(node.id.toString());
+        if (response instanceof ErrorHelper) {
+            throw new ErrorHelper(response.message, response.exception);
 
-// import { NodeModel } from "@minoru/react-dnd-treeview";
-// import openFilesSlice from "../open-files/openFilesSlice";
-// import FileType from "@/types/enum/FileType";
-// import { DeclaredNodeModel, FileMetaData } from "@/types/state-types";
-// import { openFilesAction } from "../open-files/openFilesActions";
-// import { AppThunk } from "@/redux/store";
-// import { FileRepository } from "@/services/database/FileRepository";
-// import { ApiType } from "@/types/ApiResponse.type";
-// import FileTreeSlice from "./FiletreeSlice";
-// import { ApiFile } from "@/services/api/File";
-// import { zodValidate } from "@/helpers/zod/ZodValidate";
-// import { IFileCreation } from "@/types/zTypes";
-// import { FileCreation } from "@/types/FileCreation.type";
-// import { ErrorHelper } from "@/helpers/ErrorHelper";
+        }
+        
+        await new Repository().remove(node.id.toString());
 
-// function createAndOpenNode(node: DeclaredNodeModel<FileMetaData>): AppThunk {
-//     return (async (dispatch, getState) => {
-//         try {
+        const find = (id: string) => {
+            const children = getState().FILE_TREE.tree.filter((child) => child.parent === id);
 
-//             let pathNames: string[] = [node.text];
-//             const fullPath: string[] = [node.id.toString()];
+            children.forEach((file) => {
+                dispatch(FileTreeSlice.actions.delete(file.id.toString()));
 
-//             const findParent = (id: number) => {
+                file.droppable && find(file.id.toString());
 
-//                 const found: NodeModel<FileMetaData> | undefined = getState().FILE_TREE.tree.find((parentNode) => {
-//                     return parentNode.id === id;
-//                 });
+            });
+        };
 
-//                 if (found !== undefined) {
-//                     fullPath.unshift(found.id.toString());
-//                     pathNames.unshift(found.text);
+        find(node.id.toString());
+        dispatch(FileTreeSlice.actions.delete(node.id.toString()));
 
-//                     if (found.parent !== 0) {
-//                         findParent(found.parent as number);
-//                     }
-//                 }
-//             };
+    });
+}
 
-//             findParent(node.parent as number);
-
-//             dispatch(createAndPushNode(node));
-
-//             const createdNode = getState().FILE_TREE.tree.find((n) => n.id === node.id);
-
-//             if (createdNode && createdNode.data?.extension !== FileType.FOLDER) {
-//                 dispatch(openFilesSlice.actions.add({
-//                     ...createdNode,
-//                     data: {
-//                         ...createdNode.data as FileMetaData,
-//                         edited: true,
-//                         saved: true,
-//                     }
-//                 }));
-
-//                 dispatch(FileTreeSlice.actions.select(createdNode.id));
-
-//                 dispatch(openFilesAction.open(
-//                     {
-//                         ...createdNode,
-//                         data: {
-//                             ...createdNode.data as FileMetaData,
-//                             edited: true,
-//                             saved: true,
-//                         }
-//                     }));
-//             }
-//         } catch (error: any) {
-//             console.error(error);
-//             throw error;
-
-//         }
-
-
-//     });
-// }
-
-// function createStore(files: ApiType.File[]): AppThunk {
-//     return (async (dispatch, getState) => {
-//         try {
-
-//             await new FileRepository().createStore(files);
-
-//             dispatch(FileTreeSlice.actions.createStore(
-//                 files.map<DeclaredNodeModel<FileMetaData>>((file) => {
-//                     return {
-//                         id: file.id,
-//                         parent: file.parent,
-//                         text: file.name,
-//                         droppable: file.extension.toUpperCase() === "FOLDER",
-//                         data: {
-//                             extension: file.extension,
-//                             fullPath: file.path,
-//                             pathNames: file.pathNames,
-//                             content: file.content,
-//                             author: file.author,
-//                             line: undefined,
-//                             isDropped: undefined
-//                         }
-//                     }
-//                 })
-//             ));
-
-//         } catch (error: any) {
-//             console.error(error);
-//             throw error;
-//         }
-//     });
-// }
-
-// function createAndPushNode(node: DeclaredNodeModel<FileMetaData>): AppThunk {
-//     return (async (dispatch, getState) => {
-//         const [success, data] = zodValidate<IFileCreation>({
-//             projectId: "",
-//             name: node.text,
-//             author: node.data.author,
-//             extension: node.data.extension,
-//             isFolder: node.droppable === undefined ? false : node.droppable,
-//             path: node.data.fullPath
-//         }, FileCreation);
-
-//         if (!success) {
-//             Object.entries(data.errors).forEach((e) => console.error(e));
-//             throw new ErrorHelper("aaaa nose");
-//         }
-
-//         const response = await ApiFile.create(data.data);
-
-//         if (response instanceof ErrorHelper) {
-//             throw new ErrorHelper(response.message, response.exception);
-
-//         } else {
-//             const { id, path, name, parent, ...createdFile }: ApiType.File = await response.json();
-
-//             dispatch(FileTreeSlice.actions.createNode({
-//                 id,
-//                 text: name,
-//                 parent,
-//                 data: {
-//                     ...createdFile,
-//                     fullPath: path,
-//                 }
-//             }));
-
-//         }
-//     });
-// }
-
-// export const FileTreeActions = { createAndOpenNode, createStore, createAndPushNode };
+export const FileTreeActions = { createAndOpenNode, createStore, deleteAndChilds };

@@ -1,26 +1,38 @@
+import { Repository } from "@/services/database/FileRepository";
 import { AppThunk } from "../../store";
 import FileTreeSlice from "../file-tree/FileTreeSlice";
 import openFilesSlice from "./openFilesSlice";
 import { DeclaredNodeModel, FileMetaData, OpenFileMetaData } from "@/types/state-types";
 
-const open = (node: DeclaredNodeModel<FileMetaData> | DeclaredNodeModel<OpenFileMetaData>): AppThunk => (dispatch, getState) => {
-    const state = getState();
-    const alreadyOpenNode = state.OPEN_FILES.open.find((n) => n.id === node.id);
+function open(node: DeclaredNodeModel<FileMetaData> | DeclaredNodeModel<OpenFileMetaData>): AppThunk {
+    return (async (dispatch, getState) => {
 
-    if (alreadyOpenNode === undefined) {
-        const previousEditedFile = state.OPEN_FILES.open.find((n) => n.data?.edited === false);
+        const state = getState();
+        const alreadyOpenNode = state.OPEN_FILES.open.find((n) => n.id === node.id);
 
-        dispatch(openFilesSlice.actions.add(node));
-        if (previousEditedFile !== undefined) {
-            dispatch(openFilesSlice.actions.close(previousEditedFile.id));
+        if (alreadyOpenNode === undefined) {
+            const previousEditedFile = state.OPEN_FILES.open.find((n) => n.data?.edited === false);
+
+            dispatch(openFilesSlice.actions.add(node));
+            if (previousEditedFile !== undefined) {
+                dispatch(openFilesSlice.actions.close(previousEditedFile.id));
+            }
+
+            dispatch(openFilesSlice.actions.select({ id: node.id, saved: true, edited: true }));
+
+            await new Repository().save3({
+                id: node.id as string,
+                line: 1,
+                column: 1,
+                isSaved: true
+            });
+
+        } else {
+            dispatch(openFilesSlice.actions.select(alreadyOpenNode));
+
         }
-        
-        dispatch(openFilesSlice.actions.select({ id: node.id, saved: true, edited: true }));
+    });
 
-    } else {
-        dispatch(openFilesSlice.actions.select(alreadyOpenNode));
-
-    }
 }
 
 
@@ -48,4 +60,4 @@ const closeAndChangeWindow = (id: string | number): AppThunk => (dispatch, getSt
     }
 }
 
-export const openFilesAction = { open, closeAndChangeWindow };
+export const OpenFilesAction = { open, closeAndChangeWindow };

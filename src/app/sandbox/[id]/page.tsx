@@ -1,4 +1,5 @@
 "use client";
+import { PopupProvider } from "@/context/PopupProvider";
 import Main from "@/features/sandbox/Main";
 import { store } from "@/redux/store";
 import { use, useEffect, useState } from "react";
@@ -13,7 +14,9 @@ export default function Sandbox({ params, searchParams }: { params: Promise<{ id
                 null
                 :
                 <Provider store={store}>
-                    <Main id={usedParams.id} />
+                    <PopupProvider>
+                        <Main id={usedParams.id} />
+                    </PopupProvider>
                 </Provider>
             }
         </>

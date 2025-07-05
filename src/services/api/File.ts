@@ -10,6 +10,9 @@ async function create(data: IFileCreation): Promise<Response | ErrorHelper> {
 
         const response: Response = await fetchCatch(`${API_SERVER}/demo/api/v0/file/${projectId}`, {
             method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
             body: JSON.stringify(remain)
         });
 
@@ -20,4 +23,17 @@ async function create(data: IFileCreation): Promise<Response | ErrorHelper> {
     }
 }
 
-export const ApiFile = { create }
+async function remove(id: string): Promise<Response | ErrorHelper> {
+    try {
+        const response: Response = await fetchCatch(`${API_SERVER}/demo/api/v0/file/${id}`, {
+            method: "DELETE",
+        });
+
+        return response;
+    } catch (error: any) {
+        return error instanceof ErrorHelper ? error : new ErrorHelper(ApiStatusEnum.UNKNOWN, error.message);
+
+    }
+}
+
+export const ApiFile = { create, remove }

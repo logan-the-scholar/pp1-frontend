@@ -8,10 +8,20 @@ import { RootState } from "@/redux/store";
 import FileType from "@/types/enum/FileType";
 import { useAppDispatch } from "@/hooks/useTypedSelectors";
 import { DeclaredNodeModel, FileMetaData, OpenFilesType } from "@/types/state-types";
-import { openFilesAction } from "@/redux/sandbox/open-files/openFilesActions";
 import { jetBrainsMono } from "@/helpers/FontLoader";
 import { FileTreeActions } from "@/redux/sandbox/file-tree/FileTreeActions";
 import FileTreeSlice from "@/redux/sandbox/file-tree/FileTreeSlice";
+import { FileModifStatus } from "@/types/enum/FileModifStatus.enum";
+import { Repository } from "@/services/database/FileRepository";
+import { OpenFilesAction } from "@/redux/sandbox/open-files/OpenFilesActions";
+import { showPopup } from "@/context/PopupProvider";
+
+type ContextType = {
+    node: NodeModel<FileMetaData>,
+    onToggle?: () => void,
+    isOpen?: boolean
+
+}
 
 const FileViewer: React.FC<{ info: { name: string; id: string; } }> = ({ info }) => {
 
@@ -25,12 +35,9 @@ const FileViewer: React.FC<{ info: { name: string; id: string; } }> = ({ info })
     const mainThreeRef = useRef<HTMLDivElement | null>(null);
     const [visibleMenu, setVisibleMenu] = useState(false);
     const [positionMenu, setPositionMenu] = useState({ x: 0, y: 0, pos: "top" });
+    const [isLoading, setIsloading] = useState<boolean>(false);
 
-    const [contextSelected, setContextSelected] = useState<{
-        node: NodeModel<FileMetaData>,
-        onToggle?: () => void,
-        isOpen?: boolean
-    } | null>(null);
+    const [contextSelected, setContextSelected] = useState<ContextType | null>(null);
 
     const [creatingNode, setCreatingNode] = useState<{
         parentId: string | number,
@@ -44,13 +51,32 @@ const FileViewer: React.FC<{ info: { name: string; id: string; } }> = ({ info })
 
 
     const openFile = (node: NodeModel<FileMetaData>) => {
-        dispatch(openFilesAction.open({ ...node, data: node.data as FileMetaData }));
+        dispatch(OpenFilesAction.open({ ...node, data: node.data as FileMetaData }));
     };
 
 
     //TODO hay que actualizar el path despues de hacer esto
     const handleDrop = (newTreeData: any) => {
         console.log("nothing");
+    };
+
+
+    const handleSaveState = (node: DeclaredNodeModel<FileMetaData>) => {
+        if (node.droppable) {
+
+            const handle = async () => {
+                const nose = treeData.tree.find((node_) => node_.id === node.id);
+
+                const repository = new Repository();
+                await repository.save2({
+                    id: node.id as string,
+                    isDropped: nose?.data.isDropped,
+                    status: FileModifStatus.UNMODIFIED
+                });
+            }
+
+            handle();
+        }
     };
 
 
@@ -127,8 +153,9 @@ const FileViewer: React.FC<{ info: { name: string; id: string; } }> = ({ info })
                 id: tempId,
                 parent: creatingNode.parentId,
                 text: name,
+                droppable: creatingNode.type === FileType.FOLDER,
                 data: {
-                    author: "none",
+                    author: "17cd4df6-67fc-4093-92f3-c071c87f8973",
                     extension: creatingNode.type === FileType.FOLDER ?
                         FileType.FOLDER
                         :
@@ -137,25 +164,28 @@ const FileViewer: React.FC<{ info: { name: string; id: string; } }> = ({ info })
                 }
             };
 
-            // if (newNode.data?.extension !== FileType.FOLDER) {
             dispatch(FileTreeActions.createAndOpenNode(newNode, info.id));
-            //     const created = treeData.tree.find((n) => n.id === newNode.id);
-
-            //     if (created) {
-            //         dispatch(FileTreeSlice.actions.select(created.id));
-
-            //     }
-
-            // } else {
-            //     dispatch(FileTreeSlice.actions.createNode({ ...newNode, data: newNode.data }));
-
-            // }
 
             setCreatingNode(null);
         }
 
     };
 
+
+    const handleDelete = (context: ContextType | null) => {
+        if (context === null || context === undefined) return;
+
+        showPopup({
+            title: "Permanently delete",
+            message: `Do you want to delete ${context.node.text} permanently`,
+            confirmText: "Delete",
+            cancelText: "Cancel",
+        }).then((confirmed) => {
+            if (confirmed) {
+                dispatch(FileTreeActions.deleteAndChilds(context.node as DeclaredNodeModel<FileMetaData>));
+            }
+        });
+    }
 
     return (
         <div onContextMenu={(e) => e.preventDefault()}
@@ -222,7 +252,7 @@ const FileViewer: React.FC<{ info: { name: string; id: string; } }> = ({ info })
                                     <div>
                                         Rename...
                                     </div>
-                                    <div>
+                                    <div onClick={() => handleDelete(contextSelected)}>
                                         Delete
                                     </div>
                                 </>
@@ -279,8 +309,10 @@ const FileViewer: React.FC<{ info: { name: string; id: string; } }> = ({ info })
 
                                         } else {
                                             node.droppable ? onToggle() : openFile(node);
-                                            dispatch(FileTreeSlice.actions.select(node.id));
 
+                                            dispatch(FileTreeSlice.actions.select({ id: node.id, isDropped: !isOpen }));
+
+                                            // handleSaveState(node as DeclaredNodeModel<FileMetaData>);
                                         }
                                     }}
                                 >
@@ -308,7 +340,7 @@ const FileViewer: React.FC<{ info: { name: string; id: string; } }> = ({ info })
 ${contextSelected?.node.id === node.id && !(creatingNode?.parentId === node.id) && "outline-1 outline-neutral-400 -outline-offset-1"} 
 ${treeData.selected?.id === node.id ? creatingNode?.parentId === node.id ? "bg-transparent!" : "bg-[#ffffff1c]" : "hover:bg-[#ffffff10]"}`
                                         }
-                                            style={{ paddingLeft: node.data?.extension === "folder" ? "10px" : "15px" }}
+                                            style={{ paddingLeft: "10px" }}
                                         >
                                             {Array.from({ length: depth }).map((v, i) => {
                                                 return i === 0 ?

@@ -3,12 +3,14 @@ import { ApiType } from "./ApiResponse.type";
 import { FileModifStatus } from "./enum/FileModifStatus.enum";
 
 export type FileStatus = {
+  id: string;
   status: FileModifStatus;
   isDropped?: boolean;
 
 }
 
 export type SelectedFileData = {
+  id: string;
   line: number;
   column: number;
   isSaved: boolean;
