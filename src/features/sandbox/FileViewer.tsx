@@ -12,7 +12,8 @@ import { jetBrainsMono } from "@/helpers/FontLoader";
 import { FileTreeActions } from "@/redux/sandbox/file-tree/FileTreeActions";
 import FileTreeSlice from "@/redux/sandbox/file-tree/FileTreeSlice";
 import { FileModifStatus } from "@/types/enum/FileModifStatus.enum";
-import { Repository } from "@/services/database/FileRepository";
+import { Repository } from "@/services/database/Repository";
+import { SelectedRepository } from '@/services/database/SelectedRepository';
 import { OpenFilesAction } from "@/redux/sandbox/open-files/OpenFilesActions";
 import { showPopup } from "@/context/PopupProvider";
 
@@ -67,12 +68,12 @@ const FileViewer: React.FC<{ info: { name: string; id: string; } }> = ({ info })
             const handle = async () => {
                 const nose = treeData.tree.find((node_) => node_.id === node.id);
 
-                const repository = new Repository();
-                await repository.save2({
-                    id: node.id as string,
-                    isDropped: nose?.data.isDropped,
-                    status: FileModifStatus.UNMODIFIED
-                });
+                // const repository = new SelectedRepository();
+                // await repository.save({
+                //     id: node.id as string,
+                //     isDropped: nose?.data.isDropped,
+                //     status: FileModifStatus.UNMODIFIED
+                // }, info.id);
             }
 
             handle();
@@ -193,7 +194,6 @@ const FileViewer: React.FC<{ info: { name: string; id: string; } }> = ({ info })
             className={`select-none pt-2 w-[20%] relative min-w-[10%] max-w-[50%] h-full text-sm flex flex-col ${jetBrainsMono.className}`}
         >
             {/*
-                //TODO el click derecho al root -> crear nuevo archivo no funciona.
                 //TODO cuando se hace click al arbol deberia desenfocarse ambos clicks.
             */}
 
@@ -208,7 +208,7 @@ const FileViewer: React.FC<{ info: { name: string; id: string; } }> = ({ info })
                             className="[&>div]:cursor-pointer overflow-hidden [&>div]:px-6 [&>div]:mx-1 [&>div]:pb-0.5 [&>div]:pt-1 [&>div]:hover:bg-[#ffffff1c] [&>div]:rounded-sm bg-[#1e1e1e] z-50 absolute w-fit text-nowrap flex flex-col py-1 rounded-md shadow-md shadow-black"
                         >
 
-                            {(contextSelected?.node.droppable && contextSelected.node.data?.extension === "folder") ?
+                            {(contextSelected?.node.droppable && contextSelected.node.data?.extension.toLowerCase() === "folder") ?
                                 <>
                                     <div onClick={() => addNode(FileType.PLAIN_TEXT)}>
                                         New File...
@@ -222,7 +222,7 @@ const FileViewer: React.FC<{ info: { name: string; id: string; } }> = ({ info })
                                 null
                             }
 
-                            {(contextSelected?.node.droppable && contextSelected.node.data?.extension === "folder") ?
+                            {(contextSelected?.node.droppable && contextSelected.node.data?.extension.toLowerCase() === "folder") ?
                                 <div>
                                     Paste
                                 </div>
@@ -230,7 +230,7 @@ const FileViewer: React.FC<{ info: { name: string; id: string; } }> = ({ info })
                                 null
                             }
 
-                            {contextSelected?.node.id !== "0" && contextSelected?.node.parent !== "-1" &&
+                            {contextSelected?.node.id !== "0" &&
                                 <>
                                     <div>
                                         Cut
@@ -245,7 +245,7 @@ const FileViewer: React.FC<{ info: { name: string; id: string; } }> = ({ info })
                             <div onClick={() => null}>
                                 Copy Relative Path
                             </div>
-                            {contextSelected?.node.id !== "0" && contextSelected?.node.parent !== "-1" &&
+                            {contextSelected?.node.id !== "0" &&
                                 <>
                                     <span className="w-full h-px bg-neutral-400 my-1"></span>
 

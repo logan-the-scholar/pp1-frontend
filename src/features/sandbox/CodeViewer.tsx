@@ -67,7 +67,7 @@ const CodeViewer = () => {
 
     const handleChangeWindow = (file: DeclaredNodeModel<OpenFileMetaData>) => {
         dispatch(OpenFilesAction.open({ ...file, data: file.data }));
-        dispatch(FileTreeSlice.actions.select(file.id));
+        dispatch(FileTreeSlice.actions.select({ id: file.id }));
     }
 
     return (
@@ -136,8 +136,8 @@ ${file.id === selectedFile?.id || file.data.edited ? "visible hover:bg-[#ffffff1
                     <div className="px-4 py-1.5 flex border-x border-t border-neutral-600 cursor-pointer text-xs text-neutral-300 bg-[#1e1e1e] select-none">
                         {
                             selectedFile !== undefined ?
-                                selectedFile.data?.pathNames ?
-                                    selectedFile.data.pathNames.map((path, index) => {
+                                [...selectedFile.data.pathNames || [], selectedFile.text]
+                                    .map((path, index) => {
                                         return (
                                             <span className="hover:text-neutral-100 cursor-pointer mr-1.5 flex" key={`${path}_${selectedFile.text}`}>
                                                 {path === selectedFile.text && selectedFile.data?.extension !== FileType.FOLDER && (index + 1) === selectedFile.data?.fullPath?.length &&
@@ -145,14 +145,15 @@ ${file.id === selectedFile?.id || file.data.edited ? "visible hover:bg-[#ffffff1
                                                         <FileIconMapper type={selectedFile.data?.extension as string} />
                                                     </span>
                                                 }
-                                                {`${path} >`}
+                                                {path === selectedFile.text &&
+                                                    <span className="mr-1.5 h-full flex items-center">
+                                                        <FileIconMapper size={12} type={selectedFile.data?.extension as string} />
+                                                    </span>
+                                                }
+                                                {`${path} ${path !== selectedFile.text ? ">" : ""}`}
                                             </span>
                                         );
                                     })
-                                    :
-                                    <span>
-                                        {selectedFile.parent}
-                                    </span>
                                 :
                                 null
                         }

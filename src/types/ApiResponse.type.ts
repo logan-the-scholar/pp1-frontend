@@ -23,7 +23,7 @@ export namespace ApiType {
         name: string;
         author: string;
         path: string[];
-        pathNames: string[];
+        //pathNames: string[];
         parent: string;
         extension: string;
         content?: string;

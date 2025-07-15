@@ -11,6 +11,8 @@ import { ErrorHelper } from "@/helpers/ErrorHelper";
 import { useAppDispatch } from "@/hooks/useTypedSelectors";
 import { ApiUrl } from "@/types/ApiUrl.type";
 import { FileTreeActions } from "@/redux/sandbox/file-tree/FileTreeActions";
+import { OpenFilesAction } from "@/redux/sandbox/open-files/OpenFilesActions";
+import FileTreeSlice from "@/redux/sandbox/file-tree/FileTreeSlice";
 
 const Main: React.FC<{ id: string }> = ({ id }) => {
     const dispatch = useAppDispatch();
@@ -30,6 +32,8 @@ const Main: React.FC<{ id: string }> = ({ id }) => {
 
                 setBasicInfo({ name: response.name });
 
+                dispatch(FileTreeSlice.actions.setProject(response.id));
+
                 if (response.files !== null) {
                     dispatch(FileTreeActions.createStore([
                         {
@@ -39,7 +43,7 @@ const Main: React.FC<{ id: string }> = ({ id }) => {
                             author: "none",
                             extension: "FOLDER",
                             path: [],
-                            pathNames: []
+                            //pathNames: []
                         }, ...response.files]));
                 }
                 setIsloading(false);

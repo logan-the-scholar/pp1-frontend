@@ -9,11 +9,23 @@ export type FileStatus = {
 
 }
 
-export type SelectedFileData = {
+export type SelectedFile = {
   id: string;
   line: number;
   column: number;
   isSaved: boolean;
+}
+
+export type ProjectStatus = {
+  id: string;
+  open: string;
+  files: FileStatus[];
+}
+
+export type ProjectSelectedData = {
+  id: string;
+  files: SelectedFile[];
+  selected: string;
 }
 
 export interface DBType extends DBSchema {
@@ -23,12 +35,12 @@ export interface DBType extends DBSchema {
   };
 
   status: {
-    value: FileStatus;
+    value: ProjectStatus;
     key: string;
   };
 
   selected: {
-    value: SelectedFileData;
+    value: ProjectSelectedData;
     key: string;
   }
 }

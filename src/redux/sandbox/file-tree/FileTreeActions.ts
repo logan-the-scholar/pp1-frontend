@@ -10,23 +10,22 @@ import { IFileCreation } from "@/types/zTypes";
 import { ErrorHelper } from "@/helpers/ErrorHelper";
 import { ApiFile } from "@/services/api/File";
 import { FileCreation } from "@/types/FileCreation.type";
-import { Repository } from "@/services/database/FileRepository";
 import { OpenFilesAction } from "../open-files/OpenFilesActions";
 
 function createAndOpenNode(node: DeclaredNodeModel<FileMetaData>, projectId: string): AppThunk {
     return (async (dispatch, getState) => {
         const { pathNames, fullPath } = findParent(node, getState);
         const created = await pushNode({ ...node, data: { ...node.data, pathNames, fullPath } }, projectId);
-        await new Repository().save(created);
+        //await new Repository().save(created);
 
         dispatch(FileTreeSlice.actions.createNode({
             id: created.id,
             text: created.name,
-            parent: created.parent === null ? created.parent : "0",
+            parent: created.parent === null ? "0" : created.parent,
             data: {
                 extension: created.extension,
                 fullPath: created.path,
-                pathNames: created.pathNames,
+                pathNames: created.path === null ? undefined : created.path.map((p) => getState().FILE_TREE.tree.find((s) => s.id === p)?.text) as string[],
                 content: created.content,
                 line: 1,
                 isDropped: false,
@@ -65,8 +64,8 @@ function createAndOpenNode(node: DeclaredNodeModel<FileMetaData>, projectId: str
 function createStore(files: ApiType.File[]): AppThunk {
     return (async (dispatch, getState) => {
         try {
-            await new Repository().clear();
-            await new Repository().createStore(files);
+            //await new Repository().clear();
+            //await new Repository().createStore(files);
 
             dispatch(FileTreeSlice.actions.createStore(
                 files.map<DeclaredNodeModel<FileMetaData>>((file) => {
@@ -79,7 +78,7 @@ function createStore(files: ApiType.File[]): AppThunk {
                             extension: file.extension,
                             author: file.author,
                             fullPath: file.path,
-                            pathNames: file.pathNames,
+                            pathNames: file.path === null ? undefined : file.path.map((p) => getState().FILE_TREE.tree.find((s) => s.id === p)?.text) as string[],
                             content: file.content,
                             line: undefined,
                             isDropped: file.id === "0"
@@ -150,23 +149,23 @@ async function pushNode(node: DeclaredNodeModel<FileMetaData>, projectId: string
 
 }
 
+
 function deleteAndChilds(node: DeclaredNodeModel<FileMetaData>): AppThunk {
     return (async (dispatch, getState) => {
 
         const response = await ApiFile.remove(node.id.toString());
+        
         if (response instanceof ErrorHelper) {
             throw new ErrorHelper(response.message, response.exception);
 
         }
-        
-        await new Repository().remove(node.id.toString());
 
         const find = (id: string) => {
             const children = getState().FILE_TREE.tree.filter((child) => child.parent === id);
 
             children.forEach((file) => {
                 dispatch(FileTreeSlice.actions.delete(file.id.toString()));
-
+                dispatch(OpenFilesAction.closeAndChangeWindow(file.id));
                 file.droppable && find(file.id.toString());
 
             });
@@ -174,6 +173,7 @@ function deleteAndChilds(node: DeclaredNodeModel<FileMetaData>): AppThunk {
 
         find(node.id.toString());
         dispatch(FileTreeSlice.actions.delete(node.id.toString()));
+        dispatch(OpenFilesAction.closeAndChangeWindow(node.id));
 
     });
 }

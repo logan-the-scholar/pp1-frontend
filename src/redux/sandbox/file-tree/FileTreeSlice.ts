@@ -4,7 +4,8 @@ import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 
 const treeState: TreeType = {
     tree: [],
-    selected: undefined
+    selected: undefined,
+    project: undefined
 };
 
 const FileTreeSlice = createSlice({
@@ -74,7 +75,11 @@ const FileTreeSlice = createSlice({
         },
 
         delete(state, action: PayloadAction<string>) {
-            return { tree: state.tree.filter((node) => node.id !== action.payload), selected: state.selected };
+            return { ...state, tree: state.tree.filter((node) => node.id !== action.payload) };
+        },
+
+        setProject(state, action: PayloadAction<string>) {
+            return { ...state, project: action.payload };
         }
 
     },

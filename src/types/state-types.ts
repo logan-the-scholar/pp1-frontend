@@ -12,7 +12,8 @@ export type FileMetaData = {
 
 export type TreeType = {
     tree: DeclaredNodeModel<FileMetaData>[],
-    selected: DeclaredNodeModel<FileMetaData> | undefined
+    selected: DeclaredNodeModel<FileMetaData> | undefined,
+    project: string | undefined
 }
 
 export type OpenFileMetaData = FileMetaData & {
