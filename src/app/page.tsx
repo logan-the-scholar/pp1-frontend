@@ -5,7 +5,7 @@ import SquareCanvas from "@/features/landing/SquareCanvas";
 import { jetBrainsMono } from "@/helpers/FontLoader";
 import { Tv } from "lucide-react";
 import SecondPage from "@/features/landing/SecondPage/SecondPage";
-import { AppUrl } from "@/types/UrlObject.type";
+import { ApiUrl } from "@/types/ApiUrl.type";
 
 export default function Home() {
   const [text, setText] = useState<string | undefined>(undefined);
@@ -181,7 +181,7 @@ export default function Home() {
                 </button> */}
                 {/* shadow-[0_15px_30px_-12px] */}
                 <button
-                  onClick={() => navigate(AppUrl.auth.signin)}
+                  onClick={() => navigate(ApiUrl.auth.signin)}
                   className="shadow-violet-700 h-12 key-sh-violet-900 key-bg-violet-700 key-button-[60deg] bg-violet-800 rounded-[8px] cursor-pointer">
                   <span className="hover:-translate-y-[0.44em] hover:-translate-x-[0.3em] active:translate-0 py-[0.6em] px-5 bg-violet-600 border border-violet-950 -translate-y-[0.3em] -translate-x-[0.2em] transition-all duration-100 ease-in">
                     Sign In

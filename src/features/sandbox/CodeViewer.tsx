@@ -5,15 +5,15 @@ import { Editor } from "@monaco-editor/react";
 import { useSelector } from "react-redux";
 import FileIconMapper from "./FileIconMapper";
 import FileType from "@/types/enum/FileType";
-import { openFilesAction } from "@/redux/open-files/openFilesActions";
+import { OpenTabsAction } from "@/redux/sandbox/open-files/OpenFilesActions";
 import { useAppDispatch } from "@/hooks/useTypedSelectors";
 import LanguageMapper from "@/helpers/LanguageMapper";
-import openFilesSlice from "@/redux/open-files/openFilesSlice";
+import OpenTabsSlice from "@/redux/sandbox/open-files/OpenTabsSlice";
 import { useCallback, useRef, useState } from "react";
 import { DeclaredNodeModel, OpenFileMetaData } from "@/types/state-types";
-import treeSlice from "@/redux/file-tree/treeSlice";
 import debounce from "lodash.debounce";
 import { useSaveShortcut } from "@/hooks/shortcut/useSaveShortcut";
+import FileTreeSlice from "@/redux/sandbox/file-tree/FileTreeSlice";
 
 const CodeViewer = () => {
     const dispatch = useAppDispatch();
@@ -26,7 +26,7 @@ const CodeViewer = () => {
         if (selectedFile) {
             if (timeoutRef.current) clearTimeout(timeoutRef.current);
 
-            dispatch(openFilesSlice.actions.changeSaved({ one: { id: selectedFile.id, saved: true } }));
+            dispatch(OpenTabsSlice.actions.changeSaved({ one: { id: selectedFile.id, saved: true } }));
         }
     });
 
@@ -46,7 +46,7 @@ const CodeViewer = () => {
         if (timeoutRef.current) clearTimeout(timeoutRef.current);
 
         timeoutRef.current = setTimeout(() => {
-            dispatch(openFilesSlice.actions.edit({
+            dispatch(OpenTabsSlice.actions.edit({
                 id: id,
                 code: code,
                 line: 0,
@@ -62,12 +62,11 @@ const CodeViewer = () => {
     };
 
     const handleClose = (id: string | number) => {
-        dispatch(openFilesAction.closeAndChangeWindow(id));
+        dispatch(OpenTabsAction.closeAndChangeWindow(id));
     };
 
     const handleChangeWindow = (file: DeclaredNodeModel<OpenFileMetaData>) => {
-        dispatch(openFilesAction.open({ ...file, data: file.data }));
-        dispatch(treeSlice.actions.select(file.id));
+        dispatch(OpenTabsAction.open({ ...file, data: file.data }));
     }
 
     return (
@@ -89,7 +88,7 @@ ${file.id === selectedFile?.id ? "border-x border-neutral-600" : "border-x borde
 ${!file.data.edited && "italic"}`}
                                     >
                                         <div className="mr-3 content-center">
-                                            <FileIconMapper type={file.data?.fileType as string} />
+                                            <FileIconMapper type={file.data?.extension as string} />
                                         </div>
                                         {file.text}
                                         <span
@@ -136,23 +135,24 @@ ${file.id === selectedFile?.id || file.data.edited ? "visible hover:bg-[#ffffff1
                     <div className="px-4 py-1.5 flex border-x border-t border-neutral-600 cursor-pointer text-xs text-neutral-300 bg-[#1e1e1e] select-none">
                         {
                             selectedFile !== undefined ?
-                                selectedFile.data?.pathNames ?
-                                    selectedFile.data.pathNames.map((path, index) => {
+                                [...selectedFile.data.pathNames || [], selectedFile.text]
+                                    .map((path, index) => {
                                         return (
                                             <span className="hover:text-neutral-100 cursor-pointer mr-1.5 flex" key={`${path}_${selectedFile.text}`}>
-                                                {path === selectedFile.text && selectedFile.data?.fileType !== FileType.FOLDER && (index + 1) === selectedFile.data?.fullPath?.length &&
+                                                {path === selectedFile.text && selectedFile.data?.extension !== FileType.FOLDER && (index + 1) === selectedFile.data?.fullPath?.length &&
                                                     <span className="mr-1">
-                                                        <FileIconMapper type={selectedFile.data?.fileType as string} />
+                                                        <FileIconMapper type={selectedFile.data?.extension as string} />
                                                     </span>
                                                 }
-                                                {`${path} >`}
+                                                {path === selectedFile.text &&
+                                                    <span className="mr-1.5 h-full flex items-center">
+                                                        <FileIconMapper size={12} type={selectedFile.data?.extension as string} />
+                                                    </span>
+                                                }
+                                                {`${path} ${path !== selectedFile.text ? ">" : ""}`}
                                             </span>
                                         );
                                     })
-                                    :
-                                    <span>
-                                        {selectedFile.parent}
-                                    </span>
                                 :
                                 null
                         }
@@ -167,7 +167,7 @@ ${file.id === selectedFile?.id || file.data.edited ? "visible hover:bg-[#ffffff1
                         )}
                         options={{ minimap: { enabled: false } }}
                         className="w-full flex-1 border-x border-neutral-600"
-                        language={LanguageMapper(selectedFile?.data?.fileType as string)}
+                        language={LanguageMapper(selectedFile?.data?.extension as string)}
                         theme="vs-dark"
                         path={selectedFile?.data?.pathNames?.join("/")}
                         value={selectedFile?.data?.content || ""}

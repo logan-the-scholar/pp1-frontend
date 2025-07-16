@@ -5,20 +5,27 @@ import { ApiStatusEnum } from "@/types/enum/ApiStatus.enum";
 export async function fetchCatch(url: string | URL | globalThis.Request, options: RequestInit) {
     try {
         const response: Response = await fetch(url, { ...options });
-        const data = await response.json();
 
         if (response.status === 401) {
             throw new ErrorHelper(ApiStatusEnum.TOKEN_EXPIRED, "401");
         } else if (!response.ok) {
-            throw new ErrorHelper(data.message, data.status).verifyOrThrow(ApiStatusEnum.UNKNOWN);
+            const data = await response.json()
+            const error = new ErrorHelper(data.message, response.status.toString());
+
+            if (error.isValid()) {
+                throw error;
+            } else {
+                console.error();
+                throw new Error(error.message, { cause: error.cause });
+            }
+
         }
 
-        return data;
-        
+        return response;
+
     } catch (error: any) {
 
-        if(error.message !== null && (error.message as string).includes("NetworkError")) {
-            console.error(error);
+        if (error.message !== null && (error.message as string).includes("NetworkError")) {
             throw new ErrorHelper(ApiStatusEnum.NETWORK_ERROR, "500");
         }
 

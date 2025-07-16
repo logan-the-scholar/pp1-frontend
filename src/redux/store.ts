@@ -1,12 +1,12 @@
 import { Action, configureStore, ThunkAction } from '@reduxjs/toolkit';
-import fileReducer from './open-files/openFilesSlice';
-import threeReducer from "./file-tree/treeSlice";
+import OpenTabsSlice from './sandbox/open-files/OpenTabsSlice';
+import FileTreeSlice from './sandbox/file-tree/FileTreeSlice';
 
 export const store = configureStore({
   reducer: {
-    OPEN_FILES: fileReducer.reducer,
-    FILE_TREE: threeReducer.reducer,
-  }  
+    OPEN_FILES: OpenTabsSlice.reducer,
+    FILE_TREE: FileTreeSlice.reducer,
+  }
 });
 
 export type RootState = ReturnType<typeof store.getState>;

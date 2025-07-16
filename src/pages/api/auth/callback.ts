@@ -15,7 +15,7 @@ export default async function callback(req: NextApiRequest, res: NextApiResponse
     } catch (error: unknown) {
         console.error("callback error:", error);
         if (error instanceof Error && (error as CustomError).cause?.errorDescription === "user is blocked") {
-            return res.redirect(302, "/login?from=user_blocked");
+            return res.redirect(302, "/auth/signin?from=user_blocked");
         }
 
         res.status(500).json({ error });
