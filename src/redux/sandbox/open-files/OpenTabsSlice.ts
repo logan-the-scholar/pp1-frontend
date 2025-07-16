@@ -1,18 +1,22 @@
+import { ErrorHelper } from '@/helpers/ErrorHelper';
 import FileType from '@/types/enum/FileType';
 import { DeclaredNodeModel, FileMetaData, OpenFileMetaData, OpenFilesType } from '@/types/state-types';
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-
-//TODO leer desde localStorage
 
 const initialState: OpenFilesType = {
     selected: undefined,
     open: []
 };
 
-const openFilesSlice = createSlice({
+const OpenTabsSlice = createSlice({
     name: 'OPEN_FILES',
     initialState,
     reducers: {
+
+        createStore(state, action: PayloadAction<OpenFilesType>) {
+            state.selected = action.payload.selected;
+            state.open = action.payload.open;
+        },
 
         /** Select an already-added node showing the relative content in the monaco editor
          *  (must be executed next to `openFilesSlice.add()` action) 
@@ -22,7 +26,7 @@ const openFilesSlice = createSlice({
             const foundNode = state.open.find((n) => n.id === action.payload.id);
 
             if (foundNode === undefined) {
-                throw new Error("");
+                throw new ErrorHelper("State not found", "tried to access a file instance before it was added");
 
             } else {
 
@@ -102,4 +106,4 @@ const openFilesSlice = createSlice({
 
 });
 
-export default openFilesSlice;
+export default OpenTabsSlice;

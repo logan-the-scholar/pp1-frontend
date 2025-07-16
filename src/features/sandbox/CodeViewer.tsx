@@ -5,10 +5,10 @@ import { Editor } from "@monaco-editor/react";
 import { useSelector } from "react-redux";
 import FileIconMapper from "./FileIconMapper";
 import FileType from "@/types/enum/FileType";
-import { OpenFilesAction } from "@/redux/sandbox/open-files/OpenFilesActions";
+import { OpenTabsAction } from "@/redux/sandbox/open-files/OpenFilesActions";
 import { useAppDispatch } from "@/hooks/useTypedSelectors";
 import LanguageMapper from "@/helpers/LanguageMapper";
-import openFilesSlice from "@/redux/sandbox/open-files/openFilesSlice";
+import OpenTabsSlice from "@/redux/sandbox/open-files/OpenTabsSlice";
 import { useCallback, useRef, useState } from "react";
 import { DeclaredNodeModel, OpenFileMetaData } from "@/types/state-types";
 import debounce from "lodash.debounce";
@@ -26,7 +26,7 @@ const CodeViewer = () => {
         if (selectedFile) {
             if (timeoutRef.current) clearTimeout(timeoutRef.current);
 
-            dispatch(openFilesSlice.actions.changeSaved({ one: { id: selectedFile.id, saved: true } }));
+            dispatch(OpenTabsSlice.actions.changeSaved({ one: { id: selectedFile.id, saved: true } }));
         }
     });
 
@@ -46,7 +46,7 @@ const CodeViewer = () => {
         if (timeoutRef.current) clearTimeout(timeoutRef.current);
 
         timeoutRef.current = setTimeout(() => {
-            dispatch(openFilesSlice.actions.edit({
+            dispatch(OpenTabsSlice.actions.edit({
                 id: id,
                 code: code,
                 line: 0,
@@ -62,12 +62,11 @@ const CodeViewer = () => {
     };
 
     const handleClose = (id: string | number) => {
-        dispatch(OpenFilesAction.closeAndChangeWindow(id));
+        dispatch(OpenTabsAction.closeAndChangeWindow(id));
     };
 
     const handleChangeWindow = (file: DeclaredNodeModel<OpenFileMetaData>) => {
-        dispatch(OpenFilesAction.open({ ...file, data: file.data }));
-        dispatch(FileTreeSlice.actions.select({ id: file.id }));
+        dispatch(OpenTabsAction.open({ ...file, data: file.data }));
     }
 
     return (

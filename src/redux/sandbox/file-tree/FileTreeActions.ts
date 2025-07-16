@@ -1,7 +1,7 @@
 import { NodeModel } from "@minoru/react-dnd-treeview";
-import openFilesSlice from "../open-files/openFilesSlice";
+import OpenTabsSlice from "../open-files/OpenTabsSlice";
 import FileType from "@/types/enum/FileType";
-import { DeclaredNodeModel, FileMetaData, OpenFilesType, TreeType } from "@/types/state-types";
+import { DeclaredNodeModel, FileMetaData, OpenFileMetaData, OpenFilesType, TreeType } from "@/types/state-types";
 import { AppThunk } from "@/redux/store";
 import { ApiType } from "@/types/ApiResponse.type";
 import FileTreeSlice from "./FileTreeSlice";
@@ -10,7 +10,9 @@ import { IFileCreation } from "@/types/zTypes";
 import { ErrorHelper } from "@/helpers/ErrorHelper";
 import { ApiFile } from "@/services/api/File";
 import { FileCreation } from "@/types/FileCreation.type";
-import { OpenFilesAction } from "../open-files/OpenFilesActions";
+import { OpenTabsAction as OpenTabsAction } from "../open-files/OpenFilesActions";
+import { OpenTabsRepository } from "@/services/database/OpenTabsRepository";
+import { FileTab } from "@/types/Database.type";
 
 function createAndOpenNode(node: DeclaredNodeModel<FileMetaData>, projectId: string): AppThunk {
     return (async (dispatch, getState) => {
@@ -36,7 +38,7 @@ function createAndOpenNode(node: DeclaredNodeModel<FileMetaData>, projectId: str
         const createdNode = getState().FILE_TREE.tree.find((n) => n.id === created.id);
 
         if (createdNode && createdNode.data?.extension.toLowerCase() !== FileType.FOLDER) {
-            dispatch(openFilesSlice.actions.add({
+            dispatch(OpenTabsSlice.actions.add({
                 ...createdNode,
                 data: {
                     ...createdNode.data as FileMetaData,
@@ -45,17 +47,14 @@ function createAndOpenNode(node: DeclaredNodeModel<FileMetaData>, projectId: str
                 }
             }));
 
-            dispatch(FileTreeSlice.actions.select({ id: createdNode.id }));
-
-            dispatch(OpenFilesAction.open(
-                {
-                    ...createdNode,
-                    data: {
-                        ...createdNode.data as FileMetaData,
-                        edited: true,
-                        saved: true,
-                    }
-                }));
+            dispatch(OpenTabsAction.open({
+                ...createdNode,
+                data: {
+                    ...createdNode.data as FileMetaData,
+                    edited: true,
+                    saved: true,
+                }
+            }));
         }
     })
 }
@@ -64,28 +63,59 @@ function createAndOpenNode(node: DeclaredNodeModel<FileMetaData>, projectId: str
 function createStore(files: ApiType.File[]): AppThunk {
     return (async (dispatch, getState) => {
         try {
-            //await new Repository().clear();
-            //await new Repository().createStore(files);
 
-            dispatch(FileTreeSlice.actions.createStore(
-                files.map<DeclaredNodeModel<FileMetaData>>((file) => {
-                    return {
-                        id: file.id,
-                        parent: file.parent || "0",
-                        text: file.name,
-                        droppable: file.extension.toUpperCase() === "FOLDER",
-                        data: {
-                            extension: file.extension,
-                            author: file.author,
-                            fullPath: file.path,
-                            pathNames: file.path === null ? undefined : file.path.map((p) => getState().FILE_TREE.tree.find((s) => s.id === p)?.text) as string[],
-                            content: file.content,
-                            line: undefined,
-                            isDropped: file.id === "0"
-                        }
+            const formatedFiles = files.map<DeclaredNodeModel<FileMetaData>>((file) => {
+                return {
+                    id: file.id,
+                    parent: file.parent || "0",
+                    text: file.name,
+                    droppable: file.extension.toUpperCase() === "FOLDER",
+                    data: {
+                        extension: file.extension,
+                        author: file.author,
+                        fullPath: file.path,
+                        pathNames: file.path === null ? undefined : file.path.map((p) => files.find((s) => s.id === p)?.name) as string[],
+                        content: file.content,
+                        line: undefined,
+                        isDropped: file.id === "0"
                     }
-                })
-            ));
+                }
+            })
+
+            dispatch(FileTreeSlice.actions.createStore(formatedFiles));
+
+            const projectId = getState().FILE_TREE.project;
+
+            if (projectId !== undefined) {
+                const openTabsState = await new OpenTabsRepository().get(projectId);
+
+                if (openTabsState !== undefined) {
+
+                    const openTabsFiles: DeclaredNodeModel<OpenFileMetaData>[] = openTabsState.files.map<DeclaredNodeModel<OpenFileMetaData>>((f) => {
+                        const fileRef = formatedFiles.find((i) => i.id === f.id) as DeclaredNodeModel<FileMetaData>;
+
+                        return {
+                            ...fileRef,
+                            id: f.id,
+                            data: {
+                                ...fileRef.data,
+                                pathNames: fileRef.data.pathNames,
+                                saved: f.isSaved,
+                                edited: true //Todo guardar este estado en el indexedDB
+                            }
+                        };
+                    });
+
+                    dispatch(OpenTabsSlice.actions.createStore({
+                        open: openTabsFiles,
+                        selected: openTabsFiles.find((f) => f.id === openTabsState.selected)
+                    }));
+
+                }
+
+            } else {
+                throw new ErrorHelper("aaa", "test");
+            }
 
         } catch (error: any) {
             console.error(error);
@@ -154,7 +184,7 @@ function deleteAndChilds(node: DeclaredNodeModel<FileMetaData>): AppThunk {
     return (async (dispatch, getState) => {
 
         const response = await ApiFile.remove(node.id.toString());
-        
+
         if (response instanceof ErrorHelper) {
             throw new ErrorHelper(response.message, response.exception);
 
@@ -163,9 +193,12 @@ function deleteAndChilds(node: DeclaredNodeModel<FileMetaData>): AppThunk {
         const find = (id: string) => {
             const children = getState().FILE_TREE.tree.filter((child) => child.parent === id);
 
+            //TODO esto puede causar problemas de rendimiento, se puede refactorizar 
+            //TODO recibiendo un array completo en closeAndChangeWindow() o incluso en delete()
+
             children.forEach((file) => {
                 dispatch(FileTreeSlice.actions.delete(file.id.toString()));
-                dispatch(OpenFilesAction.closeAndChangeWindow(file.id));
+                dispatch(OpenTabsAction.closeAndChangeWindow(file.id));
                 file.droppable && find(file.id.toString());
 
             });
@@ -173,7 +206,7 @@ function deleteAndChilds(node: DeclaredNodeModel<FileMetaData>): AppThunk {
 
         find(node.id.toString());
         dispatch(FileTreeSlice.actions.delete(node.id.toString()));
-        dispatch(OpenFilesAction.closeAndChangeWindow(node.id));
+        dispatch(OpenTabsAction.closeAndChangeWindow(node.id));
 
     });
 }

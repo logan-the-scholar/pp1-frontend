@@ -11,7 +11,6 @@ import { ErrorHelper } from "@/helpers/ErrorHelper";
 import { useAppDispatch } from "@/hooks/useTypedSelectors";
 import { ApiUrl } from "@/types/ApiUrl.type";
 import { FileTreeActions } from "@/redux/sandbox/file-tree/FileTreeActions";
-import { OpenFilesAction } from "@/redux/sandbox/open-files/OpenFilesActions";
 import FileTreeSlice from "@/redux/sandbox/file-tree/FileTreeSlice";
 
 const Main: React.FC<{ id: string }> = ({ id }) => {
@@ -43,10 +42,11 @@ const Main: React.FC<{ id: string }> = ({ id }) => {
                             author: "none",
                             extension: "FOLDER",
                             path: [],
-                            //pathNames: []
                         }, ...response.files]));
                 }
+
                 setIsloading(false);
+                
             } else {
                 window.location.href = `${ApiUrl.dashboard}?from=invalid-id`;
 

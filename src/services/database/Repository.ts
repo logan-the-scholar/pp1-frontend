@@ -8,9 +8,6 @@ export class Repository {
     constructor() {
         this.dbPromise = openDB<DBType>('pp1', 1, {
             upgrade(db) {
-                if (!db.objectStoreNames.contains('files')) {
-                    db.createObjectStore("files", { keyPath: 'id' });
-                }
                 if (!db.objectStoreNames.contains("selected")) {
                     db.createObjectStore("selected", { keyPath: 'id' });
                 }

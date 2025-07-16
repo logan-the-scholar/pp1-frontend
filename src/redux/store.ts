@@ -1,10 +1,10 @@
 import { Action, configureStore, ThunkAction } from '@reduxjs/toolkit';
-import openFilesSlice from './sandbox/open-files/openFilesSlice';
+import OpenTabsSlice from './sandbox/open-files/OpenTabsSlice';
 import FileTreeSlice from './sandbox/file-tree/FileTreeSlice';
 
 export const store = configureStore({
   reducer: {
-    OPEN_FILES: openFilesSlice.reducer,
+    OPEN_FILES: OpenTabsSlice.reducer,
     FILE_TREE: FileTreeSlice.reducer,
   }
 });

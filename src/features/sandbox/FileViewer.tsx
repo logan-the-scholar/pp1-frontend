@@ -13,8 +13,8 @@ import { FileTreeActions } from "@/redux/sandbox/file-tree/FileTreeActions";
 import FileTreeSlice from "@/redux/sandbox/file-tree/FileTreeSlice";
 import { FileModifStatus } from "@/types/enum/FileModifStatus.enum";
 import { Repository } from "@/services/database/Repository";
-import { SelectedRepository } from '@/services/database/SelectedRepository';
-import { OpenFilesAction } from "@/redux/sandbox/open-files/OpenFilesActions";
+import { OpenTabsRepository } from '@/services/database/OpenTabsRepository';
+import { OpenTabsAction } from "@/redux/sandbox/open-files/OpenFilesActions";
 import { showPopup } from "@/context/PopupProvider";
 
 type ContextType = {
@@ -52,7 +52,7 @@ const FileViewer: React.FC<{ info: { name: string; id: string; } }> = ({ info })
 
 
     const openFile = (node: NodeModel<FileMetaData>) => {
-        dispatch(OpenFilesAction.open({ ...node, data: node.data as FileMetaData }));
+        dispatch(OpenTabsAction.open({ ...node, data: node.data as FileMetaData }));
     };
 
 

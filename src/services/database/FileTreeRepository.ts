@@ -1,19 +1,22 @@
-import { FileStatus, ProjectStatus } from '@/types/Database.type';
+import { FileTree, TreeFileData } from '@/types/Database.type';
 import { Repository } from './Repository';
 
-export class StatusRepository extends Repository {
+export class FileTreeRepository extends Repository {
 
     constructor() {
         super();
     }
 
-    async save(file: FileStatus, id: string) {
+    async save(file: FileTree, id: string) {
         const data = await this.get(id);
 
         if (data !== undefined) {
             await (await this.dbPromise).put("status", { ...data, files: [...data.files, file] });
         } else {
-            await (await this.dbPromise).put("status", { id: id, files: [file] });
+            await (await this.dbPromise).put("status", {
+                id: id,
+                files: [file],
+            });
         }
     }
 
@@ -22,7 +25,7 @@ export class StatusRepository extends Repository {
     }
 
     async get(id: string) {
-        const data: ProjectStatus | undefined = await (await this.dbPromise).get("status", id);
+        const data: TreeFileData | undefined = await (await this.dbPromise).get("status", id);
 
         return data !== undefined && data?.files.length > 0 ? data : undefined;
     }

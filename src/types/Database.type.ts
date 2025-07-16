@@ -1,46 +1,39 @@
 import { DBSchema } from "idb";
-import { ApiType } from "./ApiResponse.type";
 import { FileModifStatus } from "./enum/FileModifStatus.enum";
 
-export type FileStatus = {
+export type FileTree = {
   id: string;
   status: FileModifStatus;
   isDropped?: boolean;
-
 }
 
-export type SelectedFile = {
+export type FileTab = {
   id: string;
   line: number;
   column: number;
   isSaved: boolean;
 }
 
-export type ProjectStatus = {
+export type TreeFileData = {
   id: string;
-  open: string;
-  files: FileStatus[];
+  files: FileTree[];
 }
 
-export type ProjectSelectedData = {
+export type OpenTabsData = {
   id: string;
-  files: SelectedFile[];
+  files: FileTab[];
   selected: string;
 }
 
-export interface DBType extends DBSchema {
-  files: {
-    value: ApiType.File;
-    key: string;
-  };
 
+export interface DBType extends DBSchema {
   status: {
-    value: ProjectStatus;
+    value: TreeFileData;
     key: string;
   };
 
   selected: {
-    value: ProjectSelectedData;
+    value: OpenTabsData;
     key: string;
   }
 }

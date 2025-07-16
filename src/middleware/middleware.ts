@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
-import { ApiUrl } from './types/ApiUrl.type';
+import { ApiUrl } from '../types/ApiUrl.type';
 import { NextURL } from 'next/dist/server/web/next-url';
 
 export function middleware(req: NextRequest) {
