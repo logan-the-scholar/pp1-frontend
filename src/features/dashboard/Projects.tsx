@@ -22,7 +22,6 @@ const Projects: React.FC<{ showPopup: boolean, setShowPopup: React.Dispatch<Reac
     useEffect(() => {
         setLoading(true);
 
-        //TODO en un futuro guardar todo esto en indexedDB
         //TODO tokens de autenticacion (de muy corta duracion) y refresh token en cookies
         const fetch = async () => {
             const response: ApiType.Workspace[] | ErrorHelper = await ApiWorkspace.getAll(user.id);

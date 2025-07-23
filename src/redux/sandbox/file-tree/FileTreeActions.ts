@@ -12,13 +12,12 @@ import { ApiFile } from "@/services/api/File";
 import { FileCreation } from "@/types/FileCreation.type";
 import { OpenTabsAction as OpenTabsAction } from "../open-files/OpenFilesActions";
 import { OpenTabsRepository } from "@/services/database/OpenTabsRepository";
-import { FileTab } from "@/types/Database.type";
+import { ApiStatusEnum } from "@/types/enum/ApiStatus.enum";
 
 function createAndOpenNode(node: DeclaredNodeModel<FileMetaData>, projectId: string): AppThunk {
     return (async (dispatch, getState) => {
         const { pathNames, fullPath } = findParent(node, getState);
         const created = await pushNode({ ...node, data: { ...node.data, pathNames, fullPath } }, projectId);
-        //await new Repository().save(created);
 
         dispatch(FileTreeSlice.actions.createNode({
             id: created.id,
@@ -87,11 +86,13 @@ function createStore(files: ApiType.File[]): AppThunk {
             const projectId = getState().FILE_TREE.project;
 
             if (projectId !== undefined) {
-                const openTabsState = await new OpenTabsRepository().get(projectId);
+
+                const repository = new OpenTabsRepository();
+                const openTabsState = await repository.get(projectId);
 
                 if (openTabsState !== undefined) {
 
-                    const openTabsFiles: DeclaredNodeModel<OpenFileMetaData>[] = openTabsState.files.map<DeclaredNodeModel<OpenFileMetaData>>((f) => {
+                    const openTabsFiles: DeclaredNodeModel<OpenFileMetaData>[] = openTabsState.map<DeclaredNodeModel<OpenFileMetaData>>((f) => {
                         const fileRef = formatedFiles.find((i) => i.id === f.id) as DeclaredNodeModel<FileMetaData>;
 
                         return {
@@ -101,20 +102,27 @@ function createStore(files: ApiType.File[]): AppThunk {
                                 ...fileRef.data,
                                 pathNames: fileRef.data.pathNames,
                                 saved: f.isSaved,
-                                edited: true //Todo guardar este estado en el indexedDB
+                                edited: f.isEdited
                             }
                         };
                     });
 
+                    let current = await repository.getSelected(projectId);
+
+                    if (current === undefined) {
+                        current = { id: projectId, selected: openTabsFiles[0].id.toString() };
+                    }
+
                     dispatch(OpenTabsSlice.actions.createStore({
                         open: openTabsFiles,
-                        selected: openTabsFiles.find((f) => f.id === openTabsState.selected)
+                        selected: openTabsFiles.find((f) => f.id === current.selected)
                     }));
 
                 }
 
             } else {
-                throw new ErrorHelper("aaa", "test");
+                throw new ErrorHelper(ApiStatusEnum.STATE_NOT_FOUND, "Project id cant be found, must be set before trying to access the storage");
+
             }
 
         } catch (error: any) {

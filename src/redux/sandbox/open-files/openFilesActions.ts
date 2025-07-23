@@ -4,6 +4,7 @@ import FileTreeSlice from "../file-tree/FileTreeSlice";
 import OpenTabsSlice from "./OpenTabsSlice";
 import { DeclaredNodeModel, FileMetaData, OpenFileMetaData } from "@/types/state-types";
 import { ErrorHelper } from "@/helpers/ErrorHelper";
+import { ApiStatusEnum } from '@/types/enum/ApiStatus.enum';
 
 function open(node: DeclaredNodeModel<FileMetaData> | DeclaredNodeModel<OpenFileMetaData>): AppThunk {
     return (async (dispatch, getState) => {
@@ -20,10 +21,10 @@ function open(node: DeclaredNodeModel<FileMetaData> | DeclaredNodeModel<OpenFile
                 dispatch(OpenTabsSlice.actions.close(previousEditedFile.id));
             }
 
-            dispatch(openAndSave({ id: node.id, saved: true, edited: true }));
+            dispatch(selectAndSave({ id: node.id, saved: true, edited: true }));
 
         } else {
-            dispatch(openAndSave(alreadyOpenNode));
+            dispatch(selectAndSave(alreadyOpenNode));
         }
 
     });
@@ -43,13 +44,13 @@ function closeAndChangeWindow(id: string | number): AppThunk {
 
                 const leftNode = state.OPEN_FILES.open.at(index - 1);
                 if (leftNode) {
-                    dispatch(openAndSave({ id: leftNode.id }));
+                    dispatch(selectAndSave({ id: leftNode.id }));
 
                 }
 
                 const rightNode = state.OPEN_FILES.open.at(index);
                 if (rightNode) {
-                    dispatch(openAndSave({ id: rightNode.id }));
+                    dispatch(selectAndSave({ id: rightNode.id }));
 
                 }
             }
@@ -58,20 +59,25 @@ function closeAndChangeWindow(id: string | number): AppThunk {
 }
 
 
-function openAndSave(node: { id: string | number, edited?: boolean, saved?: boolean }): AppThunk {
+function selectAndSave(node: { id: string | number, edited?: boolean, saved?: boolean }): AppThunk {
     return (async (dispatch, getState) => {
 
         const projectId = getState().FILE_TREE.project;
 
         if (projectId !== undefined) {
+            
+            //TODO esto se puede usar como clase? yo creo que si, en tal caso usar herencia para facilitar algunos campos que 
+            //TODO no tengan muchos cambios, para evitar el exceso de parametros y de llamadas innecesarias a getState()
 
             dispatch(OpenTabsSlice.actions.select(node));
             dispatch(FileTreeSlice.actions.select({ id: node.id }));
 
-            await new OpenTabsRepository().save(getState().OPEN_FILES, projectId);
+            const repository = new OpenTabsRepository();
+            repository.save(getState().OPEN_FILES.open, projectId);
+            repository.saveSelected(node.id.toString(), projectId);
 
         } else {
-            throw new ErrorHelper("State not found", "Project uuid reference is null");
+            throw new ErrorHelper(ApiStatusEnum.STATE_NOT_FOUND, "Project id cant be found, must be set before trying to access the storage");
 
         }
 

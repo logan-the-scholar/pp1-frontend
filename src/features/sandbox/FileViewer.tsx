@@ -193,9 +193,6 @@ const FileViewer: React.FC<{ info: { name: string; id: string; } }> = ({ info })
             onClick={() => setVisibleMenu(false)}
             className={`select-none pt-2 w-[20%] relative min-w-[10%] max-w-[50%] h-full text-sm flex flex-col ${jetBrainsMono.className}`}
         >
-            {/*
-                //TODO cuando se hace click al arbol deberia desenfocarse ambos clicks.
-            */}
 
             {/* CONTEXT MENU */}
             {

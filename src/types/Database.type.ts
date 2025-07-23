@@ -8,23 +8,18 @@ export type FileTree = {
 }
 
 export type FileTab = {
+  project_id: string;
   id: string;
   line: number;
   column: number;
   isSaved: boolean;
+  isEdited: boolean;
 }
 
 export type TreeFileData = {
   id: string;
   files: FileTree[];
 }
-
-export type OpenTabsData = {
-  id: string;
-  files: FileTab[];
-  selected: string;
-}
-
 
 export interface DBType extends DBSchema {
   status: {
@@ -33,7 +28,18 @@ export interface DBType extends DBSchema {
   };
 
   selected: {
-    value: OpenTabsData;
+    value: FileTab;
+    key: string;
+    indexes: {
+      reference: string;
+    };
+  }
+
+  selected_current: {
+    value: {
+      id: string;
+      selected: string;
+    };
     key: string;
   }
 }
