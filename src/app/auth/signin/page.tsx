@@ -6,7 +6,7 @@ import { openGithubPopup } from '@/services/openGithubPopup';
 import { ErrorHelper } from '@/helpers/ErrorHelper';
 import { ApiStatusEnum } from '@/types/enum/ApiStatus.enum';
 import { ApiType } from '@/types/ApiResponse.type';
-import { ApiUrl } from '@/types/ApiUrl.type';
+import { AppUrl } from '@/types/AppUrl.type';
 import { useLocalStorage } from '@/hooks/useLocalStorage';
 import { ApiUser } from '@/services/api';
 
@@ -39,7 +39,7 @@ const Login = () => {
                 } else {
                     console.log("here");
                     setData(response);
-                    window.location.href = ApiUrl.dashboard;
+                    window.location.href = AppUrl.dashboard;
                 }
             }
         }

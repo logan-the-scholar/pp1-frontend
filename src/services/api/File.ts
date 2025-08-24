@@ -1,19 +1,22 @@
-import { IFileCreation } from "@/types/zTypes";
+import { IFileCreation, IFileUpdation } from "@/types/zTypes";
 import { fetchCatch } from "../wrapper/fetch-catch";
 import { API_SERVER } from "@/helpers/env-config";
 import { ErrorHelper } from "@/helpers/ErrorHelper";
 import { ApiStatusEnum } from "@/types/enum/ApiStatus.enum";
 
 async function create(data: IFileCreation): Promise<Response | ErrorHelper> {
-    try {
-        const { projectId, ...remain } = data;
+    const { repoId, ...remain } = data;
 
-        const response: Response = await fetchCatch(`${API_SERVER}/demo/api/v0/file/${projectId}`, {
+    try {
+        const response: Response = await fetchCatch(`${API_SERVER}/demo/api/v0/file/${repoId}`, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
             },
-            body: JSON.stringify(remain)
+            body: JSON.stringify({
+                ...remain,
+                content: remain.content !== null ? Buffer.from(remain.content).toString("base64") : null,
+            })
         });
 
         return response;
@@ -36,4 +39,23 @@ async function remove(id: string): Promise<Response | ErrorHelper> {
     }
 }
 
-export const ApiFile = { create, remove }
+async function update(data: IFileUpdation): Promise<Response | ErrorHelper> {
+    const { repoId, ...remain } = data;
+
+    try {
+        const response: Response = await fetchCatch(`${API_SERVER}/demo/api/v0/file/repo/${repoId}`, {
+            method: "PATCH",
+            body: JSON.stringify({
+                ...remain,
+                content: remain.content !== null ? Buffer.from(remain.content).toString("base64") : null
+            })
+        });
+
+        return response
+    } catch (error: any) {
+        return error instanceof ErrorHelper ? error : new ErrorHelper(ApiStatusEnum.UNKNOWN, error.message);
+
+    }
+}
+
+export const ApiFile = { create, remove, update };

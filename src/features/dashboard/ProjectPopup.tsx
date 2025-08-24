@@ -3,8 +3,8 @@ import { zodValidate } from "@/helpers/zod/ZodValidate";
 import { useLocalStorage } from "@/hooks/useLocalStorage";
 import { ApiProject } from "@/services/api";
 import { ApiType } from "@/types/ApiResponse.type";
-import { ProjectCreation } from "@/types/ProjectCreation.type";
-import { ApiUrl } from "@/types/ApiUrl.type";
+import { ProjectCreation } from "@/types/zTypes/ProjectCreation.type";
+import { AppUrl } from "@/types/AppUrl.type";
 import { IProjectCreation } from "@/types/zTypes";
 import { ArrowDownFromLine, Eye, FolderPen } from "lucide-react";
 import { FormEvent, useState } from "react";
@@ -66,7 +66,7 @@ const ProjectPopup: React.FC<{ setShowPopup: React.Dispatch<React.SetStateAction
         }
 
         // dispatch(projectLoadStatusSlice.actions.updated(ProjectLoadStatusEnum.CREATED));
-        window.location.href = `${ApiUrl.sandbox}/${response.name}`;
+        window.location.href = `${AppUrl.sandbox}/${response.name}`;
         setIsLoading(false);
         setShowPopup(false);
     };

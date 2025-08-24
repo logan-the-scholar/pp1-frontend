@@ -1,3 +1,4 @@
+import { string } from "zod";
 import { UserType } from "./enum/UserRecurrence.enum";
 import { UserRecurrence } from "./enum/UserType.enum";
 
@@ -27,17 +28,28 @@ export namespace ApiType {
         parent: string;
         extension: string;
         content?: string;
+        moved_from?: string;
+        commitId: string;
+        isDrafted: boolean;
     }
 
     export interface Project {
         id: string;
         name: string;
         visibility: "PUBLIC" | "PRIVATE";
+        branches: string[];
         //last_edited?: number | undefined;
         //TODO agregar creador del proyecto si es que se va a usar la invitacion a workspaces...
         //created_by?: string | undefined;
-        files: File[] | null;
+        //files: File[] | null;
         members?: any;
+    }
+
+    export interface Branch {
+        name: string;
+        headId: string;
+        draftId: string;
+        files: File[];
     }
 
 }

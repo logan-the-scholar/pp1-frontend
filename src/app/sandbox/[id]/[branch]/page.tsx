@@ -5,7 +5,7 @@ import { store } from "@/redux/store";
 import { use, useEffect, useState } from "react";
 import { Provider } from "react-redux";
 
-export default function Sandbox({ params, searchParams }: { params: Promise<{ id: string }>, searchParams: Promise<any> }) {
+export default function Sandbox({ params, searchParams }: { params: Promise<{ id: string, branch: string }>, searchParams: Promise<any> }) {
     const usedParams = use(params);
 
     return (
@@ -15,7 +15,7 @@ export default function Sandbox({ params, searchParams }: { params: Promise<{ id
                 :
                 <Provider store={store}>
                     <PopupProvider>
-                        <Main id={usedParams.id} />
+                        <Main {...usedParams} />
                     </PopupProvider>
                 </Provider>
             }

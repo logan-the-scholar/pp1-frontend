@@ -24,7 +24,7 @@ type ContextType = {
 
 }
 
-const FileViewer: React.FC<{ info: { name: string; id: string; } }> = ({ info }) => {
+const FileViewer: React.FC<{ info: { name: string; id: string; branch: string; } }> = ({ info }) => {
 
     const treeContext = useTreeContext();
     const dispatch = useAppDispatch();
@@ -165,7 +165,7 @@ const FileViewer: React.FC<{ info: { name: string; id: string; } }> = ({ info })
                 }
             };
 
-            dispatch(FileTreeActions.createAndOpenNode(newNode, info.id));
+            dispatch(FileTreeActions.createAndOpenNode(newNode, info.id, info.branch));
 
             setCreatingNode(null);
         }
@@ -177,11 +177,13 @@ const FileViewer: React.FC<{ info: { name: string; id: string; } }> = ({ info })
         if (context === null || context === undefined) return;
 
         showPopup({
+            type: "confirm",
             title: "Permanently delete",
-            message: `Do you want to delete ${context.node.text} permanently`,
+            message: `Do you want to delete ${context.node.text} permanently${context.node.droppable === true && " and its content?"}`,
             confirmText: "Delete",
             cancelText: "Cancel",
-        }).then((confirmed) => {
+            dismissable: true
+        }).then(({confirmed}) => {
             if (confirmed) {
                 dispatch(FileTreeActions.deleteAndChilds(context.node as DeclaredNodeModel<FileMetaData>));
             }

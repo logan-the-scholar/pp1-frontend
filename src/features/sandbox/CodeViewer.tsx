@@ -1,7 +1,7 @@
 "use client";
 import LoadingCircle from "@/components/LoadingCircle";
 import { RootState } from "@/redux/store";
-import { Editor } from "@monaco-editor/react";
+import { Editor, OnMount, useMonaco } from "@monaco-editor/react";
 import { useSelector } from "react-redux";
 import FileIconMapper from "./FileIconMapper";
 import FileType from "@/types/enum/FileType";
@@ -9,11 +9,10 @@ import { OpenTabsAction } from "@/redux/sandbox/open-files/OpenFilesActions";
 import { useAppDispatch } from "@/hooks/useTypedSelectors";
 import LanguageMapper from "@/helpers/LanguageMapper";
 import OpenTabsSlice from "@/redux/sandbox/open-files/OpenTabsSlice";
-import { useCallback, useRef, useState } from "react";
+import { useRef } from "react";
 import { DeclaredNodeModel, OpenFileMetaData } from "@/types/state-types";
 import debounce from "lodash.debounce";
 import { useSaveShortcut } from "@/hooks/shortcut/useSaveShortcut";
-import FileTreeSlice from "@/redux/sandbox/file-tree/FileTreeSlice";
 
 const CodeViewer = () => {
     const dispatch = useAppDispatch();
@@ -21,6 +20,7 @@ const CodeViewer = () => {
     const openFiles = useSelector((state: RootState) => state.OPEN_FILES.open);
     // const [line, setLine] = useState<number>(0);
     const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+    const nose = useMonaco();
 
     useSaveShortcut(() => {
         if (selectedFile) {
@@ -30,29 +30,22 @@ const CodeViewer = () => {
         }
     });
 
-    // const debounceSaveCode = useCallback(
-    //     debounce((code: string | undefined, id: number | string) => {
-    //         dispatch(openFilesSlice.actions.edit({
-    //             id: id,
-    //             code: code,
-    //             line: 0,
-    //             edited: true
-    //         }));
-
-    //     }, 1000), []);
-
-
     const debounceSaveCode = (code: string | undefined, id: string | number) => {
         if (timeoutRef.current) clearTimeout(timeoutRef.current);
 
         timeoutRef.current = setTimeout(() => {
+
+        
+            
             dispatch(OpenTabsSlice.actions.edit({
                 id: id,
                 code: code,
-                line: 0,
+                line: 1,
                 edited: true
             }));
-        }, 1000);
+
+
+        }, 4000);
     };
 
     const handleChange = (code: string | undefined) => {
@@ -67,10 +60,27 @@ const CodeViewer = () => {
 
     const handleChangeWindow = (file: DeclaredNodeModel<OpenFileMetaData>) => {
         dispatch(OpenTabsAction.open({ ...file, data: file.data }));
-    }
+    };
+
+
+    const handleEditorMount: OnMount = (editor, monaco) => {
+        // ✅ Capturar la posición actual del cursor
+        editor.onDidChangeCursorPosition((event) => {
+            const { lineNumber, column } = event.position;
+            console.log("Cursor en línea:", lineNumber, "columna:", column);
+
+            // Si quieres el contenido de esa línea:
+            const model = editor.getModel();
+            if (model) {
+                const lineContent = model.getLineContent(lineNumber);
+                console.log("Texto de la línea actual:", lineContent);
+            }
+        });
+    };
+
 
     return (
-        <div className="w-full h-full flex flex-col">
+        <div className="w-1/2 h-full flex flex-col">
             {openFiles.length > 0 ?
                 <>
                     {/* WINDOW VIEW */}
@@ -172,6 +182,7 @@ ${file.id === selectedFile?.id || file.data.edited ? "visible hover:bg-[#ffffff1
                         path={selectedFile?.data?.pathNames?.join("/")}
                         value={selectedFile?.data?.content || ""}
                         onChange={(x) => handleChange(x)}
+                        onMount={handleEditorMount}
                     />
                 </>
                 :

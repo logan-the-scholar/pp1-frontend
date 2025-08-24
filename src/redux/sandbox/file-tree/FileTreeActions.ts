@@ -9,15 +9,15 @@ import { zodValidate } from "@/helpers/zod/ZodValidate";
 import { IFileCreation } from "@/types/zTypes";
 import { ErrorHelper } from "@/helpers/ErrorHelper";
 import { ApiFile } from "@/services/api/File";
-import { FileCreation } from "@/types/FileCreation.type";
+import { FileCreation } from "@/types/zTypes/FileCreation.type";
 import { OpenTabsAction as OpenTabsAction } from "../open-files/OpenFilesActions";
 import { OpenTabsRepository } from "@/services/database/OpenTabsRepository";
 import { ApiStatusEnum } from "@/types/enum/ApiStatus.enum";
 
-function createAndOpenNode(node: DeclaredNodeModel<FileMetaData>, projectId: string): AppThunk {
+function createAndOpenNode(node: DeclaredNodeModel<FileMetaData>, repoId: string, branch: string): AppThunk {
     return (async (dispatch, getState) => {
         const { pathNames, fullPath } = findParent(node, getState);
-        const created = await pushNode({ ...node, data: { ...node.data, pathNames, fullPath } }, projectId);
+        const created = await pushNode({ ...node, data: { ...node.data, pathNames, fullPath } }, repoId, branch);
 
         dispatch(FileTreeSlice.actions.createNode({
             id: created.id,
@@ -30,7 +30,10 @@ function createAndOpenNode(node: DeclaredNodeModel<FileMetaData>, projectId: str
                 content: created.content,
                 line: 1,
                 isDropped: false,
-                author: created.author
+                author: created.author,
+                commit: created.commitId,
+                movedFrom: created.moved_from,
+                isDrafted: created.isDrafted,
             }
         }));
 
@@ -161,14 +164,16 @@ function findParent(node: NodeModel<FileMetaData>, getState: () => { OPEN_FILES:
 }
 
 
-async function pushNode(node: DeclaredNodeModel<FileMetaData>, projectId: string) {
+async function pushNode(node: DeclaredNodeModel<FileMetaData>, repoId: string, branch: string) {
     const [success, data] = zodValidate<IFileCreation>({
-        projectId,
+        repoId,
         name: node.text,
         author: node.data.author,
         extension: node.data.extension,
-        isFolder: node.droppable as boolean,
-        path: node.data.fullPath?.filter((p) => p !== node.id.toString()) || []
+        path: node.data.fullPath?.filter((p) => p !== node.id.toString()) || [],
+        content: node.data.content || null,
+        branch: branch,
+        createdAt: Number(node.id) || Date.now()
     }, FileCreation);
 
     if (!success) {

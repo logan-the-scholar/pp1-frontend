@@ -1,4 +1,4 @@
-export const ApiUrl = {
+export const AppUrl = {
     api: {
         auth: {
             /** /api/auth */
