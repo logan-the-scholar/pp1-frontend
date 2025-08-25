@@ -24,7 +24,7 @@ type ContextType = {
 
 }
 
-const FileViewer: React.FC<{ info: { name: string; id: string; branch: string; } }> = ({ info }) => {
+const FileViewer: React.FC<{ info: { id: string; branch: string; } }> = ({ info }) => {
 
     const treeContext = useTreeContext();
     const dispatch = useAppDispatch();

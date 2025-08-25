@@ -16,13 +16,21 @@ export const AppUrl = {
     },
 
     Dashboard: {
-        /** /dashboard/projects */
+        /**@returns `/dashboard/projects` */
         projects: "/dashboard/projects",
+
+        /**@returns `/dashboard?from={action}` */
+        from: (action: "invalid-id" | "error" | "invalid-branch") => "/dashboard?from=" + action,
     },
     /** /dashboard */
     dashboard: "/dashboard",
 
     Sandbox: {
+        /**@returns `/sandbox/{id}` */
+        id: (id: string) => "/sandbox/" + id,
+        /**@returns `/sandbox/{id}/{branch}` */
+        id_branch: (id: string, branch: string) => "/sandbox/" + id + "/" + branch,
+
     },
     sandbox: "/sandbox",
 

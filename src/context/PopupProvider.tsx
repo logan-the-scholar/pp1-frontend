@@ -73,21 +73,21 @@ export const PopupProvider = ({ children }: { children: React.ReactNode }) => {
     const buttons = () => (
         <>
             {options && options.type !== "multiple-select" &&
-                <div className="flex justify-center gap-4 pt-2">
-                    {options.cancelText || options.type === "multiple-select-confirm" && (
-                        <button
-                            className="px-4 py-1 border border-neutral-300 rounded cursor-pointer"
-                            onClick={handleCancel}
-                        >
-                            {options.cancelText}
-                        </button>
-                    )}
+                <div className="flex justify-around pt-2 select-none">
                     <button
-                        className="px-4 py-1 bg-red-500 text-white rounded cursor-pointer"
+                        className="px-4 py-1 hover:bg-red-500 border border-neutral-300 rounded cursor-pointer"
                         onClick={handleConfirm}
                     >
                         {options.confirmText || 'OK'}
                     </button>
+                    {(options.cancelText || options.type === "multiple-select-confirm") &&
+                        <button
+                            className="px-4 py-1 hover:bg-[#ffffff44] border border-neutral-300 rounded cursor-pointer "
+                            onClick={handleCancel}
+                        >
+                            {options.cancelText}
+                        </button>
+                    }
                 </div>}
         </>
     );
@@ -122,8 +122,8 @@ export const PopupProvider = ({ children }: { children: React.ReactNode }) => {
                         {/* CONFIRM AND CANCEL */}
                         {options.type === "confirm" &&
                             <div className='p-6 pt-2 space-y-4 text-center'>
-                                {title !== null &&
-                                    <h2 className="text-lg font-semibold">{options.title}</h2>
+                                {options.title &&
+                                    <h2 className="truncate text-lg font-semibold">{options.title}</h2>
                                 }
                                 {options.message && <p>{options.message}</p>}
                                 {buttons()}
@@ -132,30 +132,30 @@ export const PopupProvider = ({ children }: { children: React.ReactNode }) => {
 
                         {/* BOTH MULTIPLE SELECT */}
                         {(options.type === "multiple-select" || options.type === "multiple-select-confirm") &&
-                            <div className='p-6 pt-2 space-y-4 text-center'>
+                            <div className='p-6 pt-0 space-y-4 text-center'>
                                 {options.title &&
-                                    <h2 className="text-lg font-semibold">{options.title}</h2>
+                                    <h2 className="truncate text-lg font-semibold">{options.title}</h2>
                                 }
                                 {/* <div className="flex justify-center gap-1 pt-2"> */}
 
                                 <div className='flex-row mb-10'>
-                                    <label className='w-full text-xs ml-2' htmlFor="visibility">
+                                    <div className='w-full text-xs ml-2'>
                                         {options.message && <p>{options.message}</p>}
-                                    </label>
+                                    </div>
 
                                     {/* DROPDOWN */}
                                     {options.multiple_options !== undefined &&
                                         <div
                                             onClick={() => setIsDropDown(!isDropDown)}
-                                            className='relative flex-col text-sm py-0.5 ml-2 outline-1 bg-neutral-800 select-none cursor-pointer'
+                                            className='mt-3 relative flex-col text-sm py-0.5 mx-auto outline-1 bg-neutral-800 select-none cursor-pointer w-3/4'
                                         >
                                             <div className="flex">
-                                                <Eye className="my-auto ml-3" width={20} height={20} />
+                                                {/* <Eye className="my-auto ml-3" width={20} height={20} /> */}
                                                 <div
-                                                    className='px-3 py-1 bg-transparent w-full outline-0 focus:outline-offset-0'
+                                                    className='px-3 py-1 bg-transparent w-full outline-0 focus:outline-offset-0 truncate'
                                                     id="visibility"
                                                 >
-                                                    {resolver?.arguments}
+                                                    {selected || "-"}
                                                 </div>
                                                 <ArrowDownFromLine
                                                     className={`my-auto mr-3 origin-center ${isDropDown && "-rotate-180"}`}
@@ -168,7 +168,7 @@ export const PopupProvider = ({ children }: { children: React.ReactNode }) => {
                                                     {
                                                         options.multiple_options.map((value) =>
                                                             <div
-                                                                className="pl-2 py-1 hover:bg-neutral-700"
+                                                                className="pl-2 py-1 hover:bg-neutral-700 truncate"
                                                                 onClick={(e) => handleSelect(e)}
                                                                 id={value}
                                                                 key={value}

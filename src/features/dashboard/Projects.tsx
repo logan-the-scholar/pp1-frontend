@@ -18,7 +18,6 @@ const Projects: React.FC<{ showPopup: boolean, setShowPopup: React.Dispatch<Reac
     const [loading, setLoading] = useState<boolean>(true);
     const [loadingProjects, setLoadingProjects] = useState<boolean>(true);
 
-
     useEffect(() => {
         setLoading(true);
 
@@ -45,7 +44,6 @@ const Projects: React.FC<{ showPopup: boolean, setShowPopup: React.Dispatch<Reac
 
     }, []);
 
-
     useEffect(() => {
 
         const fetch = async () => {
@@ -53,7 +51,7 @@ const Projects: React.FC<{ showPopup: boolean, setShowPopup: React.Dispatch<Reac
 
             if (response instanceof ErrorHelper) {
                 console.error(response);
-
+                
             } else {
                 setProjects(response);
 
@@ -66,7 +64,6 @@ const Projects: React.FC<{ showPopup: boolean, setShowPopup: React.Dispatch<Reac
             fetch();
         }
     }, [selectedWorkspace]);
-
 
     return (
         <>

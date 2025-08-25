@@ -61,12 +61,15 @@ const ProjectPopup: React.FC<{ setShowPopup: React.Dispatch<React.SetStateAction
 
         if (response instanceof ErrorHelper) {
             console.error(response);
+                setShowPopup(false);
+        setIsLoading(false);
+
             // dispatch(projectLoadStatusSlice.actions.updated(ProjectLoadStatusEnum.NOTHING));
             return;
         }
 
         // dispatch(projectLoadStatusSlice.actions.updated(ProjectLoadStatusEnum.CREATED));
-        window.location.href = `${AppUrl.sandbox}/${response.name}`;
+        window.location.href = `${AppUrl.sandbox}/${response.id}`;
         setIsLoading(false);
         setShowPopup(false);
     };
@@ -184,7 +187,7 @@ const ProjectPopup: React.FC<{ setShowPopup: React.Dispatch<React.SetStateAction
                                     </div>
                                 </div>
 
-                                <div className="w-full flex justify-end">
+                                <div className="w-full flex justify-end select-none">
                                     {
                                         isLoading ?
                                             <>
