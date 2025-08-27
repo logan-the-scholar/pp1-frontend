@@ -3,11 +3,11 @@ import EditorNavBar from "./EditorNavBar";
 import ContentSideBar from "./ContentSideBar";
 import FileViewer from "./FileViewer";
 import Preview from "./Preview";
-import { useEffect, useState } from "react";
-import LoadingCircle from "@/components/LoadingCircle";
+import { useEffect } from "react";
 import { useAppDispatch } from "@/hooks/useTypedSelectors";
 import { FileTreeActions } from "@/redux/sandbox/file-tree/FileTreeActions";
 import { ApiType } from "@/types/ApiResponse.type";
+import FileTreeSlice from "@/redux/sandbox/file-tree/FileTreeSlice";
 
 type RepositoryMetadata = {
     id: string,
@@ -18,10 +18,11 @@ type RepositoryMetadata = {
 const Main: React.FC<{ files: ApiType.File[] | null, basicInfo: RepositoryMetadata }> = ({ files, basicInfo }) => {
 
     const dispatch = useAppDispatch();
-    const [isLoading, setIsloading] = useState<boolean>(true);
+    // const [isLoading, setIsloading] = useState<boolean>(true);
 
     useEffect(() => {
-        if (files !== null) {
+        if (files !== null && files.length > 0) {
+            dispatch(FileTreeSlice.actions.setProject(basicInfo.id))
             dispatch(FileTreeActions.createStore(files));
         }
 
@@ -30,8 +31,8 @@ const Main: React.FC<{ files: ApiType.File[] | null, basicInfo: RepositoryMetada
     return (
         <>
             {/*
-                        //TODO AGREGAR ERROR HANDLING AQUI
-                    */}
+                //TODO AGREGAR ERROR HANDLING AQUI
+            */}
             {basicInfo !== null &&
                 <div className="flex flex-col w-full h-[100vh]">
                     <div className="w-full h-10 bg-neutral-900">

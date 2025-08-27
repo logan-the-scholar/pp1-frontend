@@ -1,9 +1,9 @@
 import { z } from "zod";
-import { UserCredentials } from "./zTypes/UserCredentials.type";
-import { UserRegistration } from "./zTypes/UserRegistration.type";
-import { ProjectCreation } from "./zTypes/ProjectCreation.type";
-import { FileCreation } from "./zTypes/FileCreation.type";
-import { FileUpdation } from "./zTypes/FileUpdation.type";
+import { UserCredentials } from "./UserCredentials.type";
+import { UserRegistration } from "./UserRegistration.type";
+import { ProjectCreation } from "./ProjectCreation.type";
+import { FileCreation } from "./FileCreation.type";
+import { FileUpdation } from "./FileUpdation.type";
 
 export type IUserCredentials = z.infer<ReturnType<typeof UserCredentials>>;
 

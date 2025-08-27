@@ -1,4 +1,4 @@
-import { IFileCreation, IFileUpdation } from "@/types/zTypes";
+import { IFileCreation, IFileUpdation } from "@/types/zTypes/zTypes";
 import { fetchCatch } from "../wrapper/fetch-catch";
 import { API_SERVER } from "@/helpers/env-config";
 import { ErrorHelper } from "@/helpers/ErrorHelper";

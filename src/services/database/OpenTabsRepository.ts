@@ -1,4 +1,3 @@
-import { FileTab } from '@/types/Database.type';
 import { Repository } from './Repository';
 import { DeclaredNodeModel, OpenFileMetaData, OpenFilesType } from '@/types/state-types';
 
@@ -53,6 +52,7 @@ export class OpenTabsRepository extends Repository {
 
     async clear() {
         await (await this.dbPromise).clear("selected");
+        await (await this.dbPromise).clear("selected_current");
     }
 
 

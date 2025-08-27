@@ -11,9 +11,6 @@ import { DeclaredNodeModel, FileMetaData, OpenFilesType } from "@/types/state-ty
 import { jetBrainsMono } from "@/helpers/FontLoader";
 import { FileTreeActions } from "@/redux/sandbox/file-tree/FileTreeActions";
 import FileTreeSlice from "@/redux/sandbox/file-tree/FileTreeSlice";
-import { FileModifStatus } from "@/types/enum/FileModifStatus.enum";
-import { Repository } from "@/services/database/Repository";
-import { OpenTabsRepository } from '@/services/database/OpenTabsRepository';
 import { OpenTabsAction } from "@/redux/sandbox/open-files/OpenFilesActions";
 import { showPopup } from "@/context/PopupProvider";
 
@@ -141,13 +138,15 @@ const FileViewer: React.FC<{ info: { id: string; branch: string; } }> = ({ info 
         }
     };
 
-    //TODO esto puede causar un error si se intenta agregar un . a una carpeta
     const handleCreateNode = (name: string) => {
-        if (!name.trim() || creatingNode === null) {
+        name.trim();
+
+        if (!name || creatingNode === null) {
             return setCreatingNode(null);
 
         } else {
 
+            setIsloading(true);
             const tempId = Date.now();
 
             const newNode: DeclaredNodeModel<FileMetaData> = {
@@ -156,16 +155,23 @@ const FileViewer: React.FC<{ info: { id: string; branch: string; } }> = ({ info 
                 text: name,
                 droppable: creatingNode.type === FileType.FOLDER,
                 data: {
-                    author: "17cd4df6-67fc-4093-92f3-c071c87f8973",
+                    author: "logan-the-scholar",
                     extension: creatingNode.type === FileType.FOLDER ?
                         FileType.FOLDER
                         :
-                        name.trim().substring(name.lastIndexOf(".") + 1).toLowerCase(),
-                    fullPath: ["0"],
+                        (() => {
+                            const a = name.substring(name.lastIndexOf(".") + 1).toLowerCase();
+                            return a === FileType.FOLDER ? FileType.PLAIN_TEXT : a;
+                        })(),
+                    fullPath: [],
+                    commit: "",
+                    isDrafted: true
                 }
             };
 
-            dispatch(FileTreeActions.createAndOpenNode(newNode, info.id, info.branch));
+            dispatch(FileTreeActions.createAndOpenNode({ node: newNode, repoId: info.id, branch: info.branch }))
+                .then((a) => setIsloading(false))
+                .catch((r) => console.error(r));
 
             setCreatingNode(null);
         }
@@ -183,7 +189,7 @@ const FileViewer: React.FC<{ info: { id: string; branch: string; } }> = ({ info 
             confirmText: "Delete",
             cancelText: "Cancel",
             dismissable: true
-        }).then(({confirmed}) => {
+        }).then(({ confirmed }) => {
             if (confirmed) {
                 dispatch(FileTreeActions.deleteAndChilds(context.node as DeclaredNodeModel<FileMetaData>));
             }
@@ -267,8 +273,12 @@ const FileViewer: React.FC<{ info: { id: string; branch: string; } }> = ({ info 
                     className="z-40 left-[calc(100%-5px)] top-0 absolute w-1! h-full cursor-ew-resize transition-colors ease-in-out delay-300 hover:bg-[#ffffff44]"
                 ></div>
 
-                <div className="px-4 py-2 font-light border-t border-transparent">
+                <div className="px-4 pt-2 pb-1 font-light border-t border-transparent">
                     FILE EXPLORER
+                </div>
+
+                <div className="w-full h-1 relative overflow-hidden">
+                    <div className={`bg-neutral-600 w-1/5 h-full absolute ease-in inset-0 ${isLoading ? "animate-direction-100/500 animate-slide-right-1800" : "-translate-x-full"}`}></div>
                 </div>
 
                 <div
@@ -278,11 +288,13 @@ const FileViewer: React.FC<{ info: { id: string; branch: string; } }> = ({ info 
                             id: "0", parent: "-1", text: "root", droppable: true, data: {
                                 extension: "folder",
                                 author: "none",
-                                fullPath: null
+                                fullPath: ["0"],
+                                commit: "",
+                                isDrafted: false
                             }
                         });
                     }}
-                    className="flex-1 relative font-light mt-2 max-w-full h-full w-full overflow-x-hidden overflow-y-scroll"
+                    className="flex-1 relative font-light max-w-full h-full w-full overflow-x-hidden overflow-y-scroll"
                 >
                     {
                         treeData.tree !== undefined && treeData.tree.length > 0 &&

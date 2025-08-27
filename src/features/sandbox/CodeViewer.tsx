@@ -35,8 +35,8 @@ const CodeViewer = () => {
 
         timeoutRef.current = setTimeout(() => {
 
-        
-            
+
+
             dispatch(OpenTabsSlice.actions.edit({
                 id: id,
                 code: code,
@@ -145,9 +145,9 @@ ${file.id === selectedFile?.id || file.data.edited ? "visible hover:bg-[#ffffff1
                     <div className="px-4 py-1.5 flex border-x border-t border-neutral-600 cursor-pointer text-xs text-neutral-300 bg-[#1e1e1e] select-none">
                         {
                             selectedFile !== undefined ?
-                                [...selectedFile.data.pathNames || [], selectedFile.text]
+                                [...selectedFile.data.pathNames || ["0", "/" + selectedFile.text]]
                                     .map((path, index) => {
-                                        return (
+                                        return (path === "0" ? null :
                                             <span className="hover:text-neutral-100 cursor-pointer mr-1.5 flex" key={`${path}_${selectedFile.text}`}>
                                                 {path === selectedFile.text && selectedFile.data?.extension !== FileType.FOLDER && (index + 1) === selectedFile.data?.fullPath?.length &&
                                                     <span className="mr-1">

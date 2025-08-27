@@ -5,7 +5,7 @@ import { ApiProject } from "@/services/api";
 import { ApiType } from "@/types/ApiResponse.type";
 import { ProjectCreation } from "@/types/zTypes/ProjectCreation.type";
 import { AppUrl } from "@/types/AppUrl.type";
-import { IProjectCreation } from "@/types/zTypes";
+import { IProjectCreation } from "@/types/zTypes/zTypes";
 import { ArrowDownFromLine, Eye, FolderPen } from "lucide-react";
 import { FormEvent, useState } from "react";
 

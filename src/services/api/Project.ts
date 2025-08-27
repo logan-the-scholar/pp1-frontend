@@ -1,5 +1,5 @@
 import { API_SERVER } from "@/helpers/env-config";
-import { IProjectCreation } from "@/types/zTypes";
+import { IProjectCreation } from "@/types/zTypes/zTypes";
 import { fetchCatch } from "../wrapper/fetch-catch";
 import { ErrorHelper } from "@/helpers/ErrorHelper";
 import { ApiStatusEnum } from "@/types/enum/ApiStatus.enum";

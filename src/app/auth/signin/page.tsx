@@ -1,7 +1,7 @@
 "use client";
 import { Eye, EyeClosed, Key, Mail } from 'lucide-react';
 import React, { useEffect, useState } from 'react'
-import { IUserCredentials } from '@/types/zTypes';
+import { IUserCredentials } from '@/types/zTypes/zTypes';
 import { openGithubPopup } from '@/services/openGithubPopup';
 import { ErrorHelper } from '@/helpers/ErrorHelper';
 import { ApiStatusEnum } from '@/types/enum/ApiStatus.enum';

@@ -11,8 +11,6 @@ export const FileCreation = () => z.object({
 
     extension: z.string({ message: "file extension can't be null" }),
 
-    //isFolder: z.boolean({ message: "isFolder status must can't be empty" }),
-
     path: z.array(z.string(), { message: "path list can't be empty" }),
 
     branch: z.string().min(4, "branch lenght must be between 1-20 characters").max(20, "branch lenght must be between 1-20 characters"),

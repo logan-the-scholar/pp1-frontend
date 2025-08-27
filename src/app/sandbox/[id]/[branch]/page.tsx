@@ -45,7 +45,7 @@ export default function Sandbox({ params, searchParams }: { params: Promise<{ id
                                 name: responseFiles.name,
                                 author: "none",
                                 extension: "FOLDER",
-                                path: [],
+                                path: ["0"],
                                 commitId: "",
                                 isDrafted: true
                             }, ...responseFiles.files]);

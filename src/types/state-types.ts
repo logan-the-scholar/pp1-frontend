@@ -8,6 +8,9 @@ export type FileMetaData = {
     line?: number,
     isDropped?: boolean,
     author: string,
+    commit: string,
+    movedFrom?: string,
+    isDrafted: boolean,
 }
 
 export type TreeType = {
