@@ -13,6 +13,7 @@ import { useRef } from "react";
 import { DeclaredNodeModel, OpenFileMetaData } from "@/types/state-types";
 import debounce from "lodash.debounce";
 import { useSaveShortcut } from "@/hooks/shortcut/useSaveShortcut";
+import { useRouter, useSearchParams } from "next/navigation";
 
 const CodeViewer = () => {
     const dispatch = useAppDispatch();
@@ -21,6 +22,8 @@ const CodeViewer = () => {
     // const [line, setLine] = useState<number>(0);
     const timeoutRef = useRef<NodeJS.Timeout | null>(null);
     const nose = useMonaco();
+    const router = useRouter();
+    const params = useSearchParams();
 
     useSaveShortcut(() => {
         if (selectedFile) {
@@ -34,8 +37,6 @@ const CodeViewer = () => {
         if (timeoutRef.current) clearTimeout(timeoutRef.current);
 
         timeoutRef.current = setTimeout(() => {
-
-
 
             dispatch(OpenTabsSlice.actions.edit({
                 id: id,
@@ -60,16 +61,18 @@ const CodeViewer = () => {
 
     const handleChangeWindow = (file: DeclaredNodeModel<OpenFileMetaData>) => {
         dispatch(OpenTabsAction.open({ ...file, data: file.data }));
+        document.title = `${"Unknown"} /${file.text}`;
+        const p = new URLSearchParams(params?.toString());
+        const path_ = file.data.fullPath?.slice(1).join("/") || `/${file.text}`;
+        p.set("file", path_);
+        router.push(`?${p.toString()}`);
     };
 
-
     const handleEditorMount: OnMount = (editor, monaco) => {
-        // ✅ Capturar la posición actual del cursor
         editor.onDidChangeCursorPosition((event) => {
             const { lineNumber, column } = event.position;
             console.log("Cursor en línea:", lineNumber, "columna:", column);
 
-            // Si quieres el contenido de esa línea:
             const model = editor.getModel();
             if (model) {
                 const lineContent = model.getLineContent(lineNumber);
@@ -142,24 +145,36 @@ ${file.id === selectedFile?.id || file.data.edited ? "visible hover:bg-[#ffffff1
                     </div>
 
                     {/* PATH VIEW */}
-                    <div className="px-4 py-1.5 flex border-x border-t border-neutral-600 cursor-pointer text-xs text-neutral-300 bg-[#1e1e1e] select-none">
+                    <div className="px-4 py-1 flex border-x border-t border-neutral-600 text-xs text-neutral-300 bg-[#1e1e1e] select-none">
                         {
                             selectedFile !== undefined ?
-                                [...selectedFile.data.pathNames || ["0", "/" + selectedFile.text]]
+                                [...selectedFile.data.fullPath || ["0", "/" + selectedFile.text]]
                                     .map((path, index) => {
                                         return (path === "0" ? null :
                                             <span className="hover:text-neutral-100 cursor-pointer mr-1.5 flex" key={`${path}_${selectedFile.text}`}>
-                                                {path === selectedFile.text && selectedFile.data?.extension !== FileType.FOLDER && (index + 1) === selectedFile.data?.fullPath?.length &&
+                                                {/* {path === selectedFile.text && selectedFile.data?.extension !== FileType.FOLDER && (index + 1) === selectedFile.data?.fullPath?.length &&
                                                     <span className="mr-1">
                                                         <FileIconMapper type={selectedFile.data?.extension as string} />
                                                     </span>
-                                                }
+                                                } */}
                                                 {path === selectedFile.text &&
                                                     <span className="mr-1.5 h-full flex items-center">
                                                         <FileIconMapper size={12} type={selectedFile.data?.extension as string} />
                                                     </span>
                                                 }
-                                                {`${path} ${path !== selectedFile.text ? ">" : ""}`}
+                                                {/* {`${path} ${path !== selectedFile.text ? "a" : ""}`} */}
+                                                {path} {path !== selectedFile.text &&
+                                                    <span className="max-w-4 max-h-4 overflow-hidden">
+                                                        <svg xmlns="http://www.w3.org/2000/svg"
+                                                            width="16" height="16"
+                                                            viewBox="0 0 24 24" fill="none"
+                                                            stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"
+                                                            className="mt-[1px] lucide lucide-chevron-right-icon lucide-chevron-right"
+                                                        >
+                                                            <path d="m9 18 6-6-6-6" />
+                                                        </svg>
+                                                    </span>
+                                                }
                                             </span>
                                         );
                                     })
@@ -179,7 +194,7 @@ ${file.id === selectedFile?.id || file.data.edited ? "visible hover:bg-[#ffffff1
                         className="w-full flex-1 border-x border-neutral-600"
                         language={LanguageMapper(selectedFile?.data?.extension as string)}
                         theme="vs-dark"
-                        path={selectedFile?.data?.pathNames?.join("/")}
+                        path={selectedFile?.data?.fullPath?.join("/")}
                         value={selectedFile?.data?.content || ""}
                         onChange={(x) => handleChange(x)}
                         onMount={handleEditorMount}

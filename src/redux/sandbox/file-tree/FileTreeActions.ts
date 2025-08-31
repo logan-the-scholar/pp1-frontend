@@ -16,21 +16,17 @@ import { ApiStatusEnum } from "@/types/enum/ApiStatus.enum";
 import { createAsyncThunk } from "@reduxjs/toolkit/react";
 import FileMapper from "@/helpers/FileMapper";
 
-type nose = { node: DeclaredNodeModel<FileMetaData>, repoId: string, branch: string }
+type CreateNodeType = { node: DeclaredNodeModel<FileMetaData>, repoId: string, branch: string }
+type ThunkOptions = { state: RootState; dispatch: AppDispatch; rejectValue: { message: string }; }
 
-export const createAndOpenNode = createAsyncThunk<
-    void, nose, { state: RootState; dispatch: AppDispatch; rejectValue: { message: string }; }
->(
+export const createAndOpenNode = createAsyncThunk<void, CreateNodeType, ThunkOptions>(
     "node/create",
-    async (
-        { node, repoId, branch },
-        { getState, dispatch, rejectWithValue }
-    ) => {
+    async ({ node, repoId, branch }, { getState, dispatch, rejectWithValue }) => {
 
         const { pathNames, fullPath } = findParent(node, getState);
-        const created = await pushNode({ ...node, data: { ...node.data, pathNames, fullPath } }, repoId, branch);
+        const created = await pushNode({ node: { ...node, data: { ...node.data, fullPath } }, repoId, branch });
 
-        dispatch(FileTreeSlice.actions.createNode(FileMapper(created, getState)));
+        dispatch(FileTreeSlice.actions.createNode(FileMapper(created)));
 
         const createdNode = getState().FILE_TREE.tree.find((n) => n.id === created.id);
 
@@ -60,7 +56,7 @@ function createStore(files: ApiType.File[]): AppThunk {
     return (async (dispatch, getState) => {
         try {
 
-            const formatedFiles = files.map<DeclaredNodeModel<FileMetaData>>((file) => FileMapper(file, getState));
+            const formatedFiles = files.map<DeclaredNodeModel<FileMetaData>>(file => FileMapper(file));
 
             dispatch(FileTreeSlice.actions.createStore(formatedFiles));
 
@@ -73,20 +69,23 @@ function createStore(files: ApiType.File[]): AppThunk {
 
                 if (openTabsState !== undefined) {
 
-                    const openTabsFiles: DeclaredNodeModel<OpenFileMetaData>[] = openTabsState.map<DeclaredNodeModel<OpenFileMetaData>>((f) => {
-                        const fileRef = formatedFiles.find((i) => i.id === f.id) as DeclaredNodeModel<FileMetaData>;
+                    const openTabsFiles: DeclaredNodeModel<OpenFileMetaData>[] = openTabsState.map<DeclaredNodeModel<OpenFileMetaData> | undefined>((f) => {
+                        const fileRef = formatedFiles.find((i) => i.id === f.id);
 
+                        if (fileRef === undefined) {
+                            return undefined;
+                        }
                         return {
                             ...fileRef,
                             id: f.id,
                             data: {
                                 ...fileRef.data,
-                                pathNames: fileRef.data.pathNames,
+                                pathNames: fileRef.data.fullPath,
                                 saved: f.isSaved,
                                 edited: f.isEdited
                             }
                         };
-                    });
+                    }).filter((f) => f !== undefined);
 
                     let current = await repository.getSelected(projectId);
 
@@ -146,8 +145,9 @@ function findParent(node: NodeModel<FileMetaData>, getState: () => { OPEN_FILES:
 }
 
 
-async function pushNode(node: DeclaredNodeModel<FileMetaData>, repoId: string, branch: string) {
-    const formatedPath = node.data.pathNames?.map((p) => "/" + p) || [];
+async function pushNode({ node, repoId, branch }: CreateNodeType) {
+
+    const formatedPath = node.data.fullPath?.map((p) => "/" + p) || [];
     formatedPath.unshift(":");
 
     const [success, data] = zodValidate<IFileCreation>({

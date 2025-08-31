@@ -37,6 +37,8 @@ export default function Sandbox({ params, searchParams }: { params: Promise<{ id
                         return;
                     }
 
+                    document.title = "Null | " + responseFiles.name;
+
                     if (responseFiles.files !== null) {
                         setFiles([
                             {

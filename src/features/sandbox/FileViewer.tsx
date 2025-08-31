@@ -13,6 +13,7 @@ import { FileTreeActions } from "@/redux/sandbox/file-tree/FileTreeActions";
 import FileTreeSlice from "@/redux/sandbox/file-tree/FileTreeSlice";
 import { OpenTabsAction } from "@/redux/sandbox/open-files/OpenFilesActions";
 import { showPopup } from "@/context/PopupProvider";
+import { ErrorHelper } from "@/helpers/ErrorHelper";
 
 type ContextType = {
     node: NodeModel<FileMetaData>,
@@ -135,6 +136,9 @@ const FileViewer: React.FC<{ info: { id: string; branch: string; } }> = ({ info 
             setVisibleMenu(false);
             setContextSelected(null);
 
+        } else {
+            throw new ErrorHelper("The file you tried to create has a nullish parent!");
+
         }
     };
 
@@ -165,7 +169,8 @@ const FileViewer: React.FC<{ info: { id: string; branch: string; } }> = ({ info 
                         })(),
                     fullPath: [],
                     commit: "",
-                    isDrafted: true
+                    isDrafted: true,
+                    versionId: ""
                 }
             };
 
@@ -290,7 +295,8 @@ const FileViewer: React.FC<{ info: { id: string; branch: string; } }> = ({ info 
                                 author: "none",
                                 fullPath: ["0"],
                                 commit: "",
-                                isDrafted: false
+                                isDrafted: false,
+                                versionId: ""
                             }
                         });
                     }}
@@ -376,7 +382,7 @@ ${treeData.selected?.id === node.id ? creatingNode?.parentId === node.id ? "bg-t
                                                     <div key={i} style={{ paddingLeft: "20px" }} className="border-l border-neutral-600"></div>
                                             }
                                             )}
-                                            <FileComponent isOpen={false} node={{ id: "???", parent: -1, text: "", data: { extension: creatingNode.type } }} />
+                                            <FileComponent isOpen={false} node={{ id: "???", parent: "-1", text: "", data: { extension: creatingNode.type } }} />
                                             <input
                                                 autoFocus
                                                 className="w-full outline-0 border border-neutral-400"
