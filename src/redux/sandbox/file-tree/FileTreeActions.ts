@@ -19,12 +19,13 @@ import FileMapper from "@/helpers/FileMapper";
 type CreateNodeType = { node: DeclaredNodeModel<FileMetaData>, repoId: string, branch: string }
 type ThunkOptions = { state: RootState; dispatch: AppDispatch; rejectValue: { message: string }; }
 
-export const createAndOpenNode = createAsyncThunk<void, CreateNodeType, ThunkOptions>(
-    "node/create",
+const createAndOpenNode = createAsyncThunk<void, CreateNodeType, ThunkOptions>(
+    "TREE/create",
     async ({ node, repoId, branch }, { getState, dispatch, rejectWithValue }) => {
 
-        const { pathNames, fullPath } = findParent(node, getState);
-        const created = await pushNode({ node: { ...node, data: { ...node.data, fullPath } }, repoId, branch });
+        const { pathNames } = findParent(node, getState);
+        console.log(pathNames);
+        const created = await pushNode({ node: { ...node, data: { ...node.data, fullPath: pathNames } }, repoId, branch });
 
         dispatch(FileTreeSlice.actions.createNode(FileMapper(created)));
 
@@ -120,7 +121,7 @@ function createStore(files: ApiType.File[]): AppThunk {
 function findParent(node: NodeModel<FileMetaData>, getState: () => { OPEN_FILES: OpenFilesType, FILE_TREE: TreeType }) {
 
     const pathNames: string[] = [];
-    const fullPath: string[] = [];
+    // const fullPath: string[] = [];
 
     pathNames.push(node.text);
 
@@ -130,7 +131,7 @@ function findParent(node: NodeModel<FileMetaData>, getState: () => { OPEN_FILES:
         });
 
         if (found !== undefined) {
-            fullPath.unshift(found.id.toString());
+            // fullPath.unshift(found.id.toString());
             pathNames.unshift(found.text);
 
             if (found.parent !== "0") {
@@ -141,7 +142,10 @@ function findParent(node: NodeModel<FileMetaData>, getState: () => { OPEN_FILES:
 
     find(node.parent as string);
 
-    return { pathNames, fullPath };
+    return {
+        pathNames,
+        // fullPath 
+    };
 }
 
 

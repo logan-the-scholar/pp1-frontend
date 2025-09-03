@@ -3,7 +3,7 @@ import useNewWindowPreview from "@/hooks/useNewWindowPreview";
 import { SandpackLayout, SandpackPreview, SandpackProvider } from "@codesandbox/sandpack-react";
 import CodeViewer from "./CodeViewer";
 
-const Preview = () => {
+const CodeAndPreview = () => {
     const { containerRef, open } = useNewWindowPreview();
 
     return (
@@ -63,4 +63,4 @@ root.render(<App />);
     );
 };
 
-export default Preview;
+export default CodeAndPreview;

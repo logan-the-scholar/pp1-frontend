@@ -128,8 +128,10 @@ const FileViewer: React.FC<{ info: { id: string; branch: string; } }> = ({ info 
     const addNode = (fileType: FileType.PLAIN_TEXT | FileType.FOLDER) => {
         if (contextSelected?.node.id !== undefined) {
 
-            if (contextSelected.onToggle && !contextSelected.isOpen) {
-                contextSelected.onToggle();
+            if (!contextSelected.isOpen) {
+                // contextSelected.onToggle();
+                //TODO hay que crear otro action para poder manejar esto
+                dispatch(FileTreeSlice.actions.select({ id: contextSelected.node.id }));
             }
 
             setCreatingNode({ parentId: contextSelected?.node.id, type: fileType });
@@ -204,9 +206,9 @@ const FileViewer: React.FC<{ info: { id: string; branch: string; } }> = ({ info 
     return (
         <div onContextMenu={(e) => e.preventDefault()}
             onClick={() => setVisibleMenu(false)}
-            className={`select-none pt-2 w-[20%] relative min-w-[10%] max-w-[50%] h-full text-sm flex flex-col ${jetBrainsMono.className}`}
+            className={`select-none pt-2 w-[20%] relative min-w-[10%] max-w-[50%] h-full text-sm flex flex-col`}
         >
-
+            {/* ${jetBrainsMono.className} */}
             {/* CONTEXT MENU */}
             {
                 visibleMenu &&
@@ -402,7 +404,7 @@ ${treeData.selected?.id === node.id ? creatingNode?.parentId === node.id ? "bg-t
                     }
                 </div>
             </DndProvider>
-        </div >
+        </div>
     );
 };
 

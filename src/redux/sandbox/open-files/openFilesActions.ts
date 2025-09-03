@@ -1,10 +1,11 @@
 import { OpenTabsRepository } from '@/services/database/OpenTabsRepository';
-import { AppThunk } from "../../store";
+import { AppDispatch, AppThunk, RootState } from "../../store";
 import FileTreeSlice from "../file-tree/FileTreeSlice";
 import OpenTabsSlice from "./OpenTabsSlice";
 import { DeclaredNodeModel, FileMetaData, OpenFileMetaData } from "@/types/state-types";
 import { ErrorHelper } from "@/helpers/ErrorHelper";
 import { ApiStatusEnum } from '@/types/enum/ApiStatus.enum';
+import { createAsyncThunk } from '@reduxjs/toolkit';
 
 function open(node: DeclaredNodeModel<FileMetaData> | DeclaredNodeModel<OpenFileMetaData>): AppThunk {
     return (async (dispatch, getState) => {
@@ -65,7 +66,7 @@ function selectAndSave(node: { id: string | number, edited?: boolean, saved?: bo
         const projectId = getState().FILE_TREE.project;
 
         if (projectId !== undefined) {
-            
+
             //TODO esto se puede usar como clase? yo creo que si, en tal caso usar herencia para facilitar algunos campos que 
             //TODO no tengan muchos cambios, para evitar el exceso de parametros y de llamadas innecesarias a getState()
 
@@ -84,4 +85,4 @@ function selectAndSave(node: { id: string | number, edited?: boolean, saved?: bo
     });
 }
 
-export const OpenTabsAction = { open, closeAndChangeWindow };
+export const OpenTabsAction = { open, closeAndChangeWindow,  };

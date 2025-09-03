@@ -1,6 +1,7 @@
 import { z } from "zod";
+import { Path } from "./Path.type";
 
-export const FileCreation = () => z.object({
+export const FileCreation = () => Path().extend({
     repoId: z.string().uuid("project id must be a valid uuid"),
 
     name: z.string({ message: "file name can't be empty" })
@@ -10,8 +11,6 @@ export const FileCreation = () => z.object({
     author: z.string({ message: "author name can't be empty" }).min(4).max(30),
 
     extension: z.string({ message: "file extension can't be null" }),
-
-    path: z.array(z.string(), { message: "path list can't be empty" }),
 
     branch: z.string().min(4, "branch lenght must be between 1-20 characters").max(20, "branch lenght must be between 1-20 characters"),
 

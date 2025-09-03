@@ -1,7 +1,7 @@
 "use client";
 import { Eye, EyeClosed, Key, Mail } from 'lucide-react';
 import React, { useEffect, useState } from 'react'
-import { IUserCredentials } from '@/types/zTypes/zTypes';
+import { ISession, IUserCredentials } from '@/types/zTypes/zTypes';
 import { openGithubPopup } from '@/services/openGithubPopup';
 import { ErrorHelper } from '@/helpers/ErrorHelper';
 import { ApiStatusEnum } from '@/types/enum/ApiStatus.enum';
@@ -9,6 +9,7 @@ import { ApiType } from '@/types/ApiResponse.type';
 import { AppUrl } from '@/types/AppUrl.type';
 import { useLocalStorage } from '@/hooks/useLocalStorage';
 import { ApiUser } from '@/services/api';
+import { useSessionStorage } from '@/hooks/useSessionStorage';
 
 const Login = () => {
     const initial: IUserCredentials = { mail: "", password: "" }
@@ -17,7 +18,8 @@ const Login = () => {
     const [loading, setLoading] = useState<boolean>(false);
     const [windowError, setWindowError] = useState<string | null>(null);
     const [openError, setOpenError] = useState<boolean>(false);
-    const [data, setData] = useLocalStorage<ApiType.Login>("session", null);
+    const [, setSession] = useLocalStorage<ISession | null>("session", null);
+    // const [, setSession] = useSessionStorage<{ name: string, email: string, }>("session", null);
 
     const login = (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
@@ -29,7 +31,6 @@ const Login = () => {
 
             if (event.data.type === "session-success") {
                 const response: ApiType.Login | ErrorHelper = await ApiUser.githubSignIn(event.data.code);
-                console.log(response);
 
                 if (response instanceof ErrorHelper) {
                     setWindowError(response.message);
@@ -37,8 +38,7 @@ const Login = () => {
                     setOpenError(true);
 
                 } else {
-                    console.log("here");
-                    setData(response);
+                    setSession({ mail: response.email, nickname: response.name, picture: response.profileImage });
                     window.location.href = AppUrl.dashboard;
                 }
             }

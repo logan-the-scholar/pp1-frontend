@@ -1,20 +1,20 @@
 "use client";
 import { useState, useEffect, Dispatch } from "react";
 
-export function useLocalStorage<S>(key: string, initialValue: S): [S, Dispatch<React.SetStateAction<S>>] {
+export function useSessionStorage<S>(key: string, initialValue: any): [S, Dispatch<React.SetStateAction<S>>] {
   const [storedValue, setStoredValue] = useState<S>(() => {
 
     if (typeof window === "undefined") {
       return initialValue;
-
+      
     }
-
+    
     try {
-      const item = window.localStorage.getItem(key);
+      const item = window.sessionStorage.getItem(key);
       return item ? JSON.parse(item) : initialValue;
 
     } catch (error) {
-      console.error("Error reading from localStorage:", error);
+      console.error("Error reading from sessionStorage:", error);
       return initialValue;
 
     }
@@ -23,7 +23,7 @@ export function useLocalStorage<S>(key: string, initialValue: S): [S, Dispatch<R
   useEffect(() => {
     try {
 
-      window.localStorage.setItem(key, JSON.stringify(storedValue));
+      window.sessionStorage.setItem(key, JSON.stringify(storedValue));
 
     } catch (error) {
       console.error("Error writing to localStorage:", error);

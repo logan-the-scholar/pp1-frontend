@@ -4,26 +4,33 @@ import { RootState } from "@/redux/store";
 import { Editor, OnMount, useMonaco } from "@monaco-editor/react";
 import { useSelector } from "react-redux";
 import FileIconMapper from "./FileIconMapper";
-import FileType from "@/types/enum/FileType";
 import { OpenTabsAction } from "@/redux/sandbox/open-files/OpenFilesActions";
 import { useAppDispatch } from "@/hooks/useTypedSelectors";
 import LanguageMapper from "@/helpers/LanguageMapper";
 import OpenTabsSlice from "@/redux/sandbox/open-files/OpenTabsSlice";
-import { useRef } from "react";
+import { useRef, useState } from "react";
 import { DeclaredNodeModel, OpenFileMetaData } from "@/types/state-types";
-import debounce from "lodash.debounce";
 import { useSaveShortcut } from "@/hooks/shortcut/useSaveShortcut";
 import { useRouter, useSearchParams } from "next/navigation";
+import { ApiFile } from "@/services/api/File";
+import { IFileUpdation, ISession } from "@/types/zTypes/zTypes";
+import { zodValidate } from "@/helpers/zod/ZodValidate";
+import { FileUpdation } from "@/types/zTypes/FileUpdation.type";
+import { ErrorHelper } from "@/helpers/ErrorHelper";
+import { useLocalStorage } from "@/hooks/useLocalStorage";
 
 const CodeViewer = () => {
     const dispatch = useAppDispatch();
     const selectedFile = useSelector((state: RootState) => state.OPEN_FILES.selected);
     const openFiles = useSelector((state: RootState) => state.OPEN_FILES.open);
-    // const [line, setLine] = useState<number>(0);
+    const { project, branch } = useSelector((state: RootState) => state.FILE_TREE);
+    const [pos, setPos] = useState<{ line: number, col: number }>({ line: 1, col: 1 });
     const timeoutRef = useRef<NodeJS.Timeout | null>(null);
     const nose = useMonaco();
     const router = useRouter();
     const params = useSearchParams();
+    const [session,] = useLocalStorage<ISession | null>("session", null);
+
 
     useSaveShortcut(() => {
         if (selectedFile) {
@@ -33,25 +40,56 @@ const CodeViewer = () => {
         }
     });
 
-    const debounceSaveCode = (code: string | undefined, id: string | number) => {
+    const debounceSaveCode = (code: string | undefined, node: DeclaredNodeModel<OpenFileMetaData>) => {
         if (timeoutRef.current) clearTimeout(timeoutRef.current);
 
-        timeoutRef.current = setTimeout(() => {
+        timeoutRef.current = setTimeout(async () => {
 
-            dispatch(OpenTabsSlice.actions.edit({
-                id: id,
-                code: code,
-                line: 1,
-                edited: true
-            }));
+            if (project && branch) {
+                if (session === null) {
+                    console.error("session storage is null!");
+                    return;
+                }
 
+                const formatedPath = node.data.fullPath?.map((p) => "/" + p) || [];
+                formatedPath.unshift(":");
+
+                const [success, data] = zodValidate<IFileUpdation>({
+                    id: node.id.toString(),
+                    content: code || null,
+                    author: session.nickname,
+                    repoId: project,
+                    path: formatedPath,
+                    newName: null,
+                    newExtension: null,
+                    newPath: null,
+                    createdAt: Date.now(),
+                    branch
+                }, FileUpdation);
+
+                if (!success) {
+                    Object.entries(data.errors).forEach((e) => console.error(e));
+                    throw new ErrorHelper("nose");
+                }
+
+                await ApiFile.update(data.data);
+
+                dispatch(OpenTabsSlice.actions.edit({
+                    id: node.id,
+                    code: code,
+                    line: pos.line,
+                    edited: true
+                }));
+            } else {
+                console.error("branch and project state are nullish!");
+            }
 
         }, 4000);
     };
 
     const handleChange = (code: string | undefined) => {
         if (selectedFile !== undefined) {
-            debounceSaveCode(code, selectedFile.id);
+            debounceSaveCode(code, selectedFile);
         }
     };
 
@@ -62,8 +100,10 @@ const CodeViewer = () => {
     const handleChangeWindow = (file: DeclaredNodeModel<OpenFileMetaData>) => {
         dispatch(OpenTabsAction.open({ ...file, data: file.data }));
         document.title = `${"Unknown"} /${file.text}`;
+
         const p = new URLSearchParams(params?.toString());
         const path_ = file.data.fullPath?.slice(1).join("/") || `/${file.text}`;
+
         p.set("file", path_);
         router.push(`?${p.toString()}`);
     };
@@ -71,13 +111,14 @@ const CodeViewer = () => {
     const handleEditorMount: OnMount = (editor, monaco) => {
         editor.onDidChangeCursorPosition((event) => {
             const { lineNumber, column } = event.position;
-            console.log("Cursor en línea:", lineNumber, "columna:", column);
+            // console.log("Cursor en línea:", lineNumber, "columna:", column);
+            setPos({ line: lineNumber, col: column });
 
-            const model = editor.getModel();
-            if (model) {
-                const lineContent = model.getLineContent(lineNumber);
-                console.log("Texto de la línea actual:", lineContent);
-            }
+            // const model = editor.getModel();
+            // if (model) {
+            //     const lineContent = model.getLineContent(lineNumber);
+            //     console.log("Texto de la línea actual:", lineContent);
+            // }
         });
     };
 

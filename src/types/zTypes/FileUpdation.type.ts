@@ -1,14 +1,13 @@
 import { z } from "zod";
+import { Path } from "./Path.type";
 
-export const FileUpdation = () => z.object({
+export const FileUpdation = () => Path().extend({
 
     repoId: z.string().uuid("project id must be a valid uuid"),
 
-    id: z.string().uuid("file id reference must be present"),
+    id: z.string(),
 
     author: z.string({ message: "author name can't be empty" }).min(4).max(30),
-
-    path: z.array(z.string(), { message: "path list can't be empty" }),
 
     newName: z.string().nullable(),
 

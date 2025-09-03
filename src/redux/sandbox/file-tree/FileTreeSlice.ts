@@ -5,7 +5,8 @@ import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 const treeState: TreeType = {
     tree: [],
     selected: undefined,
-    project: undefined
+    project: undefined,
+    branch: undefined
 };
 
 const FileTreeSlice = createSlice({
@@ -61,11 +62,16 @@ const FileTreeSlice = createSlice({
                 }
 
                 if (foundNode.data?.fullPath !== null) {
-                    foundNode.data.fullPath.forEach((x) => {
-                        const parentIndex = state.tree.findIndex((node) => node.id === x);
-
-                        if (parentIndex >= 0 && state.tree.at(parentIndex)?.droppable) {
-                            state.tree[parentIndex].data.isDropped = true;
+                    let builtPath = "";
+                    
+                    foundNode.data.fullPath.forEach((x, i) => {
+                        if (i + 1 !== foundNode.data.fullPath?.length) {
+                            builtPath = builtPath + (i > 0 ? "/" : "") + x;
+                            const parentIndex = state.tree.findIndex((node) => node.id === builtPath);
+                            
+                            if (parentIndex >= 0 && state.tree.at(parentIndex)?.droppable) {
+                                state.tree[parentIndex].data.isDropped = true;
+                            }
                         }
                     });
                 }
@@ -80,6 +86,10 @@ const FileTreeSlice = createSlice({
 
         setProject(state, action: PayloadAction<string>) {
             return { ...state, project: action.payload };
+        },
+
+        setBranch(state, action: PayloadAction<string>) {
+            return { ...state, branch: action.payload };
         }
 
     },

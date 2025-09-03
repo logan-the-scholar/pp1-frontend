@@ -2,7 +2,7 @@
 import EditorNavBar from "./EditorNavBar";
 import ContentSideBar from "./ContentSideBar";
 import FileViewer from "./FileViewer";
-import Preview from "./Preview";
+import CodeAndPreview from "./CodeAndPreview";
 import { useEffect } from "react";
 import { useAppDispatch } from "@/hooks/useTypedSelectors";
 import { FileTreeActions } from "@/redux/sandbox/file-tree/FileTreeActions";
@@ -22,7 +22,8 @@ const Main: React.FC<{ files: ApiType.File[] | null, basicInfo: RepositoryMetada
 
     useEffect(() => {
         if (files !== null && files.length > 0) {
-            dispatch(FileTreeSlice.actions.setProject(basicInfo.id))
+            dispatch(FileTreeSlice.actions.setProject(basicInfo.id));
+            dispatch(FileTreeSlice.actions.setBranch(basicInfo.branch));
             dispatch(FileTreeActions.createStore(files));
         }
 
@@ -30,9 +31,6 @@ const Main: React.FC<{ files: ApiType.File[] | null, basicInfo: RepositoryMetada
 
     return (
         <>
-            {/*
-                //TODO AGREGAR ERROR HANDLING AQUI
-            */}
             {basicInfo !== null &&
                 <div className="flex flex-col w-full h-[100vh]">
                     <div className="w-full h-10 bg-neutral-900">
@@ -41,8 +39,13 @@ const Main: React.FC<{ files: ApiType.File[] | null, basicInfo: RepositoryMetada
                     <div className="w-full flex-1 flex bg-neutral-900">
                         <ContentSideBar />
                         <FileViewer info={{ ...basicInfo }} />
-                        <Preview />
+                        <CodeAndPreview />
                     </div>
+                    {/* <div className="w-full h-5 bg-transparent absolute left-0 bottom-0">
+                        <div className="border-t border-neutral-600 w-20 bg-neutral-900">
+
+                        </div>
+                    </div> */}
                 </div>
             }
         </>

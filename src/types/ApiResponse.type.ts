@@ -4,7 +4,7 @@ import { UserRecurrence } from "./enum/UserType.enum";
 
 export namespace ApiType {
 
-    export interface Login {
+    export type Login = {
         id: string;
         name: string;
         email: string;
@@ -13,13 +13,15 @@ export namespace ApiType {
         recurrence: UserRecurrence;
     }
 
-    export interface Workspace {
+    export type Session = Pick<Login, "email" | "name">;
+
+    export type Workspace = {
         id: string;
         name: string;
         owner: string;
     }
 
-    export interface File {
+    export type File = {
         id: string;
         name: string;
         author: string;
@@ -33,7 +35,7 @@ export namespace ApiType {
         isDrafted: boolean;
     }
 
-    export interface Project {
+    export type Project = {
         id: string;
         name: string;
         visibility: "PUBLIC" | "PRIVATE";
@@ -45,7 +47,7 @@ export namespace ApiType {
         members?: any;
     }
 
-    export interface Branch {
+    export type Branch = {
         name: string;
         headId: string;
         draftId: string;

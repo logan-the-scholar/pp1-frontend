@@ -8,12 +8,17 @@ export const AppUrl = {
         },
     },
 
-    auth: {
-        /** /auth */
-        _: "/auth",
+    Auth: {
+
         /** /auth/signin */
-        signin: "/auth/signin"
+        signin: "/auth/signin",
+        /**@returns `/auth/signin?from={action}` */
+        Signin: {
+            from: (action: string) => "/auth/signin?from=" + action
+        }
     },
+    /** /auth */
+    auth: "/auth",
 
     Dashboard: {
         /**@returns `/dashboard/projects` */

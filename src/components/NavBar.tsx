@@ -7,11 +7,11 @@ import { ZodArray, ZodObject } from "zod";
 
 const NavBar: React.FC = () => {
     const [, setShowPopup] = useDashboardContext();
-    const [userData,] = useLocalStorage<ApiType.Login>("session", null);
+    const [userData,] = useLocalStorage<ApiType.Login | null>("session", null);
     const [loading, setLoading] = useState<boolean>(true);
     const [userDataState, setUserDataState] = useState<ApiType.Login | null>(null);
-    const [workspaces,] = useLocalStorage<ApiType.Workspace[]>("workspaces", null);
-    const [selectedWorkspace,] = useLocalStorage<ApiType.Workspace>("selected_workspace", null);
+    const [workspaces,] = useLocalStorage<ApiType.Workspace[] | null>("workspaces", null);
+    const [selectedWorkspace,] = useLocalStorage<ApiType.Workspace | null>("selected_workspace", null);
     const [selectedWorkspaceState, setSelectedWorkspace] = useState<ApiType.Workspace | null>(null);
 
     useEffect(() => {

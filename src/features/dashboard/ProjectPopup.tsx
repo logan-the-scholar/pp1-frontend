@@ -12,7 +12,7 @@ import { FormEvent, useState } from "react";
 const ProjectPopup: React.FC<{ setShowPopup: React.Dispatch<React.SetStateAction<boolean>>, showPopup: boolean }> = ({ setShowPopup, showPopup }) => {
     const [isDropDown, setIsDropDown] = useState<boolean>(false);
     const [projectInfo, setProjectInfo] = useState<IProjectCreation>({ name: "", visibility: "private", workspaceId: "" });
-    const [selectedWorkspace] = useLocalStorage<ApiType.Workspace>("selected_workspace", null);
+    const [selectedWorkspace] = useLocalStorage<ApiType.Workspace | null>("selected_workspace", null);
     const [isLoading, setIsLoading] = useState<boolean>(false);
     const visibilityMessage: Map<string, string> = new Map([
         ["public", "Public (Anyone can see the project)"],
@@ -48,6 +48,11 @@ const ProjectPopup: React.FC<{ setShowPopup: React.Dispatch<React.SetStateAction
         e.preventDefault();
         if (isLoading) return;
 
+        if (selectedWorkspace === null) {
+            console.error("localstorage workspace is null"); //TODO ref:1 arreglar esto
+            return;
+        }
+
         const [success, data] = zodValidate<IProjectCreation>({ ...projectInfo, workspaceId: selectedWorkspace.id }, ProjectCreation);
 
         if (!success) {
@@ -61,8 +66,8 @@ const ProjectPopup: React.FC<{ setShowPopup: React.Dispatch<React.SetStateAction
 
         if (response instanceof ErrorHelper) {
             console.error(response);
-                setShowPopup(false);
-        setIsLoading(false);
+            setShowPopup(false);
+            setIsLoading(false);
 
             // dispatch(projectLoadStatusSlice.actions.updated(ProjectLoadStatusEnum.NOTHING));
             return;

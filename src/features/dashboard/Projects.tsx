@@ -7,14 +7,15 @@ import { ErrorHelper } from "@/helpers/ErrorHelper";
 import LoadingCircle from "@/components/LoadingCircle";
 import ProjectCard from "./ProjectCard";
 import { ApiProject, ApiWorkspace } from "@/services/api";
+import { AppUrl } from "@/types/AppUrl.type";
 
 const Projects: React.FC<{ showPopup: boolean, setShowPopup: React.Dispatch<React.SetStateAction<boolean>> }> = ({
     showPopup, setShowPopup }) => {
 
     const [projects, setProjects] = useState<ApiType.Project[] | null>(null);
-    const [user,] = useLocalStorage<ApiType.Login>("session", null);
-    const [selectedWorkspace, setSelectedWorkspace] = useLocalStorage<ApiType.Workspace>("selected_workspace", null);
-    const [workspace, setWorkspace] = useLocalStorage<ApiType.Workspace[]>("workspaces", null);
+    const [session,] = useLocalStorage<ApiType.Session | null>("session", null);
+    const [selectedWorkspace, setSelectedWorkspace] = useLocalStorage<ApiType.Workspace | null>("selected_workspace", null);
+    const [workspace, setWorkspace] = useLocalStorage<ApiType.Workspace[] | null>("workspaces", null);
     const [loading, setLoading] = useState<boolean>(true);
     const [loadingProjects, setLoadingProjects] = useState<boolean>(true);
 
@@ -23,7 +24,13 @@ const Projects: React.FC<{ showPopup: boolean, setShowPopup: React.Dispatch<Reac
 
         //TODO tokens de autenticacion (de muy corta duracion) y refresh token en cookies
         const fetch = async () => {
-            const response: ApiType.Workspace[] | ErrorHelper = await ApiWorkspace.getAll(user.id);
+            if (session === null) {
+                console.error("Session storage is empty!");
+                window.location.href = AppUrl.Auth.Signin.from("error");
+                return;
+            }
+
+            const response: ApiType.Workspace[] | ErrorHelper = await ApiWorkspace.getAll(session.name);
 
             if (response instanceof Array) {
                 setWorkspace(response);
@@ -38,20 +45,27 @@ const Projects: React.FC<{ showPopup: boolean, setShowPopup: React.Dispatch<Reac
             setLoading(false);
         };
 
-        if (typeof window !== undefined && user !== null && user.id !== undefined) {
+        if (typeof window !== undefined) {
             fetch();
         }
 
     }, []);
 
+
     useEffect(() => {
 
         const fetch = async () => {
+            //TODO ref:1
+            if (selectedWorkspace === null) {
+                console.error("workspace id is null!");
+                return;
+            }
+
             const response: ApiType.Project[] | ErrorHelper = await ApiProject.getAll(selectedWorkspace.id);
 
             if (response instanceof ErrorHelper) {
                 console.error(response);
-                
+
             } else {
                 setProjects(response);
 

@@ -3,6 +3,7 @@ import LoadingCircle from "@/components/LoadingCircle";
 import { PopupProvider } from "@/context/PopupProvider";
 import Main from "@/features/sandbox/Main";
 import { ErrorHelper } from "@/helpers/ErrorHelper";
+import { useLocalStorage } from "@/hooks/useLocalStorage";
 import { store } from "@/redux/store";
 import { ApiProject } from "@/services/api";
 import { ApiType } from "@/types/ApiResponse.type";
@@ -16,8 +17,14 @@ export default function Sandbox({ params, searchParams }: { params: Promise<{ id
     const [files, setFiles] = useState<ApiType.File[] | null>(null);
     const [name, setName] = useState<string | null>(null);
     const [loading, setLoading] = useState<boolean>(true);
+    const [session,] = useLocalStorage<ApiType.Session | null>("session", null);
 
     useEffect(() => {
+        if (session === null) {
+            window.location.href = AppUrl.Auth.Signin.from("session-expired");
+            return;
+        }
+
         const fetch = async () => {
 
             if (!z.string().uuid().safeParse(useParams.id).success) {
