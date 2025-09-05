@@ -20,4 +20,6 @@ export const FileUpdation = () => Path().extend({
     createdAt: z.number({ message: "update date must be a timestamp number" }),
 
     branch: z.string().min(4, "branch lenght must be between 1-20 characters").max(20, "branch lenght must be between 1-20 characters"),
+
+    versionId: z.string().uuid(),
 });

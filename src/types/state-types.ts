@@ -2,7 +2,7 @@ import { NodeModel } from "@minoru/react-dnd-treeview"
 
 export type FileMetaData = {
     extension: string,
-    fullPath: string[] | null,
+    fullPath: string[],
     // pathNames?: string[],
     versionId: string;
     content?: string,

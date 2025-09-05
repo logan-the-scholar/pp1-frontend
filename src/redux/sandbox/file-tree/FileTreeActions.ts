@@ -24,7 +24,6 @@ const createAndOpenNode = createAsyncThunk<void, CreateNodeType, ThunkOptions>(
     async ({ node, repoId, branch }, { getState, dispatch, rejectWithValue }) => {
 
         const { pathNames } = findParent(node, getState);
-        console.log(pathNames);
         const created = await pushNode({ node: { ...node, data: { ...node.data, fullPath: pathNames } }, repoId, branch });
 
         dispatch(FileTreeSlice.actions.createNode(FileMapper(created)));

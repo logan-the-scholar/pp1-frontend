@@ -1,3 +1,5 @@
+import { DBType } from '@/types/Database.type';
+import { IDBPDatabase } from 'idb';
 import { Repository } from './Repository';
 import { DeclaredNodeModel, OpenFileMetaData, OpenFilesType } from '@/types/state-types';
 
@@ -65,7 +67,7 @@ export class OpenTabsRepository extends Repository {
     }
 
 
-    async remove(id: string, fileId: string) {
+    async remove(id: string) {
         await (await this.dbPromise).delete("selected", id);
     }
 }

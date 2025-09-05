@@ -43,15 +43,20 @@ async function update(data: IFileUpdation): Promise<Response | ErrorHelper> {
     const { repoId, ...remain } = data;
 
     try {
+
         const response: Response = await fetchCatch(`${API_SERVER}/demo/api/v0/file/repo/${repoId}`, {
             method: "PATCH",
+            headers: {
+                "Content-Type": "application/json",
+            },
             body: JSON.stringify({
                 ...remain,
+                id: remain.versionId,
                 content: remain.content !== null ? Buffer.from(remain.content).toString("base64") : null
             })
         });
 
-        return response
+        return response;
     } catch (error: any) {
         return error instanceof ErrorHelper ? error : new ErrorHelper(ApiStatusEnum.UNKNOWN, error.message);
 

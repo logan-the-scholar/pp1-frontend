@@ -1,14 +1,17 @@
 import { OpenTabsRepository } from '@/services/database/OpenTabsRepository';
-import { AppDispatch, AppThunk, RootState } from "../../store";
+import { AppThunk } from "../../store";
 import FileTreeSlice from "../file-tree/FileTreeSlice";
 import OpenTabsSlice from "./OpenTabsSlice";
 import { DeclaredNodeModel, FileMetaData, OpenFileMetaData } from "@/types/state-types";
 import { ErrorHelper } from "@/helpers/ErrorHelper";
 import { ApiStatusEnum } from '@/types/enum/ApiStatus.enum';
-import { createAsyncThunk } from '@reduxjs/toolkit';
 
 function open(node: DeclaredNodeModel<FileMetaData> | DeclaredNodeModel<OpenFileMetaData>): AppThunk {
     return (async (dispatch, getState) => {
+
+        if (node.droppable) {
+            return;
+        }
 
         const state = getState();
         const alreadyOpenNode = state.OPEN_FILES.open.find((n) => n.id === node.id);
@@ -38,6 +41,8 @@ function closeAndChangeWindow(id: string | number): AppThunk {
         const index: number = getState().OPEN_FILES.open.findIndex((n) => n.id === id);
         if (index !== -1) {
 
+            new OpenTabsRepository().remove(getState().OPEN_FILES.open[index].id.toString());
+
             dispatch(OpenTabsSlice.actions.close(id));
 
             const state = getState();
@@ -46,13 +51,11 @@ function closeAndChangeWindow(id: string | number): AppThunk {
                 const leftNode = state.OPEN_FILES.open.at(index - 1);
                 if (leftNode) {
                     dispatch(selectAndSave({ id: leftNode.id }));
-
                 }
 
                 const rightNode = state.OPEN_FILES.open.at(index);
                 if (rightNode) {
                     dispatch(selectAndSave({ id: rightNode.id }));
-
                 }
             }
         }
@@ -85,4 +88,4 @@ function selectAndSave(node: { id: string | number, edited?: boolean, saved?: bo
     });
 }
 
-export const OpenTabsAction = { open, closeAndChangeWindow,  };
+export const OpenTabsAction = { open, closeAndChangeWindow, };

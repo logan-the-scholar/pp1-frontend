@@ -1,14 +1,14 @@
 "use client";
 import LoadingCircle from "@/components/LoadingCircle";
 import { RootState } from "@/redux/store";
-import { Editor, OnMount, useMonaco } from "@monaco-editor/react";
+import { Editor, OnMount } from "@monaco-editor/react";
 import { useSelector } from "react-redux";
 import FileIconMapper from "./FileIconMapper";
 import { OpenTabsAction } from "@/redux/sandbox/open-files/OpenFilesActions";
 import { useAppDispatch } from "@/hooks/useTypedSelectors";
 import LanguageMapper from "@/helpers/LanguageMapper";
 import OpenTabsSlice from "@/redux/sandbox/open-files/OpenTabsSlice";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { DeclaredNodeModel, OpenFileMetaData } from "@/types/state-types";
 import { useSaveShortcut } from "@/hooks/shortcut/useSaveShortcut";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -18,6 +18,8 @@ import { zodValidate } from "@/helpers/zod/ZodValidate";
 import { FileUpdation } from "@/types/zTypes/FileUpdation.type";
 import { ErrorHelper } from "@/helpers/ErrorHelper";
 import { useLocalStorage } from "@/hooks/useLocalStorage";
+import { editor } from "monaco-editor";
+import FileTreeSlice from "@/redux/sandbox/file-tree/FileTreeSlice";
 
 const CodeViewer = () => {
     const dispatch = useAppDispatch();
@@ -26,11 +28,14 @@ const CodeViewer = () => {
     const { project, branch } = useSelector((state: RootState) => state.FILE_TREE);
     const [pos, setPos] = useState<{ line: number, col: number }>({ line: 1, col: 1 });
     const timeoutRef = useRef<NodeJS.Timeout | null>(null);
-    const nose = useMonaco();
+    // const nose = useMonaco();
     const router = useRouter();
-    const params = useSearchParams();
     const [session,] = useLocalStorage<ISession | null>("session", null);
 
+    const params = useSearchParams();
+    const editorRef = useRef<editor.IStandaloneCodeEditor | null>(null);
+    const line = Number(params?.get("line") || 1);
+    const column = Number(params?.get("col") || 1);
 
     useSaveShortcut(() => {
         if (selectedFile) {
@@ -51,7 +56,8 @@ const CodeViewer = () => {
                     return;
                 }
 
-                const formatedPath = node.data.fullPath?.map((p) => "/" + p) || [];
+                const formatedPath = node.data.fullPath.map((p) => "/" + p) || [];
+                formatedPath.shift();
                 formatedPath.unshift(":");
 
                 const [success, data] = zodValidate<IFileUpdation>({
@@ -60,11 +66,10 @@ const CodeViewer = () => {
                     author: session.nickname,
                     repoId: project,
                     path: formatedPath,
-                    newName: null,
-                    newExtension: null,
-                    newPath: null,
+                    newName: null, newExtension: null, newPath: null,
                     createdAt: Date.now(),
-                    branch
+                    branch,
+                    versionId: node.data.versionId
                 }, FileUpdation);
 
                 if (!success) {
@@ -72,14 +77,23 @@ const CodeViewer = () => {
                     throw new ErrorHelper("nose");
                 }
 
-                await ApiFile.update(data.data);
-
                 dispatch(OpenTabsSlice.actions.edit({
                     id: node.id,
                     code: code,
                     line: pos.line,
                     edited: true
                 }));
+
+                dispatch(FileTreeSlice.actions.edit({
+                    ...node,
+                    data: {
+                        ...node.data,
+                        content: code,
+                    }
+                }));
+
+                await ApiFile.update(data.data);
+
             } else {
                 console.error("branch and project state are nullish!");
             }
@@ -95,20 +109,30 @@ const CodeViewer = () => {
 
     const handleClose = (id: string | number) => {
         dispatch(OpenTabsAction.closeAndChangeWindow(id));
+        //TODO hacer mas GENERAL el cambio de queryparameter del file y ponerlo aqui y en todas las partes que se necesite
+        //TODO ref3
     };
 
     const handleChangeWindow = (file: DeclaredNodeModel<OpenFileMetaData>) => {
         dispatch(OpenTabsAction.open({ ...file, data: file.data }));
         document.title = `${"Unknown"} /${file.text}`;
 
+        //TODO MUST? usar implements con clases y AppThunks para linkear acciones de redux con otra logica? sera posible esto???
+
         const p = new URLSearchParams(params?.toString());
-        const path_ = file.data.fullPath?.slice(1).join("/") || `/${file.text}`;
+        const path_ = file.data.fullPath.slice(1).join("/") || `/${file.text}`;
 
         p.set("file", path_);
         router.push(`?${p.toString()}`);
     };
 
     const handleEditorMount: OnMount = (editor, monaco) => {
+        editorRef.current = editor;
+
+        editor.setPosition({ lineNumber: line, column });
+        editor.revealLineInCenter(line);
+        editor.focus();
+
         editor.onDidChangeCursorPosition((event) => {
             const { lineNumber, column } = event.position;
             // console.log("Cursor en línea:", lineNumber, "columna:", column);
@@ -121,6 +145,15 @@ const CodeViewer = () => {
             // }
         });
     };
+
+
+    useEffect(() => {
+        if (editorRef.current) {
+            editorRef.current.setPosition({ lineNumber: line, column });
+            editorRef.current.revealLineInCenter(line);
+            editorRef.current.focus();
+        }
+    }, [line, column]);
 
 
     return (
@@ -189,7 +222,7 @@ ${file.id === selectedFile?.id || file.data.edited ? "visible hover:bg-[#ffffff1
                     <div className="px-4 py-1 flex border-x border-t border-neutral-600 text-xs text-neutral-300 bg-[#1e1e1e] select-none">
                         {
                             selectedFile !== undefined ?
-                                [...selectedFile.data.fullPath || ["0", "/" + selectedFile.text]]
+                                [...selectedFile.data.fullPath]
                                     .map((path, index) => {
                                         return (path === "0" ? null :
                                             <span className="hover:text-neutral-100 cursor-pointer mr-1.5 flex" key={`${path}_${selectedFile.text}`}>
@@ -235,7 +268,7 @@ ${file.id === selectedFile?.id || file.data.edited ? "visible hover:bg-[#ffffff1
                         className="w-full flex-1 border-x border-neutral-600"
                         language={LanguageMapper(selectedFile?.data?.extension as string)}
                         theme="vs-dark"
-                        path={selectedFile?.data?.fullPath?.join("/")}
+                        path={selectedFile?.data.fullPath.join("/")}
                         value={selectedFile?.data?.content || ""}
                         onChange={(x) => handleChange(x)}
                         onMount={handleEditorMount}

@@ -12,10 +12,15 @@ import { use, useEffect, useState } from "react";
 import { Provider } from "react-redux";
 import { z } from "zod";
 
-export default function Sandbox({ params, searchParams }: { params: Promise<{ id: string, branch: string }>, searchParams: Promise<any> }) {
+export default function Sandbox({ params }: {
+    params: Promise<{ id: string, branch: string }>,
+    // searchParams: Promise<{ line?: number, col?: number }>
+}) {
     const useParams = use(params);
+    // const useSearchParams = use(searchParams);
+
     const [files, setFiles] = useState<ApiType.File[] | null>(null);
-    const [name, setName] = useState<string | null>(null);
+    // const [name, setName] = useState<string | null>(null);
     const [loading, setLoading] = useState<boolean>(true);
     const [session,] = useLocalStorage<ApiType.Session | null>("session", null);
 
@@ -83,7 +88,7 @@ export default function Sandbox({ params, searchParams }: { params: Promise<{ id
                                 <LoadingCircle size={78} />
                             </div>
                             :
-                            <Main basicInfo={{ ...useParams }} files={files} />}
+                            <Main info={{ ...useParams }} files={files} />}
                     </PopupProvider>
                 </Provider>
             }

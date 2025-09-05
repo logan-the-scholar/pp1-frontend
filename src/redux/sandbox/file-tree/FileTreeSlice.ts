@@ -1,5 +1,7 @@
+import { ErrorHelper } from "@/helpers/ErrorHelper";
 import FileType from "@/types/enum/FileType";
 import { DeclaredNodeModel, FileMetaData, TreeType } from "@/types/state-types";
+import { IFileUpdation } from "@/types/zTypes/zTypes";
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 
 const treeState: TreeType = {
@@ -61,14 +63,14 @@ const FileTreeSlice = createSlice({
                     }
                 }
 
-                if (foundNode.data?.fullPath !== null) {
+                if (foundNode.data.fullPath.length > 0) {
                     let builtPath = "";
-                    
+
                     foundNode.data.fullPath.forEach((x, i) => {
                         if (i + 1 !== foundNode.data.fullPath?.length) {
                             builtPath = builtPath + (i > 0 ? "/" : "") + x;
                             const parentIndex = state.tree.findIndex((node) => node.id === builtPath);
-                            
+
                             if (parentIndex >= 0 && state.tree.at(parentIndex)?.droppable) {
                                 state.tree[parentIndex].data.isDropped = true;
                             }
@@ -77,6 +79,41 @@ const FileTreeSlice = createSlice({
                 }
 
             }
+
+        },
+
+        edit(state, action: PayloadAction<DeclaredNodeModel<FileMetaData>>) {
+            //TODO esto hay que cambiarlo cuando se agregue el cambio de path o cambio de nombre
+            const editedFile = action.payload;
+            const index = state.tree.findIndex((f) => f.id === action.payload.id);
+
+            if(index === -1) {
+                throw new ErrorHelper("File tree state index can't be found!")
+            }
+
+            // if (action.payload.data.content) {
+
+            // }
+            // if (action.payload.newName) {
+
+            // }
+            // if (action.payload.newExtension) {
+
+            // }
+            // if (action.payload.newPath) {
+
+            // }
+
+            state.tree[index] = editedFile;
+
+            // return {
+            //     ...state,
+            //     tree: [
+            //         ...state.tree,
+            //         editedFile
+            //     ]
+
+            // };
 
         },
 

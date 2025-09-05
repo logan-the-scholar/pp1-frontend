@@ -77,19 +77,41 @@ const OpenTabsSlice = createSlice({
 
         edit(state, action: PayloadAction<{ id: string | number, code: string | undefined, line: number, edited: boolean }>) {
             const index = state.open.findIndex((n) => n.id === action.payload.id);
-            const editedData: OpenFileMetaData = {
-                ...state.open[index].data,
-                content: action.payload.code,
-                saved: false,
-                edited: action.payload.edited,
-                line: action.payload.line
+
+            if (index === -1) {
+                throw new ErrorHelper("Open file state index can't be found!");
+            }
+
+            const edited: DeclaredNodeModel<OpenFileMetaData> = {
+                ...state.open[index],
+                data: {
+                    ...state.open[index].data,
+                    content: action.payload.code,
+                    saved: false,
+                    edited: action.payload.edited,
+                    line: action.payload.line
+                }
             };
 
-            state.open[index].data = editedData;
+            state.open[index] = edited;
 
-            if (state.selected) {
-                state.selected.data = editedData;
+
+            //TODO talvez esto pueda causar un error: 
+            //todo posible solucion, crear otro action aparte y ejecutarlo inmediatamente en lugar de esperar
+            if (state.selected?.id === action.payload.id) {
+                state.selected = edited;
             }
+            // return {
+            //     ...state,
+            //     files: {
+            //         ...state.files,
+            //         [action.payload.path]: {
+            //             ...state.files[action.payload.path],
+            //             code: action.payload.content
+            //         }
+            //     }
+            // };
+
         },
 
         changeSaved(state, action: PayloadAction<{ one?: { id: string | number, saved: boolean }, two?: Map<string, boolean> }>) {

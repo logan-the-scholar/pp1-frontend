@@ -49,7 +49,7 @@ const FileViewer: React.FC<{ info: { id: string; branch: string; } }> = ({ info 
     }, [creatingNode]);
 
 
-    const openFile = (node: NodeModel<FileMetaData>) => {
+    const handleOpen = (node: NodeModel<FileMetaData>) => {
         dispatch(OpenTabsAction.open({ ...node, data: node.data as FileMetaData }));
     };
 
@@ -130,8 +130,8 @@ const FileViewer: React.FC<{ info: { id: string; branch: string; } }> = ({ info 
 
             if (!contextSelected.isOpen) {
                 // contextSelected.onToggle();
-                //TODO hay que crear otro action para poder manejar esto
-                dispatch(FileTreeSlice.actions.select({ id: contextSelected.node.id }));
+                //TODO hay que crear otro action para poder manejar esto ?
+                dispatch(FileTreeSlice.actions.select({ id: contextSelected.node.id, isDropped: true }));
             }
 
             setCreatingNode({ parentId: contextSelected?.node.id, type: fileType });
@@ -198,6 +198,7 @@ const FileViewer: React.FC<{ info: { id: string; branch: string; } }> = ({ info 
             dismissable: true
         }).then(({ confirmed }) => {
             if (confirmed) {
+                //TODO ref3
                 dispatch(FileTreeActions.deleteAndChilds(context.node as DeclaredNodeModel<FileMetaData>));
             }
         });
@@ -327,7 +328,7 @@ const FileViewer: React.FC<{ info: { id: string; branch: string; } }> = ({ info 
                                             dispatch(FileTreeSlice.actions.select(undefined));
 
                                         } else {
-                                            node.droppable ? onToggle() : openFile(node);
+                                            node.droppable ? onToggle() : handleOpen(node);
 
                                             dispatch(FileTreeSlice.actions.select({ id: node.id, isDropped: !isOpen }));
 
