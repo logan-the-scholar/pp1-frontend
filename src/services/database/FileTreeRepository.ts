@@ -1,4 +1,4 @@
-import { FileTree, TreeFileData } from '@/types/Database.type';
+import { FileTree, DbTreeFileDataType } from '@/types/Database.type';
 import { Repository } from './Repository';
 
 export class FileTreeRepository extends Repository {
@@ -25,7 +25,7 @@ export class FileTreeRepository extends Repository {
     }
 
     async get(id: string) {
-        const data: TreeFileData | undefined = await (await this.dbPromise).get("status", id);
+        const data: DbTreeFileDataType | undefined = await (await this.dbPromise).get("status", id);
 
         return data !== undefined && data?.files.length > 0 ? data : undefined;
     }

@@ -13,9 +13,9 @@ export default function LanguageMapper(language: string): string {
         case FileType.MARKDOWN:
             return "markdown";
         case FileType.TSX:
-            return "typescriptreact";
+            return "typescript";
         case FileType.JSX:
-            return "javascriptreact";
+            return "javascript";
         default:
             return "text";
     }

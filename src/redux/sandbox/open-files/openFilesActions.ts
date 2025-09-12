@@ -57,6 +57,10 @@ function closeAndChangeWindow(id: string | number): AppThunk {
                 if (rightNode) {
                     dispatch(selectAndSave({ id: rightNode.id }));
                 }
+
+            } else {
+                dispatch(OpenTabsSlice.actions.unSelect());
+                
             }
         }
     });

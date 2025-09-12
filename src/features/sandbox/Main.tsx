@@ -68,6 +68,7 @@ const Main: React.FC<{ files: ApiType.File[] | null, info: RepositoryMetadata }>
                             template="react-ts"
                             customSetup={{
                                 dependencies: {
+                                    //TODO ref:4 sincronizar esto con monaco y leerlo desde IDB
                                     "react": "^18.0.0",
                                     "react-dom": "^18.0.0",
                                 }

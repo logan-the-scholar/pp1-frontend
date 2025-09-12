@@ -1,7 +1,7 @@
 "use client";
 import LoadingCircle from "@/components/LoadingCircle";
 import { RootState } from "@/redux/store";
-import { Editor, OnMount } from "@monaco-editor/react";
+import { BeforeMount, Editor, OnMount } from "@monaco-editor/react";
 import { useSelector } from "react-redux";
 import FileIconMapper from "./FileIconMapper";
 import { OpenTabsAction } from "@/redux/sandbox/open-files/OpenFilesActions";
@@ -20,12 +20,15 @@ import { ErrorHelper } from "@/helpers/ErrorHelper";
 import { useLocalStorage } from "@/hooks/useLocalStorage";
 import { editor } from "monaco-editor";
 import FileTreeSlice from "@/redux/sandbox/file-tree/FileTreeSlice";
+import { cacheTypeFrom } from "@/services/Package";
+// import reactTypes from "@/types/react/index";
+// import reactDomTypes from "@/types/react-dom/index";
 
 const CodeViewer = () => {
     const dispatch = useAppDispatch();
     const selectedFile = useSelector((state: RootState) => state.OPEN_FILES.selected);
     const openFiles = useSelector((state: RootState) => state.OPEN_FILES.open);
-    const { project, branch } = useSelector((state: RootState) => state.FILE_TREE);
+    const { project, branch, tree } = useSelector((state: RootState) => state.FILE_TREE);
     const [pos, setPos] = useState<{ line: number, col: number }>({ line: 1, col: 1 });
     const timeoutRef = useRef<NodeJS.Timeout | null>(null);
     // const nose = useMonaco();
@@ -46,6 +49,21 @@ const CodeViewer = () => {
     });
 
     const debounceSaveCode = (code: string | undefined, node: DeclaredNodeModel<OpenFileMetaData>) => {
+        dispatch(OpenTabsSlice.actions.edit({
+            id: node.id,
+            code: code,
+            line: pos.line,
+            edited: true
+        }));
+
+        dispatch(FileTreeSlice.actions.edit({
+            ...node,
+            data: {
+                ...node.data,
+                content: code,
+            }
+        }));
+
         if (timeoutRef.current) clearTimeout(timeoutRef.current);
 
         timeoutRef.current = setTimeout(async () => {
@@ -77,25 +95,10 @@ const CodeViewer = () => {
                     throw new ErrorHelper("nose");
                 }
 
-                dispatch(OpenTabsSlice.actions.edit({
-                    id: node.id,
-                    code: code,
-                    line: pos.line,
-                    edited: true
-                }));
-
-                dispatch(FileTreeSlice.actions.edit({
-                    ...node,
-                    data: {
-                        ...node.data,
-                        content: code,
-                    }
-                }));
-
                 await ApiFile.update(data.data);
 
             } else {
-                console.error("branch and project state are nullish!");
+                console.error("error saving file, metadata redux state is null!");
             }
 
         }, 4000);
@@ -103,30 +106,58 @@ const CodeViewer = () => {
 
     const handleChange = (code: string | undefined) => {
         if (selectedFile !== undefined) {
+
             debounceSaveCode(code, selectedFile);
+
         }
     };
 
     const handleClose = (id: string | number) => {
         dispatch(OpenTabsAction.closeAndChangeWindow(id));
-        //TODO hacer mas GENERAL el cambio de queryparameter del file y ponerlo aqui y en todas las partes que se necesite
-        //TODO ref3
+
+        //TODO hacer una clase para los paths
+
     };
 
     const handleChangeWindow = (file: DeclaredNodeModel<OpenFileMetaData>) => {
         dispatch(OpenTabsAction.open({ ...file, data: file.data }));
-        document.title = `${"Unknown"} /${file.text}`;
-
-        //TODO MUST? usar implements con clases y AppThunks para linkear acciones de redux con otra logica? sera posible esto???
 
         const p = new URLSearchParams(params?.toString());
-        const path_ = file.data.fullPath.slice(1).join("/") || `/${file.text}`;
 
-        p.set("file", path_);
+        p.delete("line");
+        p.delete("col");
         router.push(`?${p.toString()}`);
+
     };
 
-    const handleEditorMount: OnMount = (editor, monaco) => {
+    const handleMount: OnMount = async (editor, monaco) => {
+
+        monaco.languages.typescript.typescriptDefaults.setCompilerOptions({
+            jsx: monaco.languages.typescript.JsxEmit.React,
+            allowJs: true,
+            esModuleInterop: true,
+            target: monaco.languages.typescript.ScriptTarget.ESNext,
+            moduleResolution: monaco.languages.typescript.ModuleResolutionKind.NodeJs,
+            module: monaco.languages.typescript.ModuleKind.ESNext,
+            typeRoots: ["node_modules/@types"],
+            allowNonTsExtensions: true,
+            noEmit: true,
+            reactNamespace: "React",
+        });
+
+        //TODO ref:4 sincronizar esto con Sandpack y leerlo desde IDB
+        cacheTypeFrom(monaco, "@types/react", "19.0.0");
+        cacheTypeFrom(monaco, "@types/react-dom", "19.0.0");
+        
+        const model = monaco.editor.createModel(
+            selectedFile?.data.content || "",
+            LanguageMapper(selectedFile?.data.extension || "text"),
+            // monaco.Uri.file(activeFile)
+        );
+
+        editor.setModel(model);
+
+
         editorRef.current = editor;
 
         editor.setPosition({ lineNumber: line, column });
@@ -135,16 +166,34 @@ const CodeViewer = () => {
 
         editor.onDidChangeCursorPosition((event) => {
             const { lineNumber, column } = event.position;
-            // console.log("Cursor en línea:", lineNumber, "columna:", column);
             setPos({ line: lineNumber, col: column });
-
-            // const model = editor.getModel();
-            // if (model) {
-            //     const lineContent = model.getLineContent(lineNumber);
-            //     console.log("Texto de la línea actual:", lineContent);
-            // }
         });
     };
+
+    const handleBeforeMount: BeforeMount = async (monaco) => {
+
+    }
+
+
+    /* CHANGE URL PARAMETERS */
+    useEffect(() => {
+
+        const p = new URLSearchParams(params?.toString());
+        if (selectedFile !== undefined) {
+
+            document.title = `${"Unknown"} /${selectedFile.text}`;
+            const path_ = selectedFile.data.fullPath.slice(1).join("/") || `/${selectedFile.text}`;
+
+            p.set("file", path_);
+
+        } else {
+            p.delete("file");
+
+        }
+
+        router.push(`?${p.toString()}`);
+
+    }, [selectedFile]);
 
 
     useEffect(() => {
@@ -157,7 +206,7 @@ const CodeViewer = () => {
 
 
     return (
-        <div className="w-1/2 h-full flex flex-col">
+        <div style={{}} className="w-1/2 h-full flex flex-col">
             {openFiles.length > 0 ?
                 <>
                     {/* WINDOW VIEW */}
@@ -271,7 +320,8 @@ ${file.id === selectedFile?.id || file.data.edited ? "visible hover:bg-[#ffffff1
                         path={selectedFile?.data.fullPath.join("/")}
                         value={selectedFile?.data?.content || ""}
                         onChange={(x) => handleChange(x)}
-                        onMount={handleEditorMount}
+                        beforeMount={handleBeforeMount}
+                        onMount={handleMount}
                     />
                 </>
                 :

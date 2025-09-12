@@ -20,6 +20,10 @@ export class Repository {
                 if (!db.objectStoreNames.contains("selected_current")) {
                     db.createObjectStore("selected_current", { keyPath: "id" });
                 }
+                
+                if (!db.objectStoreNames.contains("package")) {
+                    db.createObjectStore("package", { keyPath: "package" });
+                }
             },
         });
     }

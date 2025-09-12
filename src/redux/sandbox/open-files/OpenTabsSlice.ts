@@ -87,7 +87,7 @@ const OpenTabsSlice = createSlice({
                 data: {
                     ...state.open[index].data,
                     content: action.payload.code,
-                    saved: false,
+                    saved: true,
                     edited: action.payload.edited,
                     line: action.payload.line
                 }
@@ -123,6 +123,10 @@ const OpenTabsSlice = createSlice({
             } else if (action.payload.two) {
 
             }
+        },
+
+        unSelect(state, action: PayloadAction<void>) {
+            state.selected = undefined;
         }
     }
 
