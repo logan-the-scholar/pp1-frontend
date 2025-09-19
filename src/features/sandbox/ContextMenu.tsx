@@ -1,4 +1,4 @@
-import { FileMetaData } from "@/types/state-types";
+import { FileMetaData } from "@/types/ReduxState.type";
 import { NodeModel } from "@minoru/react-dnd-treeview";
 import { RefObject } from "react";
 

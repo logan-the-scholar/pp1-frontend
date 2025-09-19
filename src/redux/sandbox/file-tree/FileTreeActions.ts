@@ -1,7 +1,7 @@
 import { NodeModel } from "@minoru/react-dnd-treeview";
 import OpenTabsSlice from "../open-files/OpenTabsSlice";
 import FileType from "@/types/enum/FileType";
-import { DeclaredNodeModel, FileMetaData, OpenFileMetaData, OpenFilesType, TreeType } from "@/types/state-types";
+import { DeclaredNodeModel, FileMetaData, OpenFile, OpenFilesType, TreeType } from "@/types/ReduxState.type";
 import { AppDispatch, AppThunk, RootState } from "@/redux/store";
 import { ApiType } from "@/types/ApiResponse.type";
 import FileTreeSlice from "./FileTreeSlice";
@@ -69,7 +69,7 @@ function createStore(files: ApiType.File[]): AppThunk {
 
                 if (openTabsState !== undefined) {
 
-                    const openTabsFiles: DeclaredNodeModel<OpenFileMetaData>[] = openTabsState.map<DeclaredNodeModel<OpenFileMetaData> | undefined>((f) => {
+                    const openTabsFiles: DeclaredNodeModel<OpenFile>[] = openTabsState.map<DeclaredNodeModel<OpenFile> | undefined>((f) => {
                         const fileRef = formatedFiles.find((i) => i.id === f.id);
 
                         if (fileRef === undefined) {

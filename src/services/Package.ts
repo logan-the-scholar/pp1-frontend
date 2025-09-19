@@ -7,12 +7,12 @@ export async function cacheTypeFrom(monaco: typeof import("monaco-editor"), pkg:
     const existingPkg = await packageRepository.get(pkg, ver);
 
     if (existingPkg) {
-        console.log(existingPkg)
+        // console.log(existingPkg)
         existingPkg.files.forEach(f => {
             monaco.languages.typescript.typescriptDefaults.addExtraLib(f.content, f.path);
         });
 
-        console.log(`${pkg} packages loaded to monaco from cache`);
+        // console.log(`${pkg} packages loaded to monaco from cache`);
 
     } else {
 
@@ -34,14 +34,14 @@ export async function cacheTypeFrom(monaco: typeof import("monaco-editor"), pkg:
                     
                 } else if (file.name.endsWith(".d.ts")) {
                     const url = `https://cdn.jsdelivr.net/npm/${pkg}${basePath}/${file.name}`;
-                    console.log(file)
+                    // console.log(file)
 
                     try {
 
                         const content = await fetchCatch(url, {}).then((r) => r.text());
                         const path = `file:///node_modules/${pkg}${basePath}/${file.name}`;
-                        console.log(path)
-                        console.log(content)
+                        // console.log(path)
+                        // console.log(content)
 
                         monaco.languages.typescript.typescriptDefaults.addExtraLib(content, path);
 
@@ -61,7 +61,7 @@ export async function cacheTypeFrom(monaco: typeof import("monaco-editor"), pkg:
         }
 
         await loadFiles(meta.files);
-        console.log(`${pkg} packages loaded to monaco from jsdelivr`);
+        // console.log(`${pkg} packages loaded to monaco from jsdelivr`);
     }
     
 }

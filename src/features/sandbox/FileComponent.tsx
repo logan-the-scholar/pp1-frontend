@@ -1,7 +1,7 @@
 import { NodeModel } from "@minoru/react-dnd-treeview";
 import FileIconMapper from "./FileIconMapper";
 import { HTMLAttributes } from "react";
-import { DeclaredNodeModel } from "@/types/state-types";
+import { DeclaredNodeModel } from "@/types/ReduxState.type";
 import FileType from "@/types/enum/FileType";
 
 const FileComponent: React.FC<{ node: DeclaredNodeModel<{ extension: string }>, isOpen: boolean | undefined } & HTMLAttributes<HTMLSpanElement>> = ({ node, isOpen, className }) => {

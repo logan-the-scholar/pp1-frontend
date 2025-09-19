@@ -9,8 +9,8 @@ import { useAppDispatch } from "@/hooks/useTypedSelectors";
 import LanguageMapper from "@/helpers/LanguageMapper";
 import OpenTabsSlice from "@/redux/sandbox/open-files/OpenTabsSlice";
 import { useEffect, useRef, useState } from "react";
-import { DeclaredNodeModel, OpenFileMetaData } from "@/types/state-types";
-import { useSaveShortcut } from "@/hooks/shortcut/useSaveShortcut";
+import { DeclaredNodeModel, OpenFile } from "@/types/ReduxState.type";
+import { useCtrlShortcut } from "@/hooks/shortcut/useSaveShortcut";
 import { useRouter, useSearchParams } from "next/navigation";
 import { ApiFile } from "@/services/api/File";
 import { IFileUpdation, ISession } from "@/types/zTypes/zTypes";
@@ -40,7 +40,8 @@ const CodeViewer = () => {
     const line = Number(params?.get("line") || 1);
     const column = Number(params?.get("col") || 1);
 
-    useSaveShortcut(() => {
+
+    useCtrlShortcut("s", () => {
         if (selectedFile) {
             if (timeoutRef.current) clearTimeout(timeoutRef.current);
 
@@ -48,25 +49,63 @@ const CodeViewer = () => {
         }
     });
 
-    const debounceSaveCode = (code: string | undefined, node: DeclaredNodeModel<OpenFileMetaData>) => {
+
+    const debounceSaveCode = (code: string | undefined, node: DeclaredNodeModel<OpenFile>) => {
         dispatch(OpenTabsSlice.actions.edit({
             id: node.id,
-            code: code,
+            content: code,
             line: pos.line,
-            edited: true
+            edited: true,
         }));
 
+        //TODO hay que mejorar todo esto, talvez en lugar de hacer dos llamadas buscar con find y mapear el resto de info
         dispatch(FileTreeSlice.actions.edit({
             ...node,
             data: {
                 ...node.data,
                 content: code,
+                extension: "",
+                fullPath: [],
+                versionId: "",
+                author: "",
+                commit: "",
+                isDrafted: false,
+                edited: false,
+                saved: false
             }
         }));
 
         if (timeoutRef.current) clearTimeout(timeoutRef.current);
 
         timeoutRef.current = setTimeout(async () => {
+
+            if (code === node.data.last_content) {
+                return;
+            }
+
+            dispatch(FileTreeSlice.actions.edit({
+                ...node,
+                data: {
+                    ...node.data,
+                    last_content: code,
+                    extension: "",
+                    fullPath: [],
+                    versionId: "",
+                    author: "",
+                    commit: "",
+                    isDrafted: false,
+                    edited: false,
+                    saved: false
+                }
+            }));
+
+            dispatch(OpenTabsSlice.actions.edit({
+                id: node.id,
+                content: code,
+                line: pos.line,
+                edited: true,
+                last_content: code
+            }));
 
             if (project && branch) {
                 if (session === null) {
@@ -104,6 +143,7 @@ const CodeViewer = () => {
         }, 4000);
     };
 
+
     const handleChange = (code: string | undefined) => {
         if (selectedFile !== undefined) {
 
@@ -112,6 +152,7 @@ const CodeViewer = () => {
         }
     };
 
+
     const handleClose = (id: string | number) => {
         dispatch(OpenTabsAction.closeAndChangeWindow(id));
 
@@ -119,16 +160,32 @@ const CodeViewer = () => {
 
     };
 
-    const handleChangeWindow = (file: DeclaredNodeModel<OpenFileMetaData>) => {
+
+    const handleChangeWindow = (file: DeclaredNodeModel<OpenFile>) => {
+        if (selectedFile !== undefined && pos.line !== selectedFile.data.line) {
+            dispatch(OpenTabsSlice.actions.edit({
+                ...selectedFile,
+                line: pos.line,
+                edited: selectedFile?.data.edited
+            }));
+            console.log(pos.line)
+        }
+
         dispatch(OpenTabsAction.open({ ...file, data: file.data }));
 
         const p = new URLSearchParams(params?.toString());
+
+        if (editorRef.current) {
+            editorRef.current.focus();
+            editorRef.current.setPosition({ lineNumber: file.data.line || 1, column: column || 1 });
+        }
 
         p.delete("line");
         p.delete("col");
         router.push(`?${p.toString()}`);
 
     };
+
 
     const handleMount: OnMount = async (editor, monaco) => {
 
@@ -148,7 +205,7 @@ const CodeViewer = () => {
         //TODO ref:4 sincronizar esto con Sandpack y leerlo desde IDB
         cacheTypeFrom(monaco, "@types/react", "19.0.0");
         cacheTypeFrom(monaco, "@types/react-dom", "19.0.0");
-        
+
         const model = monaco.editor.createModel(
             selectedFile?.data.content || "",
             LanguageMapper(selectedFile?.data.extension || "text"),
@@ -165,10 +222,13 @@ const CodeViewer = () => {
         editor.focus();
 
         editor.onDidChangeCursorPosition((event) => {
-            const { lineNumber, column } = event.position;
-            setPos({ line: lineNumber, col: column });
+            const { lineNumber: line, column } = event.position;
+            console.log(line)
+
+            setPos({ line, col: column });
         });
     };
+
 
     const handleBeforeMount: BeforeMount = async (monaco) => {
 

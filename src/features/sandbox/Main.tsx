@@ -32,24 +32,32 @@ const Main: React.FC<{ files: ApiType.File[] | null, info: RepositoryMetadata }>
     }, [files]);
 
     useEffect(() => {
-        console.log(fileTree);
+
+        //TODO es mejor unificar OpenTabFiles con FileTree y usar el saved aqui
 
         const a = fileTree.reduce((acc, file, index) => {
             const formatedPath = file.data.fullPath.toSpliced(0, 1);
             const path = formatedPath.join("/");
-            if (file.data.content) {
+
+            if (file.data.saved && file.data.content) {
                 acc[path] = {
                     code: file.data.content,
                     active: index === 0
                 };
+
+            } else if (file.data.last_content) {
+                acc[path] = {
+                    code: file.data.last_content,
+                    active: index === 0
+                }
+
             }
+
             return acc;
         }, {} as Record<string, { code: string; active?: boolean }>);
 
-        console.log(a);
-
         setFiles_(a);
-    }, [fileTree])
+    }, [fileTree]);
 
     return (
         <>
@@ -73,9 +81,7 @@ const Main: React.FC<{ files: ApiType.File[] | null, info: RepositoryMetadata }>
                                     "react-dom": "^18.0.0",
                                 }
                             }}
-                            files={
-                                files_
-                            }
+                            files={files_}
                         >
                             <div className="w-full text-white flex h-full overflow-hidden">
                                 <CodeViewer />

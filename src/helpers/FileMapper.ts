@@ -1,5 +1,5 @@
 import { ApiType } from "@/types/ApiResponse.type";
-import { DeclaredNodeModel, FileMetaData, OpenFilesType, TreeType } from "@/types/state-types";
+import { DeclaredNodeModel, FileMetaData, OpenFilesType, TreeType } from "@/types/ReduxState.type";
 import { z, ZodString } from "zod";
 
 function FileMapper(file: ApiType.File): DeclaredNodeModel<FileMetaData> {
@@ -21,6 +21,7 @@ function FileMapper(file: ApiType.File): DeclaredNodeModel<FileMetaData> {
             fullPath: path_,
             versionId: file.id,
             content: content_,
+            last_content: content_,
             line: undefined, //TODO sacarlo de indexedDB
             isDropped: file.id === "0",
             author: file.author,

@@ -1,7 +1,7 @@
 import { DBType } from '@/types/Database.type';
 import { IDBPDatabase } from 'idb';
 import { Repository } from './Repository';
-import { DeclaredNodeModel, OpenFileMetaData, OpenFilesType } from '@/types/state-types';
+import { DeclaredNodeModel, OpenFile, OpenFilesType } from '@/types/ReduxState.type';
 
 export class OpenTabsRepository extends Repository {
 
@@ -10,18 +10,18 @@ export class OpenTabsRepository extends Repository {
     }
 
 
-    async save(state: DeclaredNodeModel<OpenFileMetaData> | DeclaredNodeModel<OpenFileMetaData>[], project_id: string) {
+    async saveOpen(state: OpenFile | OpenFile[], project_id: string) {
 
         if (state instanceof Array) {
             const tx = (await this.dbPromise).transaction("selected", "readwrite");
             await Promise.all([
-                ...state.map((f) => tx.store.put({
+                ...state.map(f => tx.store.put({
                     project_id,
                     id: f.id.toString(),
-                    line: 1,
-                    column: 1,
-                    isSaved: f.data.saved,
-                    isEdited: f.data.edited
+                    // line: 1,
+                    // column: 1,
+                    // isSaved: f.data.saved,
+                    // isEdited: f.data.edited
                 })),
                 tx.done
             ]);
@@ -30,10 +30,10 @@ export class OpenTabsRepository extends Repository {
             await (await this.dbPromise).put("selected", {
                 project_id,
                 id: state.id.toString(),
-                line: 1,
-                column: 1,
-                isSaved: state.data.saved,
-                isEdited: state.data.edited
+                // line: 1,
+                // column: 1,
+                // isSaved: state.data.saved,
+                // isEdited: state.data.edited
             });
 
         }
@@ -41,8 +41,8 @@ export class OpenTabsRepository extends Repository {
     }
 
 
-    async saveSelected(id: string, projectId: string) {
-        await (await this.dbPromise).put("selected_current", { id: projectId, selected: id });
+    async saveSelected(id: string, project_id: string) {
+        await (await this.dbPromise).put("selected_current", { project_id, id });
     }
 
 

@@ -3,15 +3,21 @@ import { NodeModel } from "@minoru/react-dnd-treeview"
 export type FileMetaData = {
     extension: string,
     fullPath: string[],
-    // pathNames?: string[],
     versionId: string;
     content?: string,
+    last_content?: string;
     line?: number,
     isDropped?: boolean,
     author: string,
     commit: string,
     movedFrom?: string,
     isDrafted: boolean,
+    edited: boolean,
+    saved: boolean,
+}
+
+export type DeclaredNodeModel<T> = NodeModel & {
+    data: T
 }
 
 export type TreeType = {
@@ -21,16 +27,11 @@ export type TreeType = {
     branch: string | undefined
 }
 
-export type OpenFileMetaData = FileMetaData & {
-    edited: boolean,
-    saved: boolean,
-}
-
-export type DeclaredNodeModel<T> = NodeModel & {
-    data: T
+export type OpenFile = {
+    id: string;
 }
 
 export type OpenFilesType = {
-    selected: DeclaredNodeModel<OpenFileMetaData> | undefined,
-    open: DeclaredNodeModel<OpenFileMetaData>[]
+    selected: OpenFile | undefined,
+    open: OpenFile[]
 }

@@ -1,6 +1,6 @@
 import { ErrorHelper } from "@/helpers/ErrorHelper";
 import FileType from "@/types/enum/FileType";
-import { DeclaredNodeModel, FileMetaData, TreeType } from "@/types/state-types";
+import { DeclaredNodeModel, FileMetaData, TreeType } from "@/types/ReduxState.type";
 import { IFileUpdation } from "@/types/zTypes/zTypes";
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 

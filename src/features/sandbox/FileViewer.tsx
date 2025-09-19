@@ -7,7 +7,7 @@ import { useSelector } from "react-redux";
 import { RootState } from "@/redux/store";
 import FileType from "@/types/enum/FileType";
 import { useAppDispatch } from "@/hooks/useTypedSelectors";
-import { DeclaredNodeModel, FileMetaData, OpenFilesType } from "@/types/state-types";
+import { DeclaredNodeModel, FileMetaData, OpenFilesType } from "@/types/ReduxState.type";
 import { jetBrainsMono } from "@/helpers/FontLoader";
 import { FileTreeActions } from "@/redux/sandbox/file-tree/FileTreeActions";
 import FileTreeSlice from "@/redux/sandbox/file-tree/FileTreeSlice";

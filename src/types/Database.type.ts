@@ -10,10 +10,10 @@ export type FileTree = {
 export type DbFileTabType = {
   project_id: string;
   id: string;
-  line: number;
-  column: number;
-  isSaved: boolean;
-  isEdited: boolean;
+  // line: number;
+  // column: number;
+  // isSaved: boolean;
+  // isEdited: boolean;
 }
 
 export type DbTreeFileDataType = {
@@ -41,10 +41,11 @@ export interface DBType extends DBSchema {
   };
 
   selected_current: {
-    value: {
-      id: string;
-      selected: string;
-    };
+    value: DbFileTabType;
+    // value: {
+    //   id: string;
+    //   selected: string;
+    // };
     key: string;
   };
 

@@ -1,18 +1,19 @@
 import { useEffect } from "react";
 
-export const useSaveShortcut = (onSave: () => void) => {
+//TODO esto se puede generalizar para crear mas shortcuts facilmente
+export const useCtrlShortcut = (key: string, handler: () => void) => {
     useEffect(() => {
         const handleKeyDown = (e: KeyboardEvent) => {
             const isMac = navigator.platform.toUpperCase().includes("MAC");
-            const isSaveShortcut = (isMac && e.metaKey && e.key === "s") || (!isMac && e.ctrlKey && e.key === "s");
+            const isKeyShortcut = (isMac && e.metaKey && e.key === key) || (!isMac && e.ctrlKey && e.key === key);
 
-            if (isSaveShortcut) {
+            if (isKeyShortcut) {
                 e.preventDefault();
-                onSave();
+                handler();
             }
         };
 
         window.addEventListener("keydown", handleKeyDown);
         return () => window.removeEventListener("keydown", handleKeyDown);
-    }, [onSave]);
+    }, [handler]);
 };
