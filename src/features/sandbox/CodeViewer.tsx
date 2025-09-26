@@ -7,9 +7,8 @@ import FileIconMapper from "./FileIconMapper";
 import { OpenTabsAction } from "@/redux/sandbox/open-files/OpenFilesActions";
 import { useAppDispatch } from "@/hooks/useTypedSelectors";
 import LanguageMapper from "@/helpers/LanguageMapper";
-import OpenTabsSlice from "@/redux/sandbox/open-files/OpenTabsSlice";
 import { useEffect, useRef, useState } from "react";
-import { DeclaredNodeModel, OpenFile } from "@/types/ReduxState.type";
+import { DeclaredNodeModel, FileMetaData } from "@/types/ReduxState.type";
 import { useCtrlShortcut } from "@/hooks/shortcut/useSaveShortcut";
 import { useRouter, useSearchParams } from "next/navigation";
 import { ApiFile } from "@/services/api/File";
@@ -19,19 +18,18 @@ import { FileUpdation } from "@/types/zTypes/FileUpdation.type";
 import { ErrorHelper } from "@/helpers/ErrorHelper";
 import { useLocalStorage } from "@/hooks/useLocalStorage";
 import { editor } from "monaco-editor";
-import FileTreeSlice from "@/redux/sandbox/file-tree/FileTreeSlice";
 import { cacheTypeFrom } from "@/services/Package";
-// import reactTypes from "@/types/react/index";
-// import reactDomTypes from "@/types/react-dom/index";
+import { FileTreeActions } from "@/redux/sandbox/file-tree/FileTreeActions";
+import FileTreeSlice, { selectOpenFiles } from "@/redux/sandbox/file-tree/FileTreeSlice";
 
 const CodeViewer = () => {
     const dispatch = useAppDispatch();
-    const selectedFile = useSelector((state: RootState) => state.OPEN_FILES.selected);
-    const openFiles = useSelector((state: RootState) => state.OPEN_FILES.open);
-    const { project, branch, tree } = useSelector((state: RootState) => state.FILE_TREE);
+    const { open, selected, project, branch } = useSelector((state: RootState) => state.PROJECT_META);
+    const selectedRef = useSelector((state: RootState) => selected === undefined ? undefined : state.FILE_TREE.entities[selected]);
+    const openFiles = useSelector(selectOpenFiles);
+    // const { project, branch, tree, selected: selectedRef_ } = useSelector((state: RootState) => state.FILE_TREE);
     const [pos, setPos] = useState<{ line: number, col: number }>({ line: 1, col: 1 });
     const timeoutRef = useRef<NodeJS.Timeout | null>(null);
-    // const nose = useMonaco();
     const router = useRouter();
     const [session,] = useLocalStorage<ISession | null>("session", null);
 
@@ -41,38 +39,25 @@ const CodeViewer = () => {
     const column = Number(params?.get("col") || 1);
 
 
-    useCtrlShortcut("s", () => {
-        if (selectedFile) {
-            if (timeoutRef.current) clearTimeout(timeoutRef.current);
+    // const selectedFile = (id: string) useSelector(state =>
+    //     state.files.byId[state.openTabs.selectedId]
+    // );
 
-            dispatch(OpenTabsSlice.actions.changeSaved({ one: { id: selectedFile.id, saved: true } }));
+
+    useCtrlShortcut("s", () => {
+        if (selectedRef) {
+            if (timeoutRef.current) clearTimeout(timeoutRef.current);
+            // dispatch(FileTreeSlice.actions.save([{ id: selectedRef.id.toString() }]));
+            dispatch(FileTreeSlice.actions.save([{ id: selectedRef.id.toString() }]));
         }
     });
 
 
-    const debounceSaveCode = (code: string | undefined, node: DeclaredNodeModel<OpenFile>) => {
-        dispatch(OpenTabsSlice.actions.edit({
-            id: node.id,
-            content: code,
-            line: pos.line,
-            edited: true,
-        }));
+    const debounceSaveCode = (code: string | undefined, node: DeclaredNodeModel<FileMetaData>) => {
 
-        //TODO hay que mejorar todo esto, talvez en lugar de hacer dos llamadas buscar con find y mapear el resto de info
         dispatch(FileTreeSlice.actions.edit({
-            ...node,
-            data: {
-                ...node.data,
-                content: code,
-                extension: "",
-                fullPath: [],
-                versionId: "",
-                author: "",
-                commit: "",
-                isDrafted: false,
-                edited: false,
-                saved: false
-            }
+            id: node.id.toString(),
+            content: code
         }));
 
         if (timeoutRef.current) clearTimeout(timeoutRef.current);
@@ -82,30 +67,6 @@ const CodeViewer = () => {
             if (code === node.data.last_content) {
                 return;
             }
-
-            dispatch(FileTreeSlice.actions.edit({
-                ...node,
-                data: {
-                    ...node.data,
-                    last_content: code,
-                    extension: "",
-                    fullPath: [],
-                    versionId: "",
-                    author: "",
-                    commit: "",
-                    isDrafted: false,
-                    edited: false,
-                    saved: false
-                }
-            }));
-
-            dispatch(OpenTabsSlice.actions.edit({
-                id: node.id,
-                content: code,
-                line: pos.line,
-                edited: true,
-                last_content: code
-            }));
 
             if (project && branch) {
                 if (session === null) {
@@ -145,31 +106,30 @@ const CodeViewer = () => {
 
 
     const handleChange = (code: string | undefined) => {
-        if (selectedFile !== undefined) {
-
-            debounceSaveCode(code, selectedFile);
+        if (selectedRef !== undefined && code !== selectedRef.data.content) {
+            debounceSaveCode(code, selectedRef);
 
         }
     };
 
 
     const handleClose = (id: string | number) => {
-        dispatch(OpenTabsAction.closeAndChangeWindow(id));
+        dispatch(OpenTabsAction.closeAndChangeWindow(id.toString()));
 
         //TODO hacer una clase para los paths
 
     };
 
 
-    const handleChangeWindow = (file: DeclaredNodeModel<OpenFile>) => {
-        if (selectedFile !== undefined && pos.line !== selectedFile.data.line) {
-            dispatch(OpenTabsSlice.actions.edit({
-                ...selectedFile,
-                line: pos.line,
-                edited: selectedFile?.data.edited
-            }));
-            console.log(pos.line)
-        }
+    const handleChangeWindow = (file: DeclaredNodeModel<FileMetaData>) => {
+        // if (selectedRef !== undefined && pos.line !== selectedRef.data.line) {
+        //     dispatch(OpenTabsSlice.actions.edit({
+        //         ...selectedRef,
+        //         line: pos.line,
+        //         edited: selectedRef?.data.edited
+        //     }));
+        //     console.log(pos.line);
+        // }
 
         dispatch(OpenTabsAction.open({ ...file, data: file.data }));
 
@@ -207,8 +167,8 @@ const CodeViewer = () => {
         cacheTypeFrom(monaco, "@types/react-dom", "19.0.0");
 
         const model = monaco.editor.createModel(
-            selectedFile?.data.content || "",
-            LanguageMapper(selectedFile?.data.extension || "text"),
+            selectedRef?.data.content || "",
+            LanguageMapper(selectedRef?.data.extension || "text"),
             // monaco.Uri.file(activeFile)
         );
 
@@ -239,10 +199,10 @@ const CodeViewer = () => {
     useEffect(() => {
 
         const p = new URLSearchParams(params?.toString());
-        if (selectedFile !== undefined) {
+        if (selectedRef !== undefined) {
 
-            document.title = `${"Unknown"} /${selectedFile.text}`;
-            const path_ = selectedFile.data.fullPath.slice(1).join("/") || `/${selectedFile.text}`;
+            document.title = `${"Unknown"} /${selectedRef.text}`;
+            const path_ = selectedRef.data.fullPath.slice(1).join("/") || `/${selectedRef.text}`;
 
             p.set("file", path_);
 
@@ -253,7 +213,7 @@ const CodeViewer = () => {
 
         router.push(`?${p.toString()}`);
 
-    }, [selectedFile]);
+    }, [selectedRef]);
 
 
     useEffect(() => {
@@ -267,35 +227,37 @@ const CodeViewer = () => {
 
     return (
         <div style={{}} className="w-1/2 h-full flex flex-col">
-            {openFiles.length > 0 ?
+            {openFiles.length > 0 && selectedRef !== undefined ?
                 <>
                     {/* WINDOW VIEW */}
                     <div className="w-full flex select-none">
 
                         {/* TITLE */}
                         {
-                            openFiles.map((file) => {
+                            openFiles.map((f) => {
+                                // const file = tree.find(f_ => f.id === f_.id);
+                                // if (!file) return null;
                                 return (
                                     <div
-                                        onClick={() => handleChangeWindow(file)}
-                                        key={`window_${file.id}`}
+                                        onClick={() => handleChangeWindow(f)}
+                                        key={`window_${f.id}`}
                                         className={`hover:[&>span]:visible pl-3 py-1.5 bg-[#1e1e1e] cursor-pointer w-fit flex relative 
-${file.id === selectedFile?.id ? "border-x border-neutral-600" : "border-x border-[#1e1e1e] bg-neutral-900"}
-${!file.data.edited && "italic"}`}
+${f.id === selectedRef.id ? "border-x border-neutral-600" : "border-x border-[#1e1e1e] bg-neutral-900"}
+${!f.data.edited && "italic"}`}
                                     >
                                         <div className="mr-3 content-center">
-                                            <FileIconMapper type={file.data?.extension as string} />
+                                            <FileIconMapper type={f.data?.extension as string} />
                                         </div>
-                                        {file.text}
+                                        {f.text}
                                         <span
                                             onClick={(e) => {
                                                 e.stopPropagation();
-                                                handleClose(file.id);
+                                                handleClose(f.id);
                                             }}
                                             className={`mx-2 px-0.5 -my-0.5 py-0.5 content-center rounded-[4px] 
-${file.id === selectedFile?.id || file.data.edited ? "visible hover:bg-[#ffffff13]" : "invisible hover:bg-[#ffffff18]"}`}>
+${f.id === selectedRef.id || f.data.edited ? "visible hover:bg-[#ffffff13]" : "invisible hover:bg-[#ffffff18]"}`}>
                                             {
-                                                file.data.edited && !file.data.saved ?
+                                                f.data.edited && !f.data.saved ?
                                                     // {/* EDITED CIRCLE */}
                                                     <svg xmlns="http://www.w3.org/2000/svg"
                                                         width="10" height="10"
@@ -306,7 +268,7 @@ ${file.id === selectedFile?.id || file.data.edited ? "visible hover:bg-[#ffffff1
                                                         <circle cx="12" cy="12" r="10" />
                                                     </svg>
                                                     :
-                                                    // {/* NOT EDITED OR HOVER TO CLOSE CROSS */}
+                                                    // {/* NOT EDITED (OR HOVER TO CLOSE) CROSS */}
                                                     <svg xmlns="http://www.w3.org/2000/svg"
                                                         width="16" height="16"
                                                         viewBox="0 0 24 24"
@@ -318,7 +280,7 @@ ${file.id === selectedFile?.id || file.data.edited ? "visible hover:bg-[#ffffff1
                                             }
                                         </span>
                                         {
-                                            file.id === selectedFile?.id &&
+                                            f.id === selectedRef?.id &&
                                             <div className="absolute left-0 h-0.5 w-full bg-[#1e1e1e] -bottom-[1px]"></div>
                                         }
                                     </div>
@@ -330,23 +292,23 @@ ${file.id === selectedFile?.id || file.data.edited ? "visible hover:bg-[#ffffff1
                     {/* PATH VIEW */}
                     <div className="px-4 py-1 flex border-x border-t border-neutral-600 text-xs text-neutral-300 bg-[#1e1e1e] select-none">
                         {
-                            selectedFile !== undefined ?
-                                [...selectedFile.data.fullPath]
+                            selectedRef !== undefined ?
+                                [...selectedRef.data.fullPath]
                                     .map((path, index) => {
                                         return (path === "0" ? null :
-                                            <span className="hover:text-neutral-100 cursor-pointer mr-1.5 flex" key={`${path}_${selectedFile.text}`}>
+                                            <span className="hover:text-neutral-100 cursor-pointer mr-1.5 flex" key={`${path}_${selectedRef.text}`}>
                                                 {/* {path === selectedFile.text && selectedFile.data?.extension !== FileType.FOLDER && (index + 1) === selectedFile.data?.fullPath?.length &&
                                                     <span className="mr-1">
                                                         <FileIconMapper type={selectedFile.data?.extension as string} />
                                                     </span>
                                                 } */}
-                                                {path === selectedFile.text &&
+                                                {path === selectedRef.text &&
                                                     <span className="mr-1.5 h-full flex items-center">
-                                                        <FileIconMapper size={12} type={selectedFile.data?.extension as string} />
+                                                        <FileIconMapper size={12} type={selectedRef.data?.extension as string} />
                                                     </span>
                                                 }
                                                 {/* {`${path} ${path !== selectedFile.text ? "a" : ""}`} */}
-                                                {path} {path !== selectedFile.text &&
+                                                {path} {path !== selectedRef.text &&
                                                     <span className="max-w-4 max-h-4 overflow-hidden">
                                                         <svg xmlns="http://www.w3.org/2000/svg"
                                                             width="16" height="16"
@@ -375,10 +337,10 @@ ${file.id === selectedFile?.id || file.data.edited ? "visible hover:bg-[#ffffff1
                         )}
                         options={{ minimap: { enabled: false } }}
                         className="w-full flex-1 border-x border-neutral-600"
-                        language={LanguageMapper(selectedFile?.data?.extension as string)}
+                        language={LanguageMapper(selectedRef?.data?.extension as string)}
                         theme="vs-dark"
-                        path={selectedFile?.data.fullPath.join("/")}
-                        value={selectedFile?.data?.content || ""}
+                        path={selectedRef?.data.fullPath.join("/")}
+                        value={selectedRef?.data?.content || ""}
                         onChange={(x) => handleChange(x)}
                         beforeMount={handleBeforeMount}
                         onMount={handleMount}

@@ -19,6 +19,20 @@ const Projects: React.FC<{ showPopup: boolean, setShowPopup: React.Dispatch<Reac
     const [loading, setLoading] = useState<boolean>(true);
     const [loadingProjects, setLoadingProjects] = useState<boolean>(true);
 
+    const loadWorkspaces = async (session_: ApiType.Session) => {
+        const response: ApiType.Workspace[] | ErrorHelper = await ApiWorkspace.getAll(session_.nickname);
+
+        if (response instanceof Array) {
+            setWorkspace(response);
+
+            if (selectedWorkspace === null && response.length > 0) {
+                setSelectedWorkspace(response[0]);
+            }
+
+        }
+
+    };
+
     useEffect(() => {
         setLoading(true);
 
@@ -30,19 +44,9 @@ const Projects: React.FC<{ showPopup: boolean, setShowPopup: React.Dispatch<Reac
                 return;
             }
 
-            const response: ApiType.Workspace[] | ErrorHelper = await ApiWorkspace.getAll(session.name);
-
-            if (response instanceof Array) {
-                setWorkspace(response);
-
-                if (selectedWorkspace === null && response.length > 0) {
-                    setSelectedWorkspace(response[0]);
-                    console.log(response[0]);
-                }
-
-            }
-
+            loadWorkspaces(session);
             setLoading(false);
+
         };
 
         if (typeof window !== undefined) {
@@ -56,12 +60,16 @@ const Projects: React.FC<{ showPopup: boolean, setShowPopup: React.Dispatch<Reac
 
         const fetch = async () => {
             //TODO ref:1
-            if (selectedWorkspace === null) {
-                console.error("workspace id is null!");
-                return;
+            let w_ = selectedWorkspace;
+            if (w_ === null || w_ === undefined) {
+
+                if (session) {
+                    await loadWorkspaces(session);
+                    setLoading(false);
+                }
             }
 
-            const response: ApiType.Project[] | ErrorHelper = await ApiProject.getAll(selectedWorkspace.id);
+            const response: ApiType.Project[] | ErrorHelper = await ApiProject.getAll((w_?.id || selectedWorkspace?.id) as string);
 
             if (response instanceof ErrorHelper) {
                 console.error(response);

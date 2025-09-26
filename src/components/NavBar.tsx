@@ -3,7 +3,6 @@ import { useDashboardContext } from "@/context/DashboardProvider";
 import { useLocalStorage } from "@/hooks/useLocalStorage";
 import { ApiType } from "@/types/ApiResponse.type";
 import { useEffect, useState } from "react";
-import { ZodArray, ZodObject } from "zod";
 
 const NavBar: React.FC = () => {
     const [, setShowPopup] = useDashboardContext();
@@ -54,7 +53,7 @@ const NavBar: React.FC = () => {
                 <div className="h-8 w-8">
                     <img
                         className="rounded-full cursor-pointer h-full w-full"
-                        src={userDataState.profileImage} alt="profile image"
+                        src={userDataState.picture} alt="profile image"
                     />
                 </div>
             }

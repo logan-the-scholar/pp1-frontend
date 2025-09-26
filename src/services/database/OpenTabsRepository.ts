@@ -1,7 +1,5 @@
-import { DBType } from '@/types/Database.type';
-import { IDBPDatabase } from 'idb';
+import { DbFileTabType, DBSelectedTabType } from '@/types/Database.type';
 import { Repository } from './Repository';
-import { DeclaredNodeModel, OpenFile, OpenFilesType } from '@/types/ReduxState.type';
 
 export class OpenTabsRepository extends Repository {
 
@@ -10,30 +8,30 @@ export class OpenTabsRepository extends Repository {
     }
 
 
-    async saveOpen(state: OpenFile | OpenFile[], project_id: string) {
+    async saveOpen(state: DbFileTabType | DbFileTabType[], project_id: string) {
 
         if (state instanceof Array) {
-            const tx = (await this.dbPromise).transaction("selected", "readwrite");
+            const tx = (await this.dbPromise).transaction("open", "readwrite");
             await Promise.all([
                 ...state.map(f => tx.store.put({
                     project_id,
-                    id: f.id.toString(),
-                    // line: 1,
+                    id: f.id,
+                    line: 1,
+                    saved: f.saved,
+                    edited: f.edited,
                     // column: 1,
-                    // isSaved: f.data.saved,
-                    // isEdited: f.data.edited
                 })),
                 tx.done
             ]);
 
         } else {
-            await (await this.dbPromise).put("selected", {
+            await (await this.dbPromise).put("open", {
                 project_id,
-                id: state.id.toString(),
-                // line: 1,
+                id: state.id,
+                line: 1,
                 // column: 1,
-                // isSaved: state.data.saved,
-                // isEdited: state.data.edited
+                saved: state.saved,
+                edited: state.edited
             });
 
         }
@@ -41,8 +39,8 @@ export class OpenTabsRepository extends Repository {
     }
 
 
-    async saveSelected(id: string, project_id: string) {
-        await (await this.dbPromise).put("selected_current", { project_id, id });
+    async saveSelected(state: DBSelectedTabType) {
+        await (await this.dbPromise).put("selected_current", state);
     }
 
 
@@ -52,14 +50,27 @@ export class OpenTabsRepository extends Repository {
     }
 
 
-    async clear() {
-        await (await this.dbPromise).clear("selected");
-        await (await this.dbPromise).clear("selected_current");
+    async clear(id: string) {
+        const db = await this.dbPromise;
+        const store = db.transaction("open", "readwrite").objectStore("open");
+        const index = store.index("reference");
+        const data = await index.getAll(id);
+
+        if (data.length > 0) {
+            const tx = store.transaction;
+            await Promise.all([
+                ...data.map(f => tx.store.delete(f.id)),
+                db.delete("selected_current", id),
+                tx.done
+            ]);
+        }
+        // await (await this.dbPromise).clear("selected");
+        // await (await this.dbPromise).clear("selected_current");
     }
 
 
     async get(id: string) {
-        const store = (await this.dbPromise).transaction("selected").objectStore("selected");
+        const store = (await this.dbPromise).transaction("open").objectStore("open");
         const index = store.index("reference");
         const data = await index.getAll(id);
 
@@ -68,6 +79,12 @@ export class OpenTabsRepository extends Repository {
 
 
     async remove(id: string) {
-        await (await this.dbPromise).delete("selected", id);
+        //TODO este se debe cambiar a remover por referencia e id, para evitar eliminar indices de otra session
+        await (await this.dbPromise).delete("open", id);
+    }
+
+
+    async unSelect(id: string) {
+        await (await this.dbPromise).delete("selected_current", id)
     }
 }

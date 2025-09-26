@@ -17,21 +17,26 @@ export type FileMetaData = {
 }
 
 export type DeclaredNodeModel<T> = NodeModel & {
+    id: string
     data: T
 }
 
-export type TreeType = {
-    tree: DeclaredNodeModel<FileMetaData>[],
-    selected: DeclaredNodeModel<FileMetaData> | undefined,
+export type FileTreeType = DeclaredNodeModel<FileMetaData> & { id: string }
+
+
+export type ProjectMetaType = {
+    selected: string | undefined,
+    open: string | undefined,
     project: string | undefined,
     branch: string | undefined
 }
 
-export type OpenFile = {
-    id: string;
-}
+// export type OpenFile = DeclaredNodeModel<FileMetaData>;
+// {
+//     id: string;
+// }
 
-export type OpenFilesType = {
-    selected: OpenFile | undefined,
-    open: OpenFile[]
-}
+// export type OpenFilesType = {
+//     selected: string | undefined,
+//     open: string[]
+// }

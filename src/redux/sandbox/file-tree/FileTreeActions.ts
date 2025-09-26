@@ -1,10 +1,10 @@
 import { NodeModel } from "@minoru/react-dnd-treeview";
 import OpenTabsSlice from "../open-files/OpenTabsSlice";
 import FileType from "@/types/enum/FileType";
-import { DeclaredNodeModel, FileMetaData, OpenFile, OpenFilesType, TreeType } from "@/types/ReduxState.type";
+import { DeclaredNodeModel, FileMetaData, FileTreeType } from "@/types/ReduxState.type";
 import { AppDispatch, AppThunk, RootState } from "@/redux/store";
 import { ApiType } from "@/types/ApiResponse.type";
-import FileTreeSlice from "./FileTreeSlice";
+import FileTreeSlice, { FileTreeSelectors } from "./FileTreeSlice";
 import { zodValidate } from "@/helpers/zod/ZodValidate";
 import { IFileCreation } from "@/types/zTypes/zTypes";
 import { ErrorHelper } from "@/helpers/ErrorHelper";
@@ -15,6 +15,7 @@ import { OpenTabsRepository } from "@/services/database/OpenTabsRepository";
 import { ApiStatusEnum } from "@/types/enum/ApiStatus.enum";
 import { createAsyncThunk } from "@reduxjs/toolkit/react";
 import FileMapper from "@/helpers/FileMapper";
+import { ProjectMetaActions } from "../project-meta/ProjectMetaActions";
 
 type CreateNodeType = { node: DeclaredNodeModel<FileMetaData>, repoId: string, branch: string }
 type ThunkOptions = { state: RootState; dispatch: AppDispatch; rejectValue: { message: string }; }
@@ -23,22 +24,22 @@ const createAndOpenNode = createAsyncThunk<void, CreateNodeType, ThunkOptions>(
     "TREE/create",
     async ({ node, repoId, branch }, { getState, dispatch, rejectWithValue }) => {
 
-        const { pathNames } = findParent(node, getState);
+        const pathNames = findParent(node, getState);
         const created = await pushNode({ node: { ...node, data: { ...node.data, fullPath: pathNames } }, repoId, branch });
 
         dispatch(FileTreeSlice.actions.createNode(FileMapper(created)));
 
-        const createdNode = getState().FILE_TREE.tree.find((n) => n.id === created.id);
+        const createdNode = getState().FILE_TREE.entities[created.id];//.tree.find((n) => n.id === created.id);
 
         if (createdNode && createdNode.data?.extension.toLowerCase() !== FileType.FOLDER) {
-            dispatch(OpenTabsSlice.actions.add({
-                ...createdNode,
-                data: {
-                    ...createdNode.data as FileMetaData,
-                    edited: true,
-                    saved: true,
-                }
-            }));
+            // dispatch(OpenTabsSlice.actions.add({
+            //     ...createdNode,
+            //     data: {
+            //         ...createdNode.data as FileMetaData,
+            //         edited: true,
+            //         saved: true,
+            //     }
+            // }));
 
             dispatch(OpenTabsAction.open({
                 ...createdNode,
@@ -56,52 +57,40 @@ function createStore(files: ApiType.File[]): AppThunk {
     return (async (dispatch, getState) => {
         try {
 
-            const formatedFiles = files.map<DeclaredNodeModel<FileMetaData>>(file => FileMapper(file));
-
-            dispatch(FileTreeSlice.actions.createStore(formatedFiles));
-
-            const projectId = getState().FILE_TREE.project;
+            const projectId = getState().PROJECT_META.project;
 
             if (projectId !== undefined) {
 
                 const repository = new OpenTabsRepository();
-                const openTabsState = await repository.get(projectId);
+                const openTabsMeta = await repository.get(projectId);
 
-                if (openTabsState !== undefined) {
+                const formatedFiles = files.map<FileTreeType>(file => FileMapper(file, openTabsMeta?.find(m => m.id === file.id)));
+                dispatch(FileTreeSlice.actions.createStore(formatedFiles));
 
-                    const openTabsFiles: DeclaredNodeModel<OpenFile>[] = openTabsState.map<DeclaredNodeModel<OpenFile> | undefined>((f) => {
-                        const fileRef = formatedFiles.find((i) => i.id === f.id);
+                if (openTabsMeta !== undefined) {
 
-                        if (fileRef === undefined) {
-                            return undefined;
-                        }
-                        return {
-                            ...fileRef,
-                            id: f.id,
-                            data: {
-                                ...fileRef.data,
-                                pathNames: fileRef.data.fullPath,
-                                saved: f.isSaved,
-                                edited: f.isEdited
-                            }
-                        };
+                    // NO ABRE archivos que se eliminaron desde el backend, 
+                    // se puede cambiar a "razon de eliminacion" tomando el ultimo commit
+
+                    const openTabsFiles = openTabsMeta.map((f) => {
+                        const fileRef = formatedFiles.find((i) => i.id === f.id)?.id;
+                        return fileRef !== undefined ? fileRef : undefined
                     }).filter((f) => f !== undefined);
 
                     let current = await repository.getSelected(projectId);
 
                     if (current === undefined) {
-                        current = { id: projectId, selected: openTabsFiles[0].id.toString() };
+                        current = { id: projectId, name: openTabsFiles[0], saved: true, edited: true, line: 1 };
                     }
 
-                    dispatch(OpenTabsSlice.actions.createStore({
-                        open: openTabsFiles,
-                        selected: openTabsFiles.find((f) => f.id === current.selected)
-                    }));
+                    dispatch(ProjectMetaActions.select(current.id));
+
+                    dispatch(OpenTabsSlice.actions.createStore(openTabsFiles));
 
                 } else {
-                    await repository.clear();
+                    await repository.clear(projectId);
 
-                    //TODO aqui o antes de llegar aqui se puede hacer fetch al estado se sesion.
+                    //TODO aqui o antes de llegar aqui se puede hacer fetch al estado de sesion. en caso de no haber una en local
                 }
 
             } else {
@@ -117,20 +106,16 @@ function createStore(files: ApiType.File[]): AppThunk {
 }
 
 
-function findParent(node: NodeModel<FileMetaData>, getState: () => { OPEN_FILES: OpenFilesType, FILE_TREE: TreeType }) {
+function findParent(node: NodeModel<FileMetaData>, getState: () => RootState) {
 
     const pathNames: string[] = [];
-    // const fullPath: string[] = [];
 
     pathNames.push(node.text);
 
     const find = (id: string) => {
-        const found: NodeModel<FileMetaData> | undefined = getState().FILE_TREE.tree.find((parentNode) => {
-            return parentNode.id === id && id !== "0";
-        });
+        const found = id !== "0" ? getState().FILE_TREE.entities[id] : undefined;
 
         if (found !== undefined) {
-            // fullPath.unshift(found.id.toString());
             pathNames.unshift(found.text);
 
             if (found.parent !== "0") {
@@ -139,12 +124,9 @@ function findParent(node: NodeModel<FileMetaData>, getState: () => { OPEN_FILES:
         }
     };
 
-    find(node.parent as string);
+    find(node.parent.toString());
 
-    return {
-        pathNames,
-        // fullPath 
-    };
+    return pathNames;
 }
 
 
@@ -191,14 +173,15 @@ function deleteAndChilds(node: DeclaredNodeModel<FileMetaData>): AppThunk {
         }
 
         const find = (id: string) => {
-            const children = getState().FILE_TREE.tree.filter((child) => child.parent === id);
+            // const children = getState().FILE_TREE.tree.filter((child) => child.parent === id);
+            const children = FileTreeSelectors.selectAll(getState()).filter(c=> c.parent === id);
 
             //TODO esto puede causar problemas de rendimiento, se puede refactorizar 
             //TODO recibiendo un array completo en closeAndChangeWindow() o incluso en delete()
 
             children.forEach((file) => {
                 dispatch(FileTreeSlice.actions.delete(file.id.toString()));
-                dispatch(OpenTabsAction.closeAndChangeWindow(file.id));
+                dispatch(OpenTabsAction.closeAndChangeWindow(file.id.toString()));
                 file.droppable && find(file.id.toString());
 
             });
@@ -206,7 +189,7 @@ function deleteAndChilds(node: DeclaredNodeModel<FileMetaData>): AppThunk {
 
         find(node.id.toString());
         dispatch(FileTreeSlice.actions.delete(node.id.toString()));
-        dispatch(OpenTabsAction.closeAndChangeWindow(node.id));
+        dispatch(OpenTabsAction.closeAndChangeWindow(node.id.toString()));
 
     });
 }

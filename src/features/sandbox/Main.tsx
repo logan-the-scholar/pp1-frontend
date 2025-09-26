@@ -2,15 +2,16 @@
 import EditorNavBar from "./EditorNavBar";
 import ContentSideBar from "./ContentSideBar";
 import FileViewer from "./FileViewer";
-import { SandpackFile, SandpackFiles, SandpackLayout, SandpackPreview, SandpackProvider } from "@codesandbox/sandpack-react";
+import { SandpackLayout, SandpackPreview, SandpackProvider } from "@codesandbox/sandpack-react";
 import CodeViewer from "./CodeViewer";
 import { useEffect, useState } from "react";
 import { useAppDispatch } from "@/hooks/useTypedSelectors";
 import { FileTreeActions } from "@/redux/sandbox/file-tree/FileTreeActions";
 import { ApiType } from "@/types/ApiResponse.type";
-import FileTreeSlice from "@/redux/sandbox/file-tree/FileTreeSlice";
+import FileTreeSlice, { FileTreeSelectors } from "@/redux/sandbox/file-tree/FileTreeSlice";
 import { useSelector } from "react-redux";
 import { RootState } from "@/redux/store";
+import ProjectMetaSlice from "@/redux/sandbox/project-meta/ProjectMetaSlice";
 
 type RepositoryMetadata = {
     id: string,
@@ -18,14 +19,14 @@ type RepositoryMetadata = {
 }
 
 const Main: React.FC<{ files: ApiType.File[] | null, info: RepositoryMetadata }> = ({ files, info }) => {
-    const fileTree = useSelector((state: RootState) => state.FILE_TREE.tree);
+    const fileTree = useSelector((state: RootState) => FileTreeSelectors.selectAll(state));
     const dispatch = useAppDispatch();
     const [files_, setFiles_] = useState<Record<string, { code: string; active?: boolean; }> | undefined>(undefined);
 
     useEffect(() => {
         if (files !== null && files.length > 0) {
-            dispatch(FileTreeSlice.actions.setProject(info.id));
-            dispatch(FileTreeSlice.actions.setBranch(info.branch));
+            dispatch(ProjectMetaSlice.actions.setProject(info.id));
+            dispatch(ProjectMetaSlice.actions.setBranch(info.branch));
             dispatch(FileTreeActions.createStore(files));
         }
 
@@ -33,24 +34,15 @@ const Main: React.FC<{ files: ApiType.File[] | null, info: RepositoryMetadata }>
 
     useEffect(() => {
 
-        //TODO es mejor unificar OpenTabFiles con FileTree y usar el saved aqui
-
         const a = fileTree.reduce((acc, file, index) => {
             const formatedPath = file.data.fullPath.toSpliced(0, 1);
             const path = formatedPath.join("/");
 
-            if (file.data.saved && file.data.content) {
-                acc[path] = {
-                    code: file.data.content,
-                    active: index === 0
-                };
-
-            } else if (file.data.last_content) {
+            if (file.data.last_content) {
                 acc[path] = {
                     code: file.data.last_content,
                     active: index === 0
-                }
-
+                };
             }
 
             return acc;

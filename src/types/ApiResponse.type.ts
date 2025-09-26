@@ -1,4 +1,3 @@
-import { string } from "zod";
 import { UserType } from "./enum/UserRecurrence.enum";
 import { UserRecurrence } from "./enum/UserType.enum";
 
@@ -6,14 +5,14 @@ export namespace ApiType {
 
     export type Login = {
         id: string;
-        name: string;
-        email: string;
-        profileImage: string;
+        nickname: string;
+        mail: string;
+        picture: string;
         userType: UserType;
         recurrence: UserRecurrence;
     }
 
-    export type Session = Pick<Login, "email" | "name">;
+    export type Session = Pick<Login, "mail" | "nickname" | "picture">;
 
     export type Workspace = {
         id: string;

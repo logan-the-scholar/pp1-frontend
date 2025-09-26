@@ -7,13 +7,15 @@ import { useSelector } from "react-redux";
 import { RootState } from "@/redux/store";
 import FileType from "@/types/enum/FileType";
 import { useAppDispatch } from "@/hooks/useTypedSelectors";
-import { DeclaredNodeModel, FileMetaData, OpenFilesType } from "@/types/ReduxState.type";
+import { DeclaredNodeModel, FileMetaData } from "@/types/ReduxState.type";
 import { jetBrainsMono } from "@/helpers/FontLoader";
 import { FileTreeActions } from "@/redux/sandbox/file-tree/FileTreeActions";
-import FileTreeSlice from "@/redux/sandbox/file-tree/FileTreeSlice";
+import FileTreeSlice, { FileTreeSelectors, selectOpenFiles } from "@/redux/sandbox/file-tree/FileTreeSlice";
 import { OpenTabsAction } from "@/redux/sandbox/open-files/OpenFilesActions";
 import { showPopup } from "@/context/PopupProvider";
 import { ErrorHelper } from "@/helpers/ErrorHelper";
+import ProjectMetaSlice from "@/redux/sandbox/project-meta/ProjectMetaSlice";
+import { ProjectMetaActions } from "@/redux/sandbox/project-meta/ProjectMetaActions";
 
 type ContextType = {
     node: NodeModel<FileMetaData>,
@@ -26,8 +28,11 @@ const FileViewer: React.FC<{ info: { id: string; branch: string; } }> = ({ info 
 
     const treeContext = useTreeContext();
     const dispatch = useAppDispatch();
-    const treeData = useSelector((state: RootState) => state.FILE_TREE);
-    const openFileData: OpenFilesType = useSelector((state: RootState) => state.OPEN_FILES);
+    const tree = useSelector((state: RootState) => FileTreeSelectors.selectAll(state));
+    const selected = useSelector((state: RootState) => {
+        const id = state.PROJECT_META.selected;
+        return id !== undefined ? state.FILE_TREE.entities[id] : undefined;
+    });
 
     const treeRef = useRef<TreeMethods>(null);
     const contextMenuRef = useRef<HTMLDivElement | null>(null);
@@ -50,7 +55,14 @@ const FileViewer: React.FC<{ info: { id: string; branch: string; } }> = ({ info 
 
 
     const handleOpen = (node: NodeModel<FileMetaData>) => {
-        dispatch(OpenTabsAction.open({ ...node, data: node.data as FileMetaData }));
+        dispatch(OpenTabsAction.open({
+            ...node,
+            id: node.id.toString(),
+            data: {
+                ...(node.data as FileMetaData),
+                edited: false
+            }
+        }));
     };
 
 
@@ -60,30 +72,11 @@ const FileViewer: React.FC<{ info: { id: string; branch: string; } }> = ({ info 
     };
 
 
-    const handleSaveState = (node: DeclaredNodeModel<FileMetaData>) => {
-        if (node.droppable) {
-
-            const handle = async () => {
-                const nose = treeData.tree.find((node_) => node_.id === node.id);
-
-                // const repository = new SelectedRepository();
-                // await repository.save({
-                //     id: node.id as string,
-                //     isDropped: nose?.data.isDropped,
-                //     status: FileModifStatus.UNMODIFIED
-                // }, info.id);
-            }
-
-            handle();
-        }
-    };
-
-
     useEffect(() => {
-        if (openFileData.selected != null) {
-            treeRef.current?.open(openFileData.selected?.data.fullPath as (string | number)[]);
+        if (selected != undefined) {
+            treeRef.current?.open(selected.id);
         }
-    }, [openFileData.selected]);
+    }, [selected]);
 
 
     useEffect(() => {
@@ -131,7 +124,7 @@ const FileViewer: React.FC<{ info: { id: string; branch: string; } }> = ({ info 
             if (!contextSelected.isOpen) {
                 // contextSelected.onToggle();
                 //TODO hay que crear otro action para poder manejar esto ?
-                dispatch(FileTreeSlice.actions.select({ id: contextSelected.node.id, isDropped: true }));
+                dispatch(ProjectMetaSlice.actions.select({ id: contextSelected.node.id.toString() }));
             }
 
             setCreatingNode({ parentId: contextSelected?.node.id, type: fileType });
@@ -156,7 +149,7 @@ const FileViewer: React.FC<{ info: { id: string; branch: string; } }> = ({ info 
             const tempId = Date.now();
 
             const newNode: DeclaredNodeModel<FileMetaData> = {
-                id: tempId,
+                id: tempId.toString(),
                 parent: creatingNode.parentId,
                 text: name,
                 droppable: creatingNode.type === FileType.FOLDER,
@@ -172,7 +165,9 @@ const FileViewer: React.FC<{ info: { id: string; branch: string; } }> = ({ info 
                     fullPath: [],
                     commit: "",
                     isDrafted: true,
-                    versionId: ""
+                    versionId: "",
+                    edited: false,
+                    saved: true
                 }
             };
 
@@ -299,21 +294,23 @@ const FileViewer: React.FC<{ info: { id: string; branch: string; } }> = ({ info 
                                 fullPath: ["0"],
                                 commit: "",
                                 isDrafted: false,
-                                versionId: ""
+                                versionId: "",
+                                edited: false,
+                                saved: true
                             }
                         });
                     }}
                     className="flex-1 relative font-light max-w-full h-full w-full overflow-x-hidden overflow-y-scroll"
                 >
                     {
-                        treeData.tree !== undefined && treeData.tree.length > 0 &&
+                        tree !== undefined && tree.length > 0 &&
                         <Tree
-                            tree={treeData.tree}
+                            tree={tree}
                             rootId={"-1"}
                             ref={treeRef}
                             onDrop={handleDrop}
                             insertDroppableFirst
-                            initialOpen={treeData.tree.flatMap((node) => node.data.isDropped ? node.id as string : undefined).filter((node) => node !== undefined)}
+                            initialOpen={tree.flatMap((node) => node.data.isDropped ? node.id as string : undefined).filter((node) => node !== undefined)}
                             render={(node, { depth, isOpen, onToggle }) => {
 
                                 return <div
@@ -325,12 +322,14 @@ const FileViewer: React.FC<{ info: { id: string; branch: string; } }> = ({ info 
 
                                         if (contextSelected !== null) {
                                             setContextSelected(null);
-                                            dispatch(FileTreeSlice.actions.select(undefined));
+                                            dispatch(ProjectMetaSlice.actions.select(undefined));
 
                                         } else {
                                             node.droppable ? onToggle() : handleOpen(node);
 
-                                            dispatch(FileTreeSlice.actions.select({ id: node.id, isDropped: !isOpen }));
+                                            dispatch(ProjectMetaActions.select(
+                                                node.id.toString()//, isDropped: !isOpen 
+                                            ));
 
                                             // handleSaveState(node as DeclaredNodeModel<FileMetaData>);
                                         }
@@ -358,7 +357,7 @@ const FileViewer: React.FC<{ info: { id: string; branch: string; } }> = ({ info 
                                         :
                                         <div className={`flex w-full cursor-pointer
 ${contextSelected?.node.id === node.id && !(creatingNode?.parentId === node.id) && "outline-1 outline-neutral-400 -outline-offset-1"} 
-${treeData.selected?.id === node.id ? creatingNode?.parentId === node.id ? "bg-transparent!" : "bg-[#ffffff1c]" : "hover:bg-[#ffffff10]"}`
+${selected?.id === node.id ? creatingNode?.parentId === node.id ? "bg-transparent!" : "bg-[#ffffff1c]" : "hover:bg-[#ffffff10]"}`
                                         }
                                             style={{ paddingLeft: "10px" }}
                                         >

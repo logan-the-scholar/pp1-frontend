@@ -38,7 +38,7 @@ const Login = () => {
                     setOpenError(true);
 
                 } else {
-                    setSession({ mail: response.email, nickname: response.name, picture: response.profileImage });
+                    setSession({ ...response });
                     window.location.href = AppUrl.dashboard;
                 }
             }
