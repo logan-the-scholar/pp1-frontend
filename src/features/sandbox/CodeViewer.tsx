@@ -20,14 +20,16 @@ import { useLocalStorage } from "@/hooks/useLocalStorage";
 import { editor } from "monaco-editor";
 import { cacheTypeFrom } from "@/services/Package";
 import { FileTreeActions } from "@/redux/sandbox/file-tree/FileTreeActions";
-import FileTreeSlice, { selectOpenFiles } from "@/redux/sandbox/file-tree/FileTreeSlice";
+import FileTreeSlice, { FileTreeSelectors, selectOpenFiles } from "@/redux/sandbox/file-tree/FileTreeSlice";
+import FileMapper from "@/helpers/FileMapper";
 
 const CodeViewer = () => {
     const dispatch = useAppDispatch();
     const { open, selected, project, branch } = useSelector((state: RootState) => state.PROJECT_META);
     const selectedRef = useSelector((state: RootState) => selected === undefined ? undefined : state.FILE_TREE.entities[selected]);
     const openFiles = useSelector(selectOpenFiles);
-    // const { project, branch, tree, selected: selectedRef_ } = useSelector((state: RootState) => state.FILE_TREE);
+    const tree = useSelector((state: RootState) => state.FILE_TREE.entities);
+
     const [pos, setPos] = useState<{ line: number, col: number }>({ line: 1, col: 1 });
     const timeoutRef = useRef<NodeJS.Timeout | null>(null);
     const router = useRouter();
@@ -37,6 +39,7 @@ const CodeViewer = () => {
     const editorRef = useRef<editor.IStandaloneCodeEditor | null>(null);
     const line = Number(params?.get("line") || 1);
     const column = Number(params?.get("col") || 1);
+    const monacoRef = useRef<typeof import("c:/J/Upskill/react-pp1/pp1-frontend/node_modules/monaco-editor/esm/vs/editor/editor.api") | null>(null);
 
 
     // const selectedFile = (id: string) useSelector(state =>
@@ -45,10 +48,10 @@ const CodeViewer = () => {
 
 
     useCtrlShortcut("s", () => {
-        if (selectedRef) {
+        if (selectedRef && project) {
             if (timeoutRef.current) clearTimeout(timeoutRef.current);
             // dispatch(FileTreeSlice.actions.save([{ id: selectedRef.id.toString() }]));
-            dispatch(FileTreeSlice.actions.save([{ id: selectedRef.id.toString() }]));
+            dispatch(FileTreeActions.save([{ id: selectedRef.id.toString() }], project));
         }
     });
 
@@ -159,6 +162,7 @@ const CodeViewer = () => {
             typeRoots: ["node_modules/@types"],
             allowNonTsExtensions: true,
             noEmit: true,
+            strict: true,
             reactNamespace: "React",
         });
 
@@ -183,7 +187,6 @@ const CodeViewer = () => {
 
         editor.onDidChangeCursorPosition((event) => {
             const { lineNumber: line, column } = event.position;
-            console.log(line)
 
             setPos({ line, col: column });
         });
@@ -191,8 +194,36 @@ const CodeViewer = () => {
 
 
     const handleBeforeMount: BeforeMount = async (monaco) => {
-
+        monacoRef.current = monaco;
     }
+
+
+    useEffect(() => {
+        if (!tree) {
+            return;
+
+        } else if (monacoRef && monacoRef.current) {
+
+            for (const id in tree) {
+
+                const uri = monacoRef.current.Uri.parse(`file:///${tree[id].data.fullPath.toSpliced(0, 1).join("/")}`);
+
+                let model = monacoRef.current.editor.getModel(uri);
+
+                if (!model) {
+                    model = monacoRef.current.editor.createModel(
+                        tree[id].data.content || "",
+                        LanguageMapper(tree[id].data.extension),
+                        uri
+                    );
+                } else {
+                    if (model.getValue() !== tree[id].data.content) {
+                        model.setValue(tree[id].data.content || "");
+                    }
+                }
+            }
+        }
+    }, [tree, monacoRef]);
 
 
     /* CHANGE URL PARAMETERS */
@@ -202,7 +233,7 @@ const CodeViewer = () => {
         if (selectedRef !== undefined) {
 
             document.title = `${"Unknown"} /${selectedRef.text}`;
-            const path_ = selectedRef.data.fullPath.slice(1).join("/") || `/${selectedRef.text}`;
+            const path_ = selectedRef.data.fullPath.toSpliced(0, 1).join("/") || `/${selectedRef.text}`;
 
             p.set("file", path_);
 
@@ -216,13 +247,13 @@ const CodeViewer = () => {
     }, [selectedRef]);
 
 
-    useEffect(() => {
-        if (editorRef.current) {
-            editorRef.current.setPosition({ lineNumber: line, column });
-            editorRef.current.revealLineInCenter(line);
-            editorRef.current.focus();
-        }
-    }, [line, column]);
+    // useEffect(() => {
+    //     if (editorRef.current) {
+    //         editorRef.current.setPosition({ lineNumber: line, column });
+    //         editorRef.current.revealLineInCenter(line);
+    //         editorRef.current.focus();
+    //     }
+    // }, [line, column]);
 
 
     return (
@@ -337,10 +368,10 @@ ${f.id === selectedRef.id || f.data.edited ? "visible hover:bg-[#ffffff13]" : "i
                         )}
                         options={{ minimap: { enabled: false } }}
                         className="w-full flex-1 border-x border-neutral-600"
-                        language={LanguageMapper(selectedRef?.data?.extension as string)}
                         theme="vs-dark"
-                        path={selectedRef?.data.fullPath.join("/")}
-                        value={selectedRef?.data?.content || ""}
+                        // language={LanguageMapper(selectedRef?.data.extension as string)}
+                        path={selectedRef?.data.fullPath.toSpliced(0, 1).join("/")}
+                        // value={selectedRef?.data?.content || ""}
                         onChange={(x) => handleChange(x)}
                         beforeMount={handleBeforeMount}
                         onMount={handleMount}

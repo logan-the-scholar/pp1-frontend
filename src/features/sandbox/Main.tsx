@@ -4,7 +4,7 @@ import ContentSideBar from "./ContentSideBar";
 import FileViewer from "./FileViewer";
 import { SandpackLayout, SandpackPreview, SandpackProvider } from "@codesandbox/sandpack-react";
 import CodeViewer from "./CodeViewer";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useAppDispatch } from "@/hooks/useTypedSelectors";
 import { FileTreeActions } from "@/redux/sandbox/file-tree/FileTreeActions";
 import { ApiType } from "@/types/ApiResponse.type";
@@ -32,7 +32,7 @@ const Main: React.FC<{ files: ApiType.File[] | null, info: RepositoryMetadata }>
 
     }, [files]);
 
-    useEffect(() => {
+    useMemo(() => {
 
         const a = fileTree.reduce((acc, file, index) => {
             const formatedPath = file.data.fullPath.toSpliced(0, 1);

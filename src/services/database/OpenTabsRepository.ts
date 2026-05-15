@@ -1,4 +1,4 @@
-import { DbFileTabType, DBSelectedTabType } from '@/types/Database.type';
+import { DbFileTabType, DbSelectedTabType } from '@/types/Database.type';
 import { Repository } from './Repository';
 
 export class OpenTabsRepository extends Repository {
@@ -8,30 +8,22 @@ export class OpenTabsRepository extends Repository {
     }
 
 
-    async saveOpen(state: DbFileTabType | DbFileTabType[], project_id: string) {
+    async saveOpen(state: DbFileTabType | DbFileTabType[]) {
 
         if (state instanceof Array) {
             const tx = (await this.dbPromise).transaction("open", "readwrite");
             await Promise.all([
                 ...state.map(f => tx.store.put({
-                    project_id,
-                    id: f.id,
+                    ...f,
                     line: 1,
-                    saved: f.saved,
-                    edited: f.edited,
-                    // column: 1,
                 })),
                 tx.done
             ]);
 
         } else {
             await (await this.dbPromise).put("open", {
-                project_id,
-                id: state.id,
-                line: 1,
-                // column: 1,
-                saved: state.saved,
-                edited: state.edited
+                ...state,
+                line: 1
             });
 
         }
@@ -39,7 +31,7 @@ export class OpenTabsRepository extends Repository {
     }
 
 
-    async saveSelected(state: DBSelectedTabType) {
+    async saveSelected(state: DbSelectedTabType) {
         await (await this.dbPromise).put("selected_current", state);
     }
 

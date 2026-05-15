@@ -25,13 +25,7 @@ function open(node: DeclaredNodeModel<FileMetaData>): AppThunk {
         console.log(alreadyOpenNode);
 
         if (alreadyOpenNode === undefined) {
-            // const prevUneditedFile = state.FILE_TREE.entities.find((n) => n.data?.edited === false);
-            // const prevUneditedFile = FileTreeSelectors.selectAll(getState()).find(f => getState().OPEN_FILES)
             const prevUneditedId = state.OPEN_FILES.ids.find(o => state.FILE_TREE.entities[o].data.edited === false);
-            // const prevUneditedFile = state.OPEN_FILES.open.find(o =>
-            //     state.FILE_TREE.tree.find(f => o.id === f.id)?.data.edited === false
-            // );
-
             dispatch(OpenTabsSlice.actions.add(node.id.toString()));
 
             if (prevUneditedId !== undefined) {
@@ -56,10 +50,6 @@ function closeAndChangeWindow(id: string): AppThunk {
         if (index !== -1) {
 
             dispatch(close(id));
-            // new OpenTabsRepository().remove(getState().OPEN_FILES.open[index].id.toString());
-
-            // dispatch(OpenTabsSlice.actions.close(id));
-            // dispatch(FileTreeSlice.actions.unedit(id));
 
             const openTabs = OpenTabsSelectors.selectAll(getState());
             if (openTabs.length > 0) {
@@ -108,7 +98,6 @@ function selectAndPersist(node: { id: string | number, edited?: boolean, saved?:
 
             }
 
-            // const foundNode = getState().OPEN_FILES.open.find(n => n.id === node.id);
             const foundNode = getState().FILE_TREE.entities[node.id];
 
             if (!foundNode) {
@@ -121,11 +110,6 @@ function selectAndPersist(node: { id: string | number, edited?: boolean, saved?:
                 throw new ErrorHelper("???", "Can't open a folder in the code editor!");
 
             } else {
-
-                // if(node.edited !== undefined && foundNode.data.edited !== node.edited) {
-                //     dispatch()
-                // }
-
                 dispatch(ProjectMetaActions.select(node.id.toString()));
 
                 const repository = new OpenTabsRepository();
@@ -138,24 +122,12 @@ function selectAndPersist(node: { id: string | number, edited?: boolean, saved?:
                     edited: node.edited || foundNode.data.edited,
                     saved: node.saved || foundNode.data.saved
                 };
-                // const dbMapper = getState().OPEN_FILES.open.map<DbFileTabType>(o => {
-                //     const state = getState();
-                //     const index = state.FILE_TREE.tree.findIndex(f => f.id === o.id);
 
-                //     return {
-                //         ...state.FILE_TREE.tree[index].data,
-                //         project_id: projectId,
-                //         id: o.id.toString(),
-                //         line: state.FILE_TREE.tree[index].data.line || 1,
-                //         // column: 1,
-                //     }
-                // });
                 if (node.persistOpen === undefined || node.persistOpen === true) {
-                    await repository.saveOpen(dbMapper, projectId);
+                    await repository.saveOpen(dbMapper);
                 }
 
-                // const saveDBMapper = dbMapper.find(f => f.id === node.id) as DbFileTabType;
-                repository.saveSelected({ ...dbMapper, name: dbMapper.id, id: projectId });
+                repository.saveSelected({ name: dbMapper.id, id: projectId });
             }
 
         } else {

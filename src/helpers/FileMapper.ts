@@ -12,6 +12,9 @@ function FileMapper(file: ApiType.File, meta?: DbFileTabType): DeclaredNodeModel
         content_ = buffer.toString('utf8');
     }
 
+    console.log(meta);
+    console.log(file);
+    
     return {
         id: path_.join("/"),
         text: file.name,

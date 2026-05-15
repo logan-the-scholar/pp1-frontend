@@ -16,8 +16,9 @@ export type DbFileTabType = {
   saved: boolean;
 }
 
-export type DBSelectedTabType = Omit<DbFileTabType, "project_id"> & {
-  name: string;
+export type DbSelectedTabType = {
+  id: string,
+  name: string
 }
 
 export type DbTreeFileDataType = {
@@ -45,7 +46,7 @@ export interface DBType extends DBSchema {
   };
 
   selected_current: {
-    value: DBSelectedTabType;
+    value: DbSelectedTabType;
     key: string;
   };
 
