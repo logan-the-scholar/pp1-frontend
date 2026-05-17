@@ -84,7 +84,7 @@ const CodeViewer = () => {
                 const [success, data] = zodValidate<IFileUpdation>({
                     id: node.id.toString(),
                     content: code || null,
-                    author: session.nickname,
+                    author: session.name,
                     repoId: project,
                     path: formatedPath,
                     newName: null, newExtension: null, newPath: null,
@@ -110,8 +110,10 @@ const CodeViewer = () => {
 
     const handleChange = (code: string | undefined) => {
         if (selectedRef !== undefined && code !== selectedRef.data.content) {
+            if ((selectedRef.data.content === "" || selectedRef.data.content === undefined) && code === "") {
+                return;
+            }
             debounceSaveCode(code, selectedRef);
-
         }
     };
 

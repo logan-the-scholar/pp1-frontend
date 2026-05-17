@@ -12,7 +12,7 @@ import { ApiUser } from '@/services/api';
 import { useSessionStorage } from '@/hooks/useSessionStorage';
 
 const Login = () => {
-    const initial: IUserCredentials = { mail: "", password: "" }
+    const initial: IUserCredentials = { email: "", password: "" }
     const [credentials, setCredentials] = useState<IUserCredentials>(initial);
     const [showPass, setShowPass] = useState<boolean>(false);
     const [loading, setLoading] = useState<boolean>(false);
@@ -178,7 +178,7 @@ const Login = () => {
                                     onChange={(e) => handleChange(e)}
                                     className='px-3 py-1 bg-transparent w-full outline-0 focus:outline-offset-0'
                                     type="text" name="fire_signal" id="fire_signal"
-                                    value={credentials?.mail || ""}
+                                    value={credentials?.email || ""}
                                 />
                             </div>
                         </div>

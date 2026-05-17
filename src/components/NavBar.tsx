@@ -53,7 +53,7 @@ const NavBar: React.FC = () => {
                 <div className="h-8 w-8">
                     <img
                         className="rounded-full cursor-pointer h-full w-full"
-                        src={userDataState.picture} alt="profile image"
+                        src={userDataState.profileImage} alt="profile image"
                     />
                 </div>
             }

@@ -24,11 +24,11 @@ export const AppUrl = {
         /**@returns `/dashboard/projects` */
         projects: "/dashboard/projects",
 
-        /**@returns `/dashboard?from={action}` */
-        from: (action: "invalid-id" | "error" | "invalid-branch") => "/dashboard?from=" + action,
+        /**@returns `/dashboard/projects?from={action}` */
+        from: (action: "invalid-id" | "error" | "invalid-branch") => "/dashboard/projects?from=" + action,
     },
     /** /dashboard */
-    dashboard: "/dashboard",
+    dashboard: "/dashboard/projects",
 
     Sandbox: {
         /**@returns `/sandbox/{id}` */

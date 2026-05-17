@@ -85,7 +85,6 @@ const FileTreeSlice = createSlice({
         },
 
         dropFrom(state, action: PayloadAction<{ id: string, isDropped?: boolean }>) {
-            console.log(action.payload.id);
             const { id, isDropped } = action.payload;
             const ref = state.entities[id];
             const path: string[] = [id];
@@ -109,8 +108,8 @@ const FileTreeSlice = createSlice({
                     changes: {
                         data: {
                             ...state.entities[id_].data,
-                            isDropped: //i === 0 ? isDropped :
-                                true,
+                            isDropped: id_ === id ? ref.droppable && !ref.data.isDropped : true//i === 0 ? isDropped :
+                                // true,
                         }
                     }
                 }

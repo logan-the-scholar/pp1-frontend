@@ -4,11 +4,11 @@ import ProjectMetaSlice from "./ProjectMetaSlice";
 
 function select(id: string): AppThunk {
     return (async (dispatch, getState) => {
-        console.log(id)
         dispatch(FileTreeSlice.actions.dropFrom({ id }));
         const foundNode = getState().FILE_TREE.entities[id];
-        if (foundNode.droppable !== true) {
-            console.log(id)
+        if (foundNode.droppable) {
+
+        } else {
             dispatch(ProjectMetaSlice.actions.select({ id }));
             dispatch(ProjectMetaSlice.actions.open({ id }));
         }

@@ -5,14 +5,14 @@ export namespace ApiType {
 
     export type Login = {
         id: string;
-        nickname: string;
-        mail: string;
-        picture: string;
+        name: string;
+        email: string;
+        profileImage: string;
         userType: UserType;
         recurrence: UserRecurrence;
     }
 
-    export type Session = Pick<Login, "mail" | "nickname" | "picture">;
+    export type Session = Pick<Login, "email" | "name" | "profileImage">;
 
     export type Workspace = {
         id: string;

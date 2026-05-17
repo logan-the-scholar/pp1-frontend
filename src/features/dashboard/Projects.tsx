@@ -20,7 +20,7 @@ const Projects: React.FC<{ showPopup: boolean, setShowPopup: React.Dispatch<Reac
     const [loadingProjects, setLoadingProjects] = useState<boolean>(true);
 
     const loadWorkspaces = async (session_: ApiType.Session) => {
-        const response: ApiType.Workspace[] | ErrorHelper = await ApiWorkspace.getAll(session_.nickname);
+        const response: ApiType.Workspace[] | ErrorHelper = await ApiWorkspace.getAll(session_.name);
 
         if (response instanceof Array) {
             setWorkspace(response);

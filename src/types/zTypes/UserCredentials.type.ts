@@ -30,7 +30,7 @@ const passwordSchema = z.string()
     });
 
 export const UserCredentials = () => z.object({
-    mail: z.string().min(6, "Email must be longer than 6 characters")
+    email: z.string().min(6, "Email must be longer than 6 characters")
         .max(50, "This mail is too long!")
         .email("Must be a valid email"),
 

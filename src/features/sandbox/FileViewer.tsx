@@ -16,6 +16,7 @@ import { showPopup } from "@/context/PopupProvider";
 import { ErrorHelper } from "@/helpers/ErrorHelper";
 import ProjectMetaSlice from "@/redux/sandbox/project-meta/ProjectMetaSlice";
 import { ProjectMetaActions } from "@/redux/sandbox/project-meta/ProjectMetaActions";
+import { useSessionStorage } from "@/hooks/useSessionStorage";
 
 type ContextType = {
     node: NodeModel<FileMetaData>,
@@ -40,6 +41,7 @@ const FileViewer: React.FC<{ info: { id: string; branch: string; } }> = ({ info 
     const [visibleMenu, setVisibleMenu] = useState(false);
     const [positionMenu, setPositionMenu] = useState({ x: 0, y: 0, pos: "top" });
     const [isLoading, setIsloading] = useState<boolean>(false);
+    const session = useSessionStorage
 
     const [contextSelected, setContextSelected] = useState<ContextType | null>(null);
 
@@ -49,9 +51,9 @@ const FileViewer: React.FC<{ info: { id: string; branch: string; } }> = ({ info 
     } | null>(null);
 
 
-    useEffect(() => {
-        console.log(creatingNode);
-    }, [creatingNode]);
+    // useEffect(() => {
+    //     console.log(creatingNode);
+    // }, [creatingNode]);
 
 
     const handleOpen = (node: NodeModel<FileMetaData>) => {
@@ -124,7 +126,7 @@ const FileViewer: React.FC<{ info: { id: string; branch: string; } }> = ({ info 
             if (!contextSelected.isOpen) {
                 // contextSelected.onToggle();
                 //TODO hay que crear otro action para poder manejar esto ?
-                dispatch(ProjectMetaSlice.actions.select({ id: contextSelected.node.id.toString() }));
+                dispatch(ProjectMetaActions.select(contextSelected.node.id.toString()));
             }
 
             setCreatingNode({ parentId: contextSelected?.node.id, type: fileType });
@@ -132,7 +134,7 @@ const FileViewer: React.FC<{ info: { id: string; branch: string; } }> = ({ info 
             setContextSelected(null);
 
         } else {
-            throw new ErrorHelper("The file you tried to create has a nullish parent!");
+            throw new ErrorHelper("The file you tried to create has an invalid parent!");
 
         }
     };
@@ -154,6 +156,7 @@ const FileViewer: React.FC<{ info: { id: string; branch: string; } }> = ({ info 
                 text: name,
                 droppable: creatingNode.type === FileType.FOLDER,
                 data: {
+                    //TODO REF 2 HARDCODED CRAP
                     author: "logan-the-scholar",
                     extension: creatingNode.type === FileType.FOLDER ?
                         FileType.FOLDER
@@ -325,7 +328,8 @@ const FileViewer: React.FC<{ info: { id: string; branch: string; } }> = ({ info 
                                             dispatch(ProjectMetaSlice.actions.select(undefined));
 
                                         } else {
-                                            node.droppable ? onToggle() : handleOpen(node);
+                                            // node.droppable ? onToggle() : handleOpen(node);
+                                            !node.droppable && handleOpen(node);
 
                                             dispatch(ProjectMetaActions.select(
                                                 node.id.toString()//, isDropped: !isOpen 

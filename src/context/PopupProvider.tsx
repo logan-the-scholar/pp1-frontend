@@ -1,6 +1,6 @@
 import { ArrowDownFromLine, Eye } from 'lucide-react';
 import { title } from 'process';
-import React, { createContext, useContext, useState } from 'react';
+import React, { createContext, useContext, useEffect, useState } from 'react';
 
 type PopupOptions = {
     title?: string;
@@ -12,6 +12,7 @@ type PopupOptions = {
     timer?: number;
     dismissable?: boolean;
     multiple_options?: string[];
+    multiple_default_selection?: string;
 };
 
 type PopupArguments = {
@@ -45,6 +46,19 @@ export const PopupProvider = ({ children }: { children: React.ReactNode }) => {
 
     externalShow = show;
 
+    useEffect(() => {
+        if (options?.type === "multiple-select" || options?.type === "multiple-select-confirm") {
+            if (options?.multiple_default_selection) {
+                setSelected(options.multiple_default_selection);
+
+            } else if (options.multiple_options) {
+                setSelected(options.multiple_options[0])
+
+            }
+        }
+
+    }, [options]);
+
     const handleConfirm = () => {
         setOptions(null);
         resolver?.({ confirmed: true, selected });
@@ -65,7 +79,7 @@ export const PopupProvider = ({ children }: { children: React.ReactNode }) => {
 
         }
 
-        if (options?.type === "multiple-select") {
+        if (options?.type === "multiple-select" || options?.type === "multiple-select-confirm") {
             handleConfirm();
         }
     };
@@ -168,7 +182,7 @@ export const PopupProvider = ({ children }: { children: React.ReactNode }) => {
                                                     {
                                                         options.multiple_options.map((value) =>
                                                             <div
-                                                                className="pl-2 py-1 hover:bg-neutral-700 truncate"
+                                                                className="pr-[40px] pl-3 py-1 hover:bg-neutral-700 truncate"
                                                                 onClick={(e) => handleSelect(e)}
                                                                 id={value}
                                                                 key={value}
