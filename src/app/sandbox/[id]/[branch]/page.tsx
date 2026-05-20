@@ -8,6 +8,7 @@ import { store } from "@/redux/store";
 import { ApiProject } from "@/services/api";
 import { ApiType } from "@/types/ApiResponse.type";
 import { AppUrl } from "@/types/AppUrl.type";
+import { StorageSession } from "@/types/zTypes/Login.type";
 import { use, useEffect, useState } from "react";
 import { Provider } from "react-redux";
 import { z } from "zod";
@@ -22,7 +23,7 @@ export default function Sandbox({ params }: {
     const [files, setFiles] = useState<ApiType.File[] | null>(null);
     // const [name, setName] = useState<string | null>(null);
     const [loading, setLoading] = useState<boolean>(true);
-    const [session,] = useLocalStorage<ApiType.Session | null>("session", null);
+    const [session,] = useLocalStorage("session", StorageSession(), null);
 
     useEffect(() => {
         if (session === null) {

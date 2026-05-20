@@ -1,7 +1,7 @@
 "use client";
 import { Eye, EyeClosed, Key, Mail } from 'lucide-react';
 import React, { useEffect, useState } from 'react'
-import { ISession, IUserCredentials } from '@/types/zTypes/zTypes';
+import { IUserCredentials } from '@/types/zTypes/zTypes';
 import { openGithubPopup } from '@/services/openGithubPopup';
 import { ErrorHelper } from '@/helpers/ErrorHelper';
 import { ApiStatusEnum } from '@/types/enum/ApiStatus.enum';
@@ -9,7 +9,7 @@ import { ApiType } from '@/types/ApiResponse.type';
 import { AppUrl } from '@/types/AppUrl.type';
 import { useLocalStorage } from '@/hooks/useLocalStorage';
 import { ApiUser } from '@/services/api';
-import { useSessionStorage } from '@/hooks/useSessionStorage';
+import { StorageSession } from '@/types/zTypes/Login.type';
 
 const Login = () => {
     const initial: IUserCredentials = { email: "", password: "" }
@@ -18,8 +18,7 @@ const Login = () => {
     const [loading, setLoading] = useState<boolean>(false);
     const [windowError, setWindowError] = useState<string | null>(null);
     const [openError, setOpenError] = useState<boolean>(false);
-    const [, setSession] = useLocalStorage<ISession | null>("session", null);
-    // const [, setSession] = useSessionStorage<{ name: string, email: string, }>("session", null);
+    const [, setSession] = useLocalStorage("session", StorageSession(), null);
 
     const login = (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();

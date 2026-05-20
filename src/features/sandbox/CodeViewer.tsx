@@ -12,7 +12,7 @@ import { DeclaredNodeModel, FileMetaData } from "@/types/ReduxState.type";
 import { useCtrlShortcut } from "@/hooks/shortcut/useSaveShortcut";
 import { useRouter, useSearchParams } from "next/navigation";
 import { ApiFile } from "@/services/api/File";
-import { IFileUpdation, ISession } from "@/types/zTypes/zTypes";
+import { IFileUpdation } from "@/types/zTypes/zTypes";
 import { zodValidate } from "@/helpers/zod/ZodValidate";
 import { FileUpdation } from "@/types/zTypes/FileUpdation.type";
 import { ErrorHelper } from "@/helpers/ErrorHelper";
@@ -22,6 +22,7 @@ import { cacheTypeFrom } from "@/services/Package";
 import { FileTreeActions } from "@/redux/sandbox/file-tree/FileTreeActions";
 import FileTreeSlice, { FileTreeSelectors, selectOpenFiles } from "@/redux/sandbox/file-tree/FileTreeSlice";
 import FileMapper from "@/helpers/FileMapper";
+import { StorageSession } from "@/types/zTypes/Login.type";
 
 const CodeViewer = () => {
     const dispatch = useAppDispatch();
@@ -33,7 +34,7 @@ const CodeViewer = () => {
     const [pos, setPos] = useState<{ line: number, col: number }>({ line: 1, col: 1 });
     const timeoutRef = useRef<NodeJS.Timeout | null>(null);
     const router = useRouter();
-    const [session,] = useLocalStorage<ISession | null>("session", null);
+    const [session,] = useLocalStorage("session", StorageSession(), null);
 
     const params = useSearchParams();
     const editorRef = useRef<editor.IStandaloneCodeEditor | null>(null);
@@ -259,11 +260,22 @@ const CodeViewer = () => {
 
 
     return (
-        <div style={{}} className="w-1/2 h-full flex flex-col">
+        <div style={{}} className="w-1/2 h-full flex flex-col min-h-0">
             {openFiles.length > 0 && selectedRef !== undefined ?
                 <>
-                    {/* WINDOW VIEW */}
-                    <div className="w-full flex select-none">
+                    {/* WINDOW TAB VIEW */}
+                    <div
+                        onWheel={(e) => {
+                            const target = e.currentTarget;
+
+                            if (target.scrollWidth > target.clientWidth) {
+                                e.preventDefault();
+                                target.scrollLeft += e.deltaY * 0.8
+                            }
+                        }}
+                        className="w-full flex select-none overflow-y-clip overflow-x-auto min-h-0 min-w-0"
+                        style={{ scrollbarWidth: "none" }}
+                    >
 
                         {/* TITLE */}
                         {
@@ -274,8 +286,8 @@ const CodeViewer = () => {
                                     <div
                                         onClick={() => handleChangeWindow(f)}
                                         key={`window_${f.id}`}
-                                        className={`hover:[&>span]:visible pl-3 py-1.5 bg-[#1e1e1e] cursor-pointer w-fit flex relative 
-${f.id === selectedRef.id ? "border-x border-neutral-600" : "border-x border-[#1e1e1e] bg-neutral-900"}
+                                        className={`shrink-0 hover:[&>span]:visible pl-3 py-1.5 bg-[#1e1e1e] cursor-pointer w-fit flex relative 
+${f.id === selectedRef.id ? "border-x border-neutral-600 border-b-0" : "border-b border-b-neutral-600 border-x border-[#1e1e1e] bg-neutral-900"}
 ${!f.data.edited && "italic"}`}
                                     >
                                         <div className="mr-3 content-center">
@@ -323,7 +335,7 @@ ${f.id === selectedRef.id || f.data.edited ? "visible hover:bg-[#ffffff13]" : "i
                     </div>
 
                     {/* PATH VIEW */}
-                    <div className="px-4 py-1 flex border-x border-t border-neutral-600 text-xs text-neutral-300 bg-[#1e1e1e] select-none">
+                    <div className="min-h-0 px-4 py-1 flex border-x border-neutral-600 text-xs text-neutral-300 bg-[#1e1e1e] select-none">
                         {
                             selectedRef !== undefined ?
                                 [...selectedRef.data.fullPath]
@@ -361,26 +373,28 @@ ${f.id === selectedRef.id || f.data.edited ? "visible hover:bg-[#ffffff13]" : "i
                         }
                     </div>
 
-                    {/* EDITOR */}
-                    <Editor
-                        loading={(
-                            <div className="h-full w-full bg-[#1e1e1e] border-x border-neutral-600">
-                                <LoadingCircle size={80} stroke={8} />
-                            </div>
-                        )}
-                        options={{ minimap: { enabled: false } }}
-                        className="w-full flex-1 border-x border-neutral-600"
-                        theme="vs-dark"
-                        // language={LanguageMapper(selectedRef?.data.extension as string)}
-                        path={selectedRef?.data.fullPath.toSpliced(0, 1).join("/")}
-                        // value={selectedRef?.data?.content || ""}
-                        onChange={(x) => handleChange(x)}
-                        beforeMount={handleBeforeMount}
-                        onMount={handleMount}
-                    />
+                    <div className="min-h-0 overflow-hidden w-full flex-1">
+                        {/* EDITOR */}
+                        <Editor
+                            className="w-full border-x border-neutral-600"
+                            loading={(
+                                <div className="h-full w-full bg-[#1e1e1e] border-x border-neutral-600">
+                                    <LoadingCircle size={80} stroke={8} />
+                                </div>
+                            )}
+                            options={{ minimap: { enabled: false } }}
+                            theme="vs-dark"
+                            // language={LanguageMapper(selectedRef?.data.extension as string)}
+                            path={selectedRef?.data.fullPath.toSpliced(0, 1).join("/")}
+                            // value={selectedRef?.data?.content || ""}
+                            onChange={(x) => handleChange(x)}
+                            beforeMount={handleBeforeMount}
+                            onMount={handleMount}
+                        />
+                    </div>
                 </>
                 :
-                <div className="border-neutral-600 border-x bg-[#1e1e1e] flex-1 text-center content-center">
+                <div className="border-neutral-600 min-h-0 border-x bg-[#1e1e1e] flex-1 text-center content-center">
                     Nothing here yet!
                 </div>
 

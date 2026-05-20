@@ -15,5 +15,3 @@ export type IProjectCreation = z.infer<ReturnType<typeof ProjectCreation>>;
 export type IFileCreation = z.infer<ReturnType<typeof FileCreation>>;
 
 export type IFileUpdation = z.infer<ReturnType<typeof FileUpdation>>;
-//TODO posible idea: pasar esto a un tipado especifico que pueda referenciar la "key" usada en localStorage
-export type ISession = z.infer<ReturnType<typeof Session>>

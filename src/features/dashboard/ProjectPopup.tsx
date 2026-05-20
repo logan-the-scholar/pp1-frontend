@@ -8,11 +8,12 @@ import { AppUrl } from "@/types/AppUrl.type";
 import { IProjectCreation } from "@/types/zTypes/zTypes";
 import { ArrowDownFromLine, Eye, FolderPen } from "lucide-react";
 import { FormEvent, useState } from "react";
+import { StorageWorkspace } from "@/types/zTypes/Workspace.type";
 
 const ProjectPopup: React.FC<{ setShowPopup: React.Dispatch<React.SetStateAction<boolean>>, showPopup: boolean }> = ({ setShowPopup, showPopup }) => {
     const [isDropDown, setIsDropDown] = useState<boolean>(false);
     const [projectInfo, setProjectInfo] = useState<IProjectCreation>({ name: "", visibility: "private", workspaceId: "" });
-    const [selectedWorkspace] = useLocalStorage<ApiType.Workspace | null>("selected_workspace", null);
+    const [selectedWorkspace,] = useLocalStorage("selected_workspace", StorageWorkspace(), null);
     const [isLoading, setIsLoading] = useState<boolean>(false);
     const visibilityMessage: Map<string, string> = new Map([
         ["public", "Public (Anyone can see the project)"],

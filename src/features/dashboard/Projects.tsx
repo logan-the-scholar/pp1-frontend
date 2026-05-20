@@ -8,14 +8,17 @@ import LoadingCircle from "@/components/LoadingCircle";
 import ProjectCard from "./ProjectCard";
 import { ApiProject, ApiWorkspace } from "@/services/api";
 import { AppUrl } from "@/types/AppUrl.type";
+import { StorageSession } from "@/types/zTypes/Login.type";
+import { StorageWorkspace } from "@/types/zTypes/Workspace.type";
+import { StorageWorkspaces } from "@/types/zTypes/Workspaces.type";
 
 const Projects: React.FC<{ showPopup: boolean, setShowPopup: React.Dispatch<React.SetStateAction<boolean>> }> = ({
     showPopup, setShowPopup }) => {
 
     const [projects, setProjects] = useState<ApiType.Project[] | null>(null);
-    const [session,] = useLocalStorage<ApiType.Session | null>("session", null);
-    const [selectedWorkspace, setSelectedWorkspace] = useLocalStorage<ApiType.Workspace | null>("selected_workspace", null);
-    const [workspace, setWorkspace] = useLocalStorage<ApiType.Workspace[] | null>("workspaces", null);
+    const [session,] = useLocalStorage("session", StorageSession(), null);
+    const [selectedWorkspace, setSelectedWorkspace] = useLocalStorage("selected_workspace", StorageWorkspace(), null);
+    const [workspace, setWorkspace] = useLocalStorage("workspaces", StorageWorkspaces(), null);
     const [loading, setLoading] = useState<boolean>(true);
     const [loadingProjects, setLoadingProjects] = useState<boolean>(true);
 
