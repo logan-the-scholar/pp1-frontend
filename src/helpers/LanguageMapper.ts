@@ -1,15 +1,21 @@
+import FileType from "@/types/enum/FileType";
+
 export default function LanguageMapper(language: string): string {
     switch (language.toLowerCase()) {
-        case "js":
+        case FileType.JAVASCRIPT:
             return "javascript";
-        case "css":
+        case FileType.CSS:
             return "css";
-        case "html":
+        case FileType.HTML:
             return "html";
-        case "ts":
+        case FileType.TYPESCRIPT:
             return "typescript";
-        case "md":
+        case FileType.MARKDOWN:
             return "markdown";
+        case FileType.TSX:
+            return "typescript";
+        case FileType.JSX:
+            return "javascript";
         default:
             return "text";
     }

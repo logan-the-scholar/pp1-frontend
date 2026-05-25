@@ -1,4 +1,5 @@
 export enum ApiStatusEnum {
+    
     TOKEN_EXPIRED = "Token expired, request a new one",
     USER_DELETED = "This user was deleted",
     NOT_ALLOWED_HERE = "You are not allowed here",
@@ -10,5 +11,6 @@ export enum ApiStatusEnum {
     NETWORK_ERROR = "Network error try again in a few minutes",
     SERVER_ERROR = "A fatal server error ocurred",
 
-    NO_PROJECTS_FOUND = "No projects found in this workspace",
+    RESOURCE_NOT_FOUND = "No projects found in this workspace",
+    STATE_NOT_FOUND = "State not found in redux store",
 }

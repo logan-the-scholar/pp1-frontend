@@ -2,7 +2,7 @@ import { UserCredentials } from "./UserCredentials.type";
 import { z } from "zod";
 
 export const UserRegistration = () => UserCredentials().extend({
-    nickname: z
+    name: z
         .string()
         .min(3, "Nickname must be longer than 3 characters")
         .max(20, "This nickname is too long")

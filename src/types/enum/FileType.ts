@@ -8,6 +8,7 @@ enum FileType {
     HTML = "html",
     MARKDOWN = "md",
     TSX = "tsx",
+    JSX = "jsx",
 }
 
 export default FileType;

@@ -1,6 +1,5 @@
-import { OpenTabsData, FileTab } from '@/types/Database.type';
+import { DbFileTabType, DbSelectedTabType } from '@/types/Database.type';
 import { Repository } from './Repository';
-import { OpenFilesType } from '@/types/state-types';
 
 export class OpenTabsRepository extends Repository {
 
@@ -8,41 +7,76 @@ export class OpenTabsRepository extends Repository {
         super();
     }
 
-    async save(state: OpenFilesType, projectId: string) {
-        const data = await this.get(projectId);
-        console.log(state);
-        const mappedFiles: FileTab[] = state.open.map<FileTab>((f) => {
-            return {
-                id: f.id.toString(),
-                line: 1,
-                column: 1,
-                isSaved: f.data.saved,
-            };
-        });
 
-        if (data !== undefined) {
-            await (await this.dbPromise).put("selected", { id: data.id, files: mappedFiles, selected: state.selected?.id as string });
+    async saveOpen(state: DbFileTabType | DbFileTabType[]) {
+
+        if (state instanceof Array) {
+            const tx = (await this.dbPromise).transaction("open", "readwrite");
+            await Promise.all([
+                ...state.map(f => tx.store.put({
+                    ...f,
+                    line: 1,
+                })),
+                tx.done
+            ]);
 
         } else {
-            await (await this.dbPromise).put("selected", {
-                id: projectId,
-                files: mappedFiles,
-                selected: state.selected?.id as string
+            await (await this.dbPromise).put("open", {
+                ...state,
+                line: 1
             });
+
         }
+
     }
 
-    async clear() {
-        await (await this.dbPromise).clear("selected");
+
+    async saveSelected(state: DbSelectedTabType) {
+        await (await this.dbPromise).put("selected_current", state);
     }
+
+
+    async getSelected(id: string) {
+        const data = await (await this.dbPromise).get("selected_current", id);
+        return data;
+    }
+
+
+    async clear(id: string) {
+        const db = await this.dbPromise;
+        const store = db.transaction("open", "readwrite").objectStore("open");
+        const index = store.index("reference");
+        const data = await index.getAll(id);
+
+        if (data.length > 0) {
+            const tx = store.transaction;
+            await Promise.all([
+                ...data.map(f => tx.store.delete(f.id)),
+                db.delete("selected_current", id),
+                tx.done
+            ]);
+        }
+        // await (await this.dbPromise).clear("selected");
+        // await (await this.dbPromise).clear("selected_current");
+    }
+
 
     async get(id: string) {
-        const data: OpenTabsData | undefined = await (await this.dbPromise).get("selected", id);
+        const store = (await this.dbPromise).transaction("open").objectStore("open");
+        const index = store.index("reference");
+        const data = await index.getAll(id);
 
-        return data !== undefined && data?.files.length > 0 ? data : undefined;
+        return data !== undefined && data?.length > 0 ? data : undefined;
     }
 
-    async remove(id: string, fileId: string) {
-        await (await this.dbPromise).delete("selected", id);
+
+    async remove(id: string) {
+        //TODO este se debe cambiar a remover por referencia e id, para evitar eliminar indices de otra session
+        await (await this.dbPromise).delete("open", id);
+    }
+
+
+    async unSelect(id: string) {
+        await (await this.dbPromise).delete("selected_current", id)
     }
 }

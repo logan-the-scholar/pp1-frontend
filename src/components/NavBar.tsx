@@ -1,17 +1,19 @@
 "use client";
 import { useDashboardContext } from "@/context/DashboardProvider";
 import { useLocalStorage } from "@/hooks/useLocalStorage";
-import { ApiType } from "@/types/ApiResponse.type";
+import { ApiType } from "@/types/Api.type";
+import { StorageSession } from "@/types/zTypes/Login.type";
+import { StorageWorkspace } from "@/types/zTypes/Workspace.type";
+import { StorageWorkspaces } from "@/types/zTypes/Workspaces.type";
 import { useEffect, useState } from "react";
-import { ZodArray, ZodObject } from "zod";
 
 const NavBar: React.FC = () => {
     const [, setShowPopup] = useDashboardContext();
-    const [userData,] = useLocalStorage<ApiType.Login>("session", null);
+    const [userData,] = useLocalStorage("session", StorageSession(), null);
     const [loading, setLoading] = useState<boolean>(true);
-    const [userDataState, setUserDataState] = useState<ApiType.Login | null>(null);
-    const [workspaces,] = useLocalStorage<ApiType.Workspace[]>("workspaces", null);
-    const [selectedWorkspace,] = useLocalStorage<ApiType.Workspace>("selected_workspace", null);
+    const [userDataState, setUserDataState] = useState<ApiType.Session | null>(null);
+    const [workspaces,] = useLocalStorage("workspaces", StorageWorkspaces(), null);
+    const [selectedWorkspace,] = useLocalStorage("selected_workspace", StorageWorkspace(), null);
     const [selectedWorkspaceState, setSelectedWorkspace] = useState<ApiType.Workspace | null>(null);
 
     useEffect(() => {

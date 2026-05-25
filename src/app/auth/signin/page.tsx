@@ -1,23 +1,24 @@
 "use client";
 import { Eye, EyeClosed, Key, Mail } from 'lucide-react';
 import React, { useEffect, useState } from 'react'
-import { IUserCredentials } from '@/types/zTypes';
+import { IUserCredentials } from '@/types/zTypes/zTypes';
 import { openGithubPopup } from '@/services/openGithubPopup';
 import { ErrorHelper } from '@/helpers/ErrorHelper';
 import { ApiStatusEnum } from '@/types/enum/ApiStatus.enum';
 import { ApiType } from '@/types/ApiResponse.type';
-import { ApiUrl } from '@/types/ApiUrl.type';
+import { AppUrl } from '@/types/AppUrl.type';
 import { useLocalStorage } from '@/hooks/useLocalStorage';
 import { ApiUser } from '@/services/api';
+import { StorageSession } from '@/types/zTypes/Login.type';
 
 const Login = () => {
-    const initial: IUserCredentials = { mail: "", password: "" }
+    const initial: IUserCredentials = { email: "", password: "" }
     const [credentials, setCredentials] = useState<IUserCredentials>(initial);
     const [showPass, setShowPass] = useState<boolean>(false);
     const [loading, setLoading] = useState<boolean>(false);
     const [windowError, setWindowError] = useState<string | null>(null);
     const [openError, setOpenError] = useState<boolean>(false);
-    const [data, setData] = useLocalStorage<ApiType.Login>("session", null);
+    const [, setSession] = useLocalStorage("session", StorageSession(), null);
 
     const login = (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
@@ -29,7 +30,6 @@ const Login = () => {
 
             if (event.data.type === "session-success") {
                 const response: ApiType.Login | ErrorHelper = await ApiUser.githubSignIn(event.data.code);
-                console.log(response);
 
                 if (response instanceof ErrorHelper) {
                     setWindowError(response.message);
@@ -37,9 +37,8 @@ const Login = () => {
                     setOpenError(true);
 
                 } else {
-                    console.log("here");
-                    setData(response);
-                    window.location.href = ApiUrl.dashboard;
+                    setSession({ ...response });
+                    window.location.href = AppUrl.dashboard;
                 }
             }
         }
@@ -178,7 +177,7 @@ const Login = () => {
                                     onChange={(e) => handleChange(e)}
                                     className='px-3 py-1 bg-transparent w-full outline-0 focus:outline-offset-0'
                                     type="text" name="fire_signal" id="fire_signal"
-                                    value={credentials?.mail || ""}
+                                    value={credentials?.email || ""}
                                 />
                             </div>
                         </div>

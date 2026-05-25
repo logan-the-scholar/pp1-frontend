@@ -1,89 +1,129 @@
+import { RootState } from "@/redux/store";
 import FileType from "@/types/enum/FileType";
-import { DeclaredNodeModel, FileMetaData, TreeType } from "@/types/state-types";
-import { createSlice, PayloadAction } from "@reduxjs/toolkit";
+import { DeclaredNodeModel, FileMetaData, FileTreeType } from "@/types/ReduxState.type";
+import { createEntityAdapter, createSelector, createSlice, PayloadAction } from "@reduxjs/toolkit";
 
-const treeState: TreeType = {
-    tree: [],
-    selected: undefined,
-    project: undefined
-};
+const filesAdapter = createEntityAdapter<FileTreeType, string>({
+    selectId: (file: FileTreeType) => file.id,
+});
+
+const initialState = filesAdapter.getInitialState();
 
 const FileTreeSlice = createSlice({
     name: "TREE",
-    initialState: treeState,
+    initialState,
     reducers: {
 
-        createStore(state, action: PayloadAction<DeclaredNodeModel<FileMetaData>[]>) {
-            console.log(action.payload);
-            state.tree = [...action.payload];
-        },
+        createStore: filesAdapter.addMany,
+
+        delete: filesAdapter.removeOne,
 
         createNode(state, action: PayloadAction<DeclaredNodeModel<FileMetaData>>) {
-            if (action.payload.parent !== 0) {
 
-                const newNode: DeclaredNodeModel<FileMetaData> = {
+            if (action.payload.parent !== 0) {
+                filesAdapter.addOne(state, {
                     ...action.payload,
-                    droppable: action.payload.data?.extension === FileType.FOLDER ? true : undefined,
+                    droppable: action.payload.data.extension === FileType.FOLDER ? true : undefined,
                     data: {
                         ...action.payload.data,
-                        extension: action.payload.data?.extension || FileType.PLAIN_TEXT
+                        extension: action.payload.data.extension || FileType.PLAIN_TEXT
                     }
-                };
-
-                state.tree.push(newNode);
-
+                });
             } else {
-                state.tree.push(action.payload);
+                filesAdapter.addOne(state, action.payload);
 
             }
         },
 
-        /**Highlights visually the provided node and saves it as a state*/
-        select(state, action: PayloadAction<{ id: string | number, isDropped?: boolean } | undefined>) {
-            const foundNode = state.tree.find((n) => n.id === action.payload?.id);
+        edit(state, action: PayloadAction<{ id: string, content: string | undefined }>) {
+            const { id, content } = action.payload;
+            const prev = state.entities[id];
 
-            if (action.payload === undefined || foundNode === undefined) {
-                state.selected = undefined;
-
-            } else {
-
-                const i = state.tree.findIndex((node) => node.id === action.payload?.id);
-                state.tree[i].data.isDropped = action.payload.isDropped;
-
-                state.selected = {
-                    id: foundNode.id,
-                    parent: foundNode.parent,
-                    text: foundNode.text,
+            filesAdapter.updateOne(state, {
+                id,
+                changes: {
                     data: {
-                        ...foundNode.data,
-                        isDropped: action.payload.isDropped
+                        ...prev.data,
+                        content,
+                        saved: content === prev.data.last_content,//false,
+                        edited: true//content !== prev.data.last_content,
                     }
                 }
+            });
+        },
 
-                if (foundNode.data?.fullPath !== null) {
-                    foundNode.data.fullPath.forEach((x) => {
-                        const parentIndex = state.tree.findIndex((node) => node.id === x);
-
-                        if (parentIndex >= 0 && state.tree.at(parentIndex)?.droppable) {
-                            state.tree[parentIndex].data.isDropped = true;
+        save(state, action: PayloadAction<{ id: string }[]>) {
+            filesAdapter.updateMany(state, action.payload.map(f => {
+                const ref = state.entities[f.id];
+                return {
+                    id: f.id,
+                    changes: {
+                        data: {
+                            ...ref.data,
+                            last_content: ref.data.content,
+                            saved: true,
+                            edited: true,
                         }
-                    });
+                    }
                 }
+            }));
+        },
 
+        unedit(state, action: PayloadAction<string>) {
+            const id = action.payload;
+            const prev = state.entities[id];
+
+            filesAdapter.updateOne(state, {
+                id,
+                changes: {
+                    data: {
+                        ...prev.data,
+                        edited: false,
+                    }
+                }
+            });
+        },
+
+        dropFrom(state, action: PayloadAction<{ id: string, isDropped?: boolean }>) {
+            const { id, isDropped } = action.payload;
+            const ref = state.entities[id];
+            const path: string[] = [id];
+            if (ref.data.fullPath.length > 0) {
+                let builtPath = "";
+
+                path.push(
+                    ...ref.data.fullPath.map((x, i) => {
+                        if (i + 1 !== ref.data.fullPath?.length) {
+                            builtPath = builtPath + (i > 0 ? "/" : "") + x;
+                            return builtPath;
+                        }
+                    }).filter(f => f !== undefined).toReversed() as string[]
+                );
             }
 
-        },
-
-        delete(state, action: PayloadAction<string>) {
-            return { ...state, tree: state.tree.filter((node) => node.id !== action.payload) };
-        },
-
-        setProject(state, action: PayloadAction<string>) {
-            return { ...state, project: action.payload };
+            console.log(path)
+            filesAdapter.updateMany(state, path.map((id_, i) => {
+                return {
+                    id: id_,
+                    changes: {
+                        data: {
+                            ...state.entities[id_].data,
+                            isDropped: id_ === id ? ref.droppable && !ref.data.isDropped : true//i === 0 ? isDropped :
+                                // true,
+                        }
+                    }
+                }
+            }));
         }
 
     },
-
 });
+
+export const selectOpenFiles = createSelector([(state: RootState) => state.OPEN_FILES, (state: RootState) => state.FILE_TREE],
+    (openTabs, files) => openTabs.ids.map((id) => files.entities[id])
+        .filter((f): f is FileTreeType => f !== undefined)
+);
+
+export const FileTreeSelectors = filesAdapter.getSelectors((state: RootState) => state.FILE_TREE);
 
 export default FileTreeSlice;

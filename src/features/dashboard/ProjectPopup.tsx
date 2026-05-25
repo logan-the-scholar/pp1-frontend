@@ -3,16 +3,17 @@ import { zodValidate } from "@/helpers/zod/ZodValidate";
 import { useLocalStorage } from "@/hooks/useLocalStorage";
 import { ApiProject } from "@/services/api";
 import { ApiType } from "@/types/ApiResponse.type";
-import { ProjectCreation } from "@/types/ProjectCreation.type";
-import { ApiUrl } from "@/types/ApiUrl.type";
-import { IProjectCreation } from "@/types/zTypes";
+import { ProjectCreation } from "@/types/zTypes/ProjectCreation.type";
+import { AppUrl } from "@/types/AppUrl.type";
+import { IProjectCreation } from "@/types/zTypes/zTypes";
 import { ArrowDownFromLine, Eye, FolderPen } from "lucide-react";
 import { FormEvent, useState } from "react";
+import { StorageWorkspace } from "@/types/zTypes/Workspace.type";
 
 const ProjectPopup: React.FC<{ setShowPopup: React.Dispatch<React.SetStateAction<boolean>>, showPopup: boolean }> = ({ setShowPopup, showPopup }) => {
     const [isDropDown, setIsDropDown] = useState<boolean>(false);
     const [projectInfo, setProjectInfo] = useState<IProjectCreation>({ name: "", visibility: "private", workspaceId: "" });
-    const [selectedWorkspace] = useLocalStorage<ApiType.Workspace>("selected_workspace", null);
+    const [selectedWorkspace,] = useLocalStorage("selected_workspace", StorageWorkspace(), null);
     const [isLoading, setIsLoading] = useState<boolean>(false);
     const visibilityMessage: Map<string, string> = new Map([
         ["public", "Public (Anyone can see the project)"],
@@ -48,6 +49,11 @@ const ProjectPopup: React.FC<{ setShowPopup: React.Dispatch<React.SetStateAction
         e.preventDefault();
         if (isLoading) return;
 
+        if (selectedWorkspace === null) {
+            console.error("localstorage workspace is null"); //TODO ref:1 arreglar esto
+            return;
+        }
+
         const [success, data] = zodValidate<IProjectCreation>({ ...projectInfo, workspaceId: selectedWorkspace.id }, ProjectCreation);
 
         if (!success) {
@@ -61,12 +67,15 @@ const ProjectPopup: React.FC<{ setShowPopup: React.Dispatch<React.SetStateAction
 
         if (response instanceof ErrorHelper) {
             console.error(response);
+            setShowPopup(false);
+            setIsLoading(false);
+
             // dispatch(projectLoadStatusSlice.actions.updated(ProjectLoadStatusEnum.NOTHING));
             return;
         }
 
         // dispatch(projectLoadStatusSlice.actions.updated(ProjectLoadStatusEnum.CREATED));
-        window.location.href = `${ApiUrl.sandbox}/${response.name}`;
+        window.location.href = `${AppUrl.sandbox}/${response.id}`;
         setIsLoading(false);
         setShowPopup(false);
     };
@@ -184,7 +193,7 @@ const ProjectPopup: React.FC<{ setShowPopup: React.Dispatch<React.SetStateAction
                                     </div>
                                 </div>
 
-                                <div className="w-full flex justify-end">
+                                <div className="w-full flex justify-end select-none">
                                     {
                                         isLoading ?
                                             <>

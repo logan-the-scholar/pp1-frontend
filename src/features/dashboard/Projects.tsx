@@ -2,45 +2,57 @@
 import React, { useEffect, useState } from "react";
 import ProjectPopup from "./ProjectPopup";
 import { useLocalStorage } from "@/hooks/useLocalStorage";
-import { ApiType } from "@/types/ApiResponse.type";
 import { ErrorHelper } from "@/helpers/ErrorHelper";
 import LoadingCircle from "@/components/LoadingCircle";
 import ProjectCard from "./ProjectCard";
 import { ApiProject, ApiWorkspace } from "@/services/api";
+import { AppUrl } from "@/types/AppUrl.type";
+import { StorageSession } from "@/types/zTypes/Login.type";
+import { StorageWorkspace } from "@/types/zTypes/Workspace.type";
+import { StorageWorkspaces } from "@/types/zTypes/Workspaces.type";
+import { ApiType } from "@/types/Api.type";
 
 const Projects: React.FC<{ showPopup: boolean, setShowPopup: React.Dispatch<React.SetStateAction<boolean>> }> = ({
     showPopup, setShowPopup }) => {
 
     const [projects, setProjects] = useState<ApiType.Project[] | null>(null);
-    const [user,] = useLocalStorage<ApiType.Login>("session", null);
-    const [selectedWorkspace, setSelectedWorkspace] = useLocalStorage<ApiType.Workspace>("selected_workspace", null);
-    const [workspace, setWorkspace] = useLocalStorage<ApiType.Workspace[]>("workspaces", null);
+    const [session,] = useLocalStorage("session", StorageSession(), null);
+    const [selectedWorkspace, setSelectedWorkspace] = useLocalStorage("selected_workspace", StorageWorkspace(), null);
+    const [workspace, setWorkspace] = useLocalStorage("workspaces", StorageWorkspaces(), null);
     const [loading, setLoading] = useState<boolean>(true);
     const [loadingProjects, setLoadingProjects] = useState<boolean>(true);
 
+    const loadWorkspaces = async (session_: ApiType.Session) => {
+        const response: ApiType.Workspace[] | ErrorHelper = await ApiWorkspace.getAll(session_.name);
+
+        if (response instanceof Array) {
+            setWorkspace(response);
+
+            if (selectedWorkspace === null && response.length > 0) {
+                setSelectedWorkspace(response[0]);
+            }
+
+        }
+
+    };
 
     useEffect(() => {
         setLoading(true);
 
-        //TODO en un futuro guardar todo esto en indexedDB
         //TODO tokens de autenticacion (de muy corta duracion) y refresh token en cookies
         const fetch = async () => {
-            const response: ApiType.Workspace[] | ErrorHelper = await ApiWorkspace.getAll(user.id);
-
-            if (response instanceof Array) {
-                setWorkspace(response);
-
-                if (selectedWorkspace === null && response.length > 0) {
-                    setSelectedWorkspace(response[0]);
-                    console.log(response[0]);
-                }
-
+            if (session === null) {
+                console.error("Session storage is empty!");
+                window.location.href = AppUrl.Auth.Signin.from("error");
+                return;
             }
 
+            loadWorkspaces(session);
             setLoading(false);
+
         };
 
-        if (typeof window !== undefined && user !== null && user.id !== undefined) {
+        if (typeof window !== undefined) {
             fetch();
         }
 
@@ -50,7 +62,17 @@ const Projects: React.FC<{ showPopup: boolean, setShowPopup: React.Dispatch<Reac
     useEffect(() => {
 
         const fetch = async () => {
-            const response: ApiType.Project[] | ErrorHelper = await ApiProject.getAll(selectedWorkspace.id);
+            //TODO ref:1
+            let w_ = selectedWorkspace;
+            if (w_ === null || w_ === undefined) {
+
+                if (session) {
+                    await loadWorkspaces(session);
+                    setLoading(false);
+                }
+            }
+
+            const response: ApiType.Project[] | ErrorHelper = await ApiProject.getAll((w_?.id || selectedWorkspace?.id) as string);
 
             if (response instanceof ErrorHelper) {
                 console.error(response);
@@ -67,7 +89,6 @@ const Projects: React.FC<{ showPopup: boolean, setShowPopup: React.Dispatch<Reac
             fetch();
         }
     }, [selectedWorkspace]);
-
 
     return (
         <>

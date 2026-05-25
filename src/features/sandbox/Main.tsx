@@ -2,85 +2,101 @@
 import EditorNavBar from "./EditorNavBar";
 import ContentSideBar from "./ContentSideBar";
 import FileViewer from "./FileViewer";
-import Preview from "./Preview";
-import { useEffect, useState } from "react";
-import { ApiProject } from "@/services/api";
-import { z } from "zod";
-import LoadingCircle from "@/components/LoadingCircle";
-import { ErrorHelper } from "@/helpers/ErrorHelper";
+import { SandpackLayout, SandpackPreview, SandpackProvider } from "@codesandbox/sandpack-react";
+import CodeViewer from "./CodeViewer";
+import { useEffect, useMemo, useState } from "react";
 import { useAppDispatch } from "@/hooks/useTypedSelectors";
-import { ApiUrl } from "@/types/ApiUrl.type";
 import { FileTreeActions } from "@/redux/sandbox/file-tree/FileTreeActions";
-import FileTreeSlice from "@/redux/sandbox/file-tree/FileTreeSlice";
+import { ApiType } from "@/types/ApiResponse.type";
+import FileTreeSlice, { FileTreeSelectors } from "@/redux/sandbox/file-tree/FileTreeSlice";
+import { useSelector } from "react-redux";
+import { RootState } from "@/redux/store";
+import ProjectMetaSlice from "@/redux/sandbox/project-meta/ProjectMetaSlice";
 
-const Main: React.FC<{ id: string }> = ({ id }) => {
+type RepositoryMetadata = {
+    id: string,
+    branch: string,
+}
+
+const Main: React.FC<{ files: ApiType.File[] | null, info: RepositoryMetadata }> = ({ files, info }) => {
+    const fileTree = useSelector((state: RootState) => FileTreeSelectors.selectAll(state));
     const dispatch = useAppDispatch();
-    const [isLoading, setIsloading] = useState<boolean>(true);
-    const [basicInfo, setBasicInfo] = useState<{ name: string } | null>(null);
+    const [files_, setFiles_] = useState<Record<string, { code: string; active?: boolean; }> | undefined>(undefined);
 
     useEffect(() => {
-
-        const fetch = async () => {
-            if (z.string().uuid().safeParse(id).success) {
-                const response = await ApiProject.get(id);
-
-                if (response instanceof ErrorHelper) {
-                    window.location.href = `${ApiUrl.dashboard}?from=error`;
-                    return;
-                }
-
-                setBasicInfo({ name: response.name });
-
-                dispatch(FileTreeSlice.actions.setProject(response.id));
-
-                if (response.files !== null) {
-                    dispatch(FileTreeActions.createStore([
-                        {
-                            id: "0",
-                            parent: "-1",
-                            name: response.name,
-                            author: "none",
-                            extension: "FOLDER",
-                            path: [],
-                        }, ...response.files]));
-                }
-
-                setIsloading(false);
-                
-            } else {
-                window.location.href = `${ApiUrl.dashboard}?from=invalid-id`;
-
-            }
-        };
-
-        if (typeof window !== "undefined") {
-            fetch();
+        if (files !== null && files.length > 0) {
+            dispatch(ProjectMetaSlice.actions.setProject(info.id));
+            dispatch(ProjectMetaSlice.actions.setBranch(info.branch));
+            dispatch(FileTreeActions.createStore(files));
         }
 
-    }, []);
+    }, [files]);
+
+    useMemo(() => {
+
+        const a = fileTree.reduce((acc, file, index) => {
+            const formatedPath = file.data.fullPath.toSpliced(0, 1);
+            const path = formatedPath.join("/");
+
+            if (file.data.last_content) {
+                acc[path] = {
+                    code: file.data.last_content,
+                    active: index === 0
+                };
+            }
+
+            return acc;
+        }, {} as Record<string, { code: string; active?: boolean }>);
+
+        setFiles_(a);
+    }, [fileTree]);
 
     return (
         <>
-            {isLoading || id === undefined ?
-                <div className="w-full h-[100vh]">
-                    <LoadingCircle size={78} />
-                </div >
-                :
-                <>
-                    {/* //TODO AGREGAR ERROR HANDLING AQUI */}
-                    {basicInfo !== null &&
-                        <div className="flex flex-col w-full h-[100vh]">
-                            <div className="w-full h-10 bg-neutral-900">
-                                <EditorNavBar />
+            {info !== null &&
+                <div className="flex flex-col w-full h-[100vh]">
+                    <div className="w-full h-10 bg-neutral-900">
+                        <EditorNavBar />
+                    </div>
+                    <div className="w-full flex-1 flex bg-neutral-900">
+                        <ContentSideBar />
+                        <FileViewer info={{ ...info }} />
+                        {/* <CodeAndPreview /> */}
+
+                        <SandpackProvider
+                            style={{ flex: 1 }}
+                            template="react-ts"
+                            customSetup={{
+                                dependencies: {
+                                    //TODO ref:4 sincronizar esto con monaco y leerlo desde IDB
+                                    "react": "^18.0.0",
+                                    "react-dom": "^18.0.0",
+                                }
+                            }}
+                            files={files_}
+                        >
+                            <div className="w-full text-white flex h-full overflow-hidden">
+                                <CodeViewer />
+                                <div className="h-full w-1/2">
+                                    <SandpackLayout style={{ height: "100%" }}>
+                                        <SandpackPreview
+                                            style={{ height: "100%" }}
+                                            showNavigator={true}
+                                            showOpenInCodeSandbox={false}
+
+                                        />
+                                    </SandpackLayout>
+                                </div>
                             </div>
-                            <div className="w-full flex-1 flex bg-neutral-900">
-                                <ContentSideBar />
-                                <FileViewer info={{ name: basicInfo.name, id }} />
-                                <Preview />
-                            </div>
+
+                        </SandpackProvider>
+                    </div>
+                    {/* <div className="w-full h-5 bg-transparent absolute left-0 bottom-0">
+                        <div className="border-t border-neutral-600 w-20 bg-neutral-900">
+
                         </div>
-                    }
-                </>
+                    </div> */}
+                </div >
             }
         </>
     );

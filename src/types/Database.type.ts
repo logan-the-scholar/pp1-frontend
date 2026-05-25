@@ -7,33 +7,55 @@ export type FileTree = {
   isDropped?: boolean;
 }
 
-export type FileTab = {
+export type DbFileTabType = {
+  project_id: string;
   id: string;
   line: number;
-  column: number;
-  isSaved: boolean;
+  // column: number;
+  edited: boolean;
+  saved: boolean;
 }
 
-export type TreeFileData = {
+export type DbSelectedTabType = {
+  id: string,
+  name: string
+}
+
+export type DbTreeFileDataType = {
   id: string;
   files: FileTree[];
 }
 
-export type OpenTabsData = {
-  id: string;
-  files: FileTab[];
-  selected: string;
+export type DbPackageType = {
+  content: string,
+  path: string
 }
-
 
 export interface DBType extends DBSchema {
   status: {
-    value: TreeFileData;
+    value: DbTreeFileDataType;
     key: string;
   };
 
-  selected: {
-    value: OpenTabsData;
+  open: {
+    value: DbFileTabType;
+    indexes: {
+      reference: string;
+    };
+    key: string;
+  };
+
+  selected_current: {
+    value: DbSelectedTabType;
+    key: string;
+  };
+
+  package: {
+    value: {
+      package: string,
+      version: string,
+      files: DbPackageType[]
+    };
     key: string;
   }
 }

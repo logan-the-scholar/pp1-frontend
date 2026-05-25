@@ -7,15 +7,18 @@ import { useSelector } from "react-redux";
 import { RootState } from "@/redux/store";
 import FileType from "@/types/enum/FileType";
 import { useAppDispatch } from "@/hooks/useTypedSelectors";
-import { DeclaredNodeModel, FileMetaData, OpenFilesType } from "@/types/state-types";
+import { DeclaredNodeModel, FileMetaData } from "@/types/ReduxState.type";
 import { jetBrainsMono } from "@/helpers/FontLoader";
 import { FileTreeActions } from "@/redux/sandbox/file-tree/FileTreeActions";
-import FileTreeSlice from "@/redux/sandbox/file-tree/FileTreeSlice";
-import { FileModifStatus } from "@/types/enum/FileModifStatus.enum";
-import { Repository } from "@/services/database/Repository";
-import { OpenTabsRepository } from '@/services/database/OpenTabsRepository';
+import { FileTreeSelectors } from "@/redux/sandbox/file-tree/FileTreeSlice";
 import { OpenTabsAction } from "@/redux/sandbox/open-files/OpenFilesActions";
 import { showPopup } from "@/context/PopupProvider";
+import { ErrorHelper } from "@/helpers/ErrorHelper";
+import ProjectMetaSlice from "@/redux/sandbox/project-meta/ProjectMetaSlice";
+import { ProjectMetaActions } from "@/redux/sandbox/project-meta/ProjectMetaActions";
+import { useLocalStorage } from "@/hooks/useLocalStorage";
+import { StorageSession } from "@/types/zTypes/Login.type";
+import { StorageBranch } from "@/types/zTypes/Branch.type";
 
 type ContextType = {
     node: NodeModel<FileMetaData>,
@@ -24,12 +27,15 @@ type ContextType = {
 
 }
 
-const FileViewer: React.FC<{ info: { name: string; id: string; } }> = ({ info }) => {
+const FileViewer: React.FC<{ info: { id: string; branch: string; } }> = ({ info }) => {
 
     const treeContext = useTreeContext();
     const dispatch = useAppDispatch();
-    const treeData = useSelector((state: RootState) => state.FILE_TREE);
-    const openFileData: OpenFilesType = useSelector((state: RootState) => state.OPEN_FILES);
+    const tree = useSelector((state: RootState) => FileTreeSelectors.selectAll(state));
+    const selected = useSelector((state: RootState) => {
+        const id = state.PROJECT_META.selected;
+        return id !== undefined ? state.FILE_TREE.entities[id] : undefined;
+    });
 
     const treeRef = useRef<TreeMethods>(null);
     const contextMenuRef = useRef<HTMLDivElement | null>(null);
@@ -37,6 +43,8 @@ const FileViewer: React.FC<{ info: { name: string; id: string; } }> = ({ info })
     const [visibleMenu, setVisibleMenu] = useState(false);
     const [positionMenu, setPositionMenu] = useState({ x: 0, y: 0, pos: "top" });
     const [isLoading, setIsloading] = useState<boolean>(false);
+    const [session,] = useLocalStorage("session", StorageSession(), null);
+    const [branch,] = useLocalStorage("branch", StorageBranch(), null);
 
     const [contextSelected, setContextSelected] = useState<ContextType | null>(null);
 
@@ -46,13 +54,20 @@ const FileViewer: React.FC<{ info: { name: string; id: string; } }> = ({ info })
     } | null>(null);
 
 
-    useEffect(() => {
-        console.log(creatingNode);
-    }, [creatingNode]);
+    // useEffect(() => {
+    //     console.log(creatingNode);
+    // }, [creatingNode]);
 
 
-    const openFile = (node: NodeModel<FileMetaData>) => {
-        dispatch(OpenTabsAction.open({ ...node, data: node.data as FileMetaData }));
+    const handleOpen = (node: NodeModel<FileMetaData>) => {
+        dispatch(OpenTabsAction.open({
+            ...node,
+            id: node.id.toString(),
+            data: {
+                ...(node.data as FileMetaData),
+                edited: false
+            }
+        }));
     };
 
 
@@ -62,30 +77,11 @@ const FileViewer: React.FC<{ info: { name: string; id: string; } }> = ({ info })
     };
 
 
-    const handleSaveState = (node: DeclaredNodeModel<FileMetaData>) => {
-        if (node.droppable) {
-
-            const handle = async () => {
-                const nose = treeData.tree.find((node_) => node_.id === node.id);
-
-                // const repository = new SelectedRepository();
-                // await repository.save({
-                //     id: node.id as string,
-                //     isDropped: nose?.data.isDropped,
-                //     status: FileModifStatus.UNMODIFIED
-                // }, info.id);
-            }
-
-            handle();
-        }
-    };
-
-
     useEffect(() => {
-        if (openFileData.selected != null) {
-            treeRef.current?.open(openFileData.selected?.data.fullPath as (string | number)[]);
+        if (selected != undefined) {
+            treeRef.current?.open(selected.id);
         }
-    }, [openFileData.selected]);
+    }, [selected]);
 
 
     useEffect(() => {
@@ -130,42 +126,60 @@ const FileViewer: React.FC<{ info: { name: string; id: string; } }> = ({ info })
     const addNode = (fileType: FileType.PLAIN_TEXT | FileType.FOLDER) => {
         if (contextSelected?.node.id !== undefined) {
 
-            if (contextSelected.onToggle && !contextSelected.isOpen) {
-                contextSelected.onToggle();
+            if (!contextSelected.isOpen) {
+                // contextSelected.onToggle();
+                //TODO hay que crear otro action para poder manejar esto ?
+                dispatch(ProjectMetaActions.select(contextSelected.node.id.toString()));
             }
 
             setCreatingNode({ parentId: contextSelected?.node.id, type: fileType });
             setVisibleMenu(false);
             setContextSelected(null);
 
+        } else {
+            throw new ErrorHelper("The file you tried to create has an invalid parent!");
+
         }
     };
 
-    //TODO esto puede causar un error si se intenta agregar un . a una carpeta
     const handleCreateNode = (name: string) => {
-        if (!name.trim() || creatingNode === null) {
+        name.trim();
+
+        if (!name || creatingNode === null) {
             return setCreatingNode(null);
 
         } else {
 
+            setIsloading(true);
             const tempId = Date.now();
 
             const newNode: DeclaredNodeModel<FileMetaData> = {
-                id: tempId,
+                id: tempId.toString(),
                 parent: creatingNode.parentId,
                 text: name,
                 droppable: creatingNode.type === FileType.FOLDER,
                 data: {
-                    author: "17cd4df6-67fc-4093-92f3-c071c87f8973",
+                    //TODO REF 2 HARDCODED CRAP
+                    author: "logan-the-scholar",
                     extension: creatingNode.type === FileType.FOLDER ?
                         FileType.FOLDER
                         :
-                        name.trim().substring(name.lastIndexOf(".") + 1).toLowerCase(),
-                    fullPath: ["0"],
+                        (() => {
+                            const a = name.substring(name.lastIndexOf(".") + 1).toLowerCase();
+                            return a === FileType.FOLDER ? FileType.PLAIN_TEXT : a;
+                        })(),
+                    fullPath: [],
+                    commit: "",
+                    isDrafted: true,
+                    versionId: "",
+                    edited: false,
+                    saved: true
                 }
             };
 
-            dispatch(FileTreeActions.createAndOpenNode(newNode, info.id));
+            dispatch(FileTreeActions.createAndOpenNode({ node: newNode, repoId: info.id, branch: info.branch }))
+                .then((a) => setIsloading(false))
+                .catch((r) => console.error(r));
 
             setCreatingNode(null);
         }
@@ -177,13 +191,26 @@ const FileViewer: React.FC<{ info: { name: string; id: string; } }> = ({ info })
         if (context === null || context === undefined) return;
 
         showPopup({
+            type: "confirm",
             title: "Permanently delete",
-            message: `Do you want to delete ${context.node.text} permanently`,
+            message: `Do you want to delete ${context.node.text} permanently${context.node.droppable === true && " and its content?"}`,
             confirmText: "Delete",
             cancelText: "Cancel",
-        }).then((confirmed) => {
+            dismissable: true
+        }).then(({ confirmed }) => {
+
             if (confirmed) {
-                dispatch(FileTreeActions.deleteAndChilds(context.node as DeclaredNodeModel<FileMetaData>));
+                setIsloading(true);
+
+                if (branch.draftId) {
+                    dispatch(FileTreeActions.deleteAndChilds({ id: context.node.id.toString(), commit: branch.draftId }))
+                        .then((a) => setIsloading(false))
+                        .catch((r) => console.error(r));;
+
+                } else {
+                    console.error("Nothing happened!!!");
+
+                }
             }
         });
     }
@@ -191,12 +218,9 @@ const FileViewer: React.FC<{ info: { name: string; id: string; } }> = ({ info })
     return (
         <div onContextMenu={(e) => e.preventDefault()}
             onClick={() => setVisibleMenu(false)}
-            className={`select-none pt-2 w-[20%] relative min-w-[10%] max-w-[50%] h-full text-sm flex flex-col ${jetBrainsMono.className}`}
+            className={`select-none pt-2 w-[20%] relative min-w-[10%] max-w-[50%] h-full text-sm flex flex-col`}
         >
-            {/*
-                //TODO cuando se hace click al arbol deberia desenfocarse ambos clicks.
-            */}
-
+            {/* ${jetBrainsMono.className} */}
             {/* CONTEXT MENU */}
             {
                 visibleMenu &&
@@ -268,8 +292,12 @@ const FileViewer: React.FC<{ info: { name: string; id: string; } }> = ({ info })
                     className="z-40 left-[calc(100%-5px)] top-0 absolute w-1! h-full cursor-ew-resize transition-colors ease-in-out delay-300 hover:bg-[#ffffff44]"
                 ></div>
 
-                <div className="px-4 py-2 font-light border-t border-transparent">
+                <div className="px-4 pt-2 pb-1 font-light border-t border-transparent">
                     FILE EXPLORER
+                </div>
+
+                <div className="w-full h-1 relative overflow-hidden">
+                    <div className={`bg-neutral-600 w-1/5 h-full absolute ease-in inset-0 ${isLoading ? "animate-direction-100/500 animate-slide-right-1800" : "-translate-x-full"}`}></div>
                 </div>
 
                 <div
@@ -279,21 +307,26 @@ const FileViewer: React.FC<{ info: { name: string; id: string; } }> = ({ info })
                             id: "0", parent: "-1", text: "root", droppable: true, data: {
                                 extension: "folder",
                                 author: "none",
-                                fullPath: null
+                                fullPath: ["0"],
+                                commit: "",
+                                isDrafted: false,
+                                versionId: "",
+                                edited: false,
+                                saved: true
                             }
                         });
                     }}
-                    className="flex-1 relative font-light mt-2 max-w-full h-full w-full overflow-x-hidden overflow-y-scroll"
+                    className="flex-1 relative font-light max-w-full h-full w-full overflow-x-hidden overflow-y-scroll"
                 >
                     {
-                        treeData.tree !== undefined && treeData.tree.length > 0 &&
+                        tree !== undefined && tree.length > 0 &&
                         <Tree
-                            tree={treeData.tree}
+                            tree={tree}
                             rootId={"-1"}
                             ref={treeRef}
                             onDrop={handleDrop}
                             insertDroppableFirst
-                            initialOpen={treeData.tree.flatMap((node) => node.data.isDropped ? node.id as string : undefined).filter((node) => node !== undefined)}
+                            initialOpen={tree.flatMap((node) => node.data.isDropped ? node.id as string : undefined).filter((node) => node !== undefined)}
                             render={(node, { depth, isOpen, onToggle }) => {
 
                                 return <div
@@ -305,12 +338,15 @@ const FileViewer: React.FC<{ info: { name: string; id: string; } }> = ({ info })
 
                                         if (contextSelected !== null) {
                                             setContextSelected(null);
-                                            dispatch(FileTreeSlice.actions.select(undefined));
+                                            dispatch(ProjectMetaSlice.actions.select(undefined));
 
                                         } else {
-                                            node.droppable ? onToggle() : openFile(node);
+                                            // node.droppable ? onToggle() : handleOpen(node);
+                                            !node.droppable && handleOpen(node);
 
-                                            dispatch(FileTreeSlice.actions.select({ id: node.id, isDropped: !isOpen }));
+                                            dispatch(ProjectMetaActions.select(
+                                                node.id.toString()//, isDropped: !isOpen 
+                                            ));
 
                                             // handleSaveState(node as DeclaredNodeModel<FileMetaData>);
                                         }
@@ -338,7 +374,7 @@ const FileViewer: React.FC<{ info: { name: string; id: string; } }> = ({ info })
                                         :
                                         <div className={`flex w-full cursor-pointer
 ${contextSelected?.node.id === node.id && !(creatingNode?.parentId === node.id) && "outline-1 outline-neutral-400 -outline-offset-1"} 
-${treeData.selected?.id === node.id ? creatingNode?.parentId === node.id ? "bg-transparent!" : "bg-[#ffffff1c]" : "hover:bg-[#ffffff10]"}`
+${selected?.id === node.id ? creatingNode?.parentId === node.id ? "bg-transparent!" : "bg-[#ffffff1c]" : "hover:bg-[#ffffff10]"}`
                                         }
                                             style={{ paddingLeft: "10px" }}
                                         >
@@ -365,7 +401,7 @@ ${treeData.selected?.id === node.id ? creatingNode?.parentId === node.id ? "bg-t
                                                     <div key={i} style={{ paddingLeft: "20px" }} className="border-l border-neutral-600"></div>
                                             }
                                             )}
-                                            <FileComponent isOpen={false} node={{ id: "???", parent: -1, text: "", data: { extension: creatingNode.type } }} />
+                                            <FileComponent isOpen={false} node={{ id: "???", parent: "-1", text: "", data: { extension: creatingNode.type } }} />
                                             <input
                                                 autoFocus
                                                 className="w-full outline-0 border border-neutral-400"
@@ -385,7 +421,7 @@ ${treeData.selected?.id === node.id ? creatingNode?.parentId === node.id ? "bg-t
                     }
                 </div>
             </DndProvider>
-        </div >
+        </div>
     );
 };
 

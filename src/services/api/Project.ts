@@ -1,9 +1,9 @@
 import { API_SERVER } from "@/helpers/env-config";
-import { IProjectCreation } from "@/types/zTypes";
+import { IProjectCreation } from "@/types/zTypes/zTypes";
 import { fetchCatch } from "../wrapper/fetch-catch";
 import { ErrorHelper } from "@/helpers/ErrorHelper";
 import { ApiStatusEnum } from "@/types/enum/ApiStatus.enum";
-import { ApiType } from "@/types/ApiResponse.type";
+import { ApiType } from "@/types/Api.type";
 
 async function create(data: IProjectCreation) {
     try {
@@ -51,7 +51,7 @@ async function delete_(id: string): Promise<ErrorHelper | { message: string }> {
     }
 }
 
-async function get(id: string): Promise<ErrorHelper | ApiType.Project> {
+async function getAndBranches(id: string): Promise<ErrorHelper | ApiType.Project> {
     try {
         const response = await fetchCatch(`${API_SERVER}/demo/api/v0/project/${id}`, {
             method: "GET"
@@ -65,4 +65,32 @@ async function get(id: string): Promise<ErrorHelper | ApiType.Project> {
     }
 }
 
-export const ApiProject = { getAll, create, delete_, get };
+async function getBranchAndFiles(id: string, branch: string): Promise<ErrorHelper | ApiType.BranchAndFiles> {
+    try {
+        const response = await fetchCatch(`${API_SERVER}/demo/api/v0/project/${id}/branch/${branch}`, {
+            method: "GET"
+        });
+
+        return await response.json();
+
+    } catch (error: any) {
+        return error instanceof ErrorHelper ? error : new ErrorHelper(ApiStatusEnum.UNKNOWN, error.message);
+
+    }
+}
+
+// async function getCommits(branch: string): Promise<ErrorHelper | ApiType.Branch> {
+//     try {
+//         const response = await fetchCatch(`${API_SERVER}/demo/api/v0/project/${id}/branch/${branch}`, {
+//             method: "GET"
+//         });
+
+//         return await response.json();
+
+//     } catch (error: any) {
+//         return error instanceof ErrorHelper ? error : new ErrorHelper(ApiStatusEnum.UNKNOWN, error.message);
+
+//     }
+// }
+
+export const ApiProject = { getAll, create, delete_, getAndBranches, getBranchAndFiles };

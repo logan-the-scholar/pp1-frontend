@@ -1,24 +1,16 @@
 "use client";
 import { PopupProvider } from "@/context/PopupProvider";
-import Main from "@/features/sandbox/Main";
-import { store } from "@/redux/store";
-import { use, useEffect, useState } from "react";
-import { Provider } from "react-redux";
+import PreMain from "@/features/sandbox/PreMain";
+import { use } from "react";
 
-export default function Sandbox({ params, searchParams }: { params: Promise<{ id: string }>, searchParams: Promise<any> }) {
-    const usedParams = use(params);
+function Branch({ params, searchParams }: { params: Promise<{ id: string, branch: string }>, searchParams: Promise<any> }) {
+    const { id, branch } = use(params);
 
     return (
-        <>
-            {usedParams.id === null ?
-                null
-                :
-                <Provider store={store}>
-                    <PopupProvider>
-                        <Main id={usedParams.id} />
-                    </PopupProvider>
-                </Provider>
-            }
-        </>
+        <PopupProvider>
+            <PreMain id={id} branch={branch} />
+        </PopupProvider>
     );
 }
+
+export default Branch;
