@@ -2,7 +2,10 @@
 import { useState, useEffect, Dispatch } from "react";
 import { z } from "zod";
 
-export function useLocalStorage<S extends z.ZodTypeAny>(key: string, schema: S, initialValue: z.infer<S> | null): [z.infer<S>, Dispatch<React.SetStateAction<z.infer<S>>>] {
+
+type keyType = "session" | "workspaces" | "selected_workspace" | "branch";
+
+export function useLocalStorage<S extends z.ZodTypeAny>(key: keyType, schema: S, initialValue: z.infer<S> | null): [z.infer<S>, Dispatch<React.SetStateAction<z.infer<S>>>] {
 
   const [storedValue, setStoredValue] = useState<z.infer<S> | null>(() => {
 

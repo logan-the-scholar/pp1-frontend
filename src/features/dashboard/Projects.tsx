@@ -2,7 +2,6 @@
 import React, { useEffect, useState } from "react";
 import ProjectPopup from "./ProjectPopup";
 import { useLocalStorage } from "@/hooks/useLocalStorage";
-import { ApiType } from "@/types/ApiResponse.type";
 import { ErrorHelper } from "@/helpers/ErrorHelper";
 import LoadingCircle from "@/components/LoadingCircle";
 import ProjectCard from "./ProjectCard";
@@ -11,6 +10,7 @@ import { AppUrl } from "@/types/AppUrl.type";
 import { StorageSession } from "@/types/zTypes/Login.type";
 import { StorageWorkspace } from "@/types/zTypes/Workspace.type";
 import { StorageWorkspaces } from "@/types/zTypes/Workspaces.type";
+import { ApiType } from "@/types/Api.type";
 
 const Projects: React.FC<{ showPopup: boolean, setShowPopup: React.Dispatch<React.SetStateAction<boolean>> }> = ({
     showPopup, setShowPopup }) => {

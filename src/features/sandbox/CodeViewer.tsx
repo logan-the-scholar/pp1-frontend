@@ -23,6 +23,7 @@ import { FileTreeActions } from "@/redux/sandbox/file-tree/FileTreeActions";
 import FileTreeSlice, { FileTreeSelectors, selectOpenFiles } from "@/redux/sandbox/file-tree/FileTreeSlice";
 import FileMapper from "@/helpers/FileMapper";
 import { StorageSession } from "@/types/zTypes/Login.type";
+import { RefreshCcw } from "lucide-react";
 
 const CodeViewer = () => {
     const dispatch = useAppDispatch();
@@ -42,6 +43,7 @@ const CodeViewer = () => {
     const column = Number(params?.get("col") || 1);
     const monacoRef = useRef<typeof import("c:/J/Upskill/react-pp1/pp1-frontend/node_modules/monaco-editor/esm/vs/editor/editor.api") | null>(null);
 
+    const openTabsRefs = useRef<Record<string, HTMLDivElement | null>>({});
 
     // const selectedFile = (id: string) useSelector(state =>
     //     state.files.byId[state.openTabs.selectedId]
@@ -228,6 +230,25 @@ const CodeViewer = () => {
         }
     }, [tree, monacoRef]);
 
+    /* SCROLL TO SELECTED WINDOW */
+    useEffect(() => {
+        console.log("SELECTED: ", selected);
+        if (!selected) {
+            return;
+        }
+
+        const element = openTabsRefs.current[`window_${selected}`];
+
+        if (element) {
+            element.scrollIntoView({
+                behavior: "smooth",
+                inline: "nearest",
+                block: "nearest"
+            })
+        }
+
+    }, [selected]);
+
 
     /* CHANGE URL PARAMETERS */
     useEffect(() => {
@@ -286,6 +307,13 @@ const CodeViewer = () => {
                                     <div
                                         onClick={() => handleChangeWindow(f)}
                                         key={`window_${f.id}`}
+                                        ref={(element) => {
+                                            if (element) {
+                                                openTabsRefs.current[`window_${f.id}`] = element;
+                                            } else {
+                                                delete openTabsRefs.current[`window_${f.id}`]
+                                            }
+                                        }}
                                         className={`shrink-0 hover:[&>span]:visible pl-3 py-1.5 bg-[#1e1e1e] cursor-pointer w-fit flex relative 
 ${f.id === selectedRef.id ? "border-x border-neutral-600 border-b-0" : "border-b border-b-neutral-600 border-x border-[#1e1e1e] bg-neutral-900"}
 ${!f.data.edited && "italic"}`}

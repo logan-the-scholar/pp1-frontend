@@ -2,24 +2,17 @@ import { z } from "zod";
 import { StorageSession } from "./zTypes/Login.type";
 import { StorageWorkspace } from "./zTypes/Workspace.type";
 import { StorageWorkspaces } from "./zTypes/Workspaces.type";
+import { StorageBranch } from "./zTypes/Branch.type";
 
 export namespace ApiType {
 
-    // export type Login = {
-    //     id: string;
-    //     name: string;
-    //     email: string;
-    //     profileImage: string;
-    //     userType: UserType;
-    //     recurrence: UserRecurrence;
-    // }
-
     export type Session = z.infer<ReturnType<typeof StorageSession>>;
 
+    
     export type Workspace = z.infer<ReturnType<typeof StorageWorkspace>>;
-
+    
     export type Workspaces = z.infer<ReturnType<typeof StorageWorkspaces>>;
-
+    
     export type File = {
         id: string;
         name: string;
@@ -34,6 +27,15 @@ export namespace ApiType {
         isDrafted: boolean;
     }
 
+    export type Branch = z.infer<ReturnType<typeof StorageBranch>>;
+    
+    export type BranchAndFiles = {
+        name: string;
+        headId: string;
+        draftId: string;
+        files: File[];
+    }
+
     export type Project = {
         id: string;
         name: string;
@@ -46,11 +48,11 @@ export namespace ApiType {
         members?: any;
     }
 
-    export type Branch = {
-        name: string;
-        headId: string;
-        draftId: string;
-        files: File[];
-    }
+    // export type Branch = {
+    //     name: string;
+    //     headId: string;
+    //     draftId: string;
+    //     files: File[];
+    // }
 
 }

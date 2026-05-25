@@ -26,10 +26,14 @@ async function create(data: IFileCreation): Promise<Response | ErrorHelper> {
     }
 }
 
-async function remove(id: string): Promise<Response | ErrorHelper> {
+async function remove(id: string, commit: string): Promise<Response | ErrorHelper> {
     try {
-        const response: Response = await fetchCatch(`${API_SERVER}/demo/api/v0/file/${id}`, {
+        const response: Response = await fetchCatch(`${API_SERVER}/demo/api/v0/file`, {
             method: "DELETE",
+            body: JSON.stringify({
+                fileId: id,
+                commitId: commit
+            })
         });
 
         return response;

@@ -6,8 +6,9 @@ import { ErrorHelper } from "@/helpers/ErrorHelper";
 import { useLocalStorage } from "@/hooks/useLocalStorage";
 import { store } from "@/redux/store";
 import { ApiProject } from "@/services/api";
-import { ApiType } from "@/types/ApiResponse.type";
+import { ApiType } from "@/types/Api.type";
 import { AppUrl } from "@/types/AppUrl.type";
+import { StorageBranch } from "@/types/zTypes/Branch.type";
 import { StorageSession } from "@/types/zTypes/Login.type";
 import { use, useEffect, useState } from "react";
 import { Provider } from "react-redux";
@@ -24,6 +25,7 @@ export default function Sandbox({ params }: {
     // const [name, setName] = useState<string | null>(null);
     const [loading, setLoading] = useState<boolean>(true);
     const [session,] = useLocalStorage("session", StorageSession(), null);
+    const [, setBranchMeta] = useLocalStorage("branch", StorageBranch(), null);
 
     useEffect(() => {
         if (session === null) {
@@ -43,28 +45,34 @@ export default function Sandbox({ params }: {
 
                 } else {
 
-                    const responseFiles = await ApiProject.getBranchAndFiles(useParams.id, useParams.branch);
+                    const response = await ApiProject.getBranchAndFiles(useParams.id, useParams.branch);
 
-                    if (responseFiles instanceof ErrorHelper) {
+                    if (response instanceof ErrorHelper) {
                         window.location.href = AppUrl.Dashboard.from("error");
                         return;
                     }
 
-                    document.title = "Null | " + responseFiles.name;
+                    // document.title = "Null | " + response.name;
 
-                    if (responseFiles.files !== null) {
+                    if (response.files !== null) {
                         setFiles([
                             {
                                 id: "0",
                                 parent: "-1",
-                                name: responseFiles.name,
+                                name: response.name,
                                 author: "none",
                                 extension: "FOLDER",
                                 path: ["0"],
                                 commitId: "",
                                 isDrafted: true
-                            }, ...responseFiles.files]);
+                            }, ...response.files]);
                     }
+
+                    setBranchMeta({
+                        branch: response.name,
+                        draftId: response.draftId,
+                        headId: response.headId,
+                    });
 
                     setLoading(false);
                 }

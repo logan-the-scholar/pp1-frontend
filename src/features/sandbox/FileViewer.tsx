@@ -10,13 +10,15 @@ import { useAppDispatch } from "@/hooks/useTypedSelectors";
 import { DeclaredNodeModel, FileMetaData } from "@/types/ReduxState.type";
 import { jetBrainsMono } from "@/helpers/FontLoader";
 import { FileTreeActions } from "@/redux/sandbox/file-tree/FileTreeActions";
-import FileTreeSlice, { FileTreeSelectors, selectOpenFiles } from "@/redux/sandbox/file-tree/FileTreeSlice";
+import { FileTreeSelectors } from "@/redux/sandbox/file-tree/FileTreeSlice";
 import { OpenTabsAction } from "@/redux/sandbox/open-files/OpenFilesActions";
 import { showPopup } from "@/context/PopupProvider";
 import { ErrorHelper } from "@/helpers/ErrorHelper";
 import ProjectMetaSlice from "@/redux/sandbox/project-meta/ProjectMetaSlice";
 import { ProjectMetaActions } from "@/redux/sandbox/project-meta/ProjectMetaActions";
-import { useSessionStorage } from "@/hooks/useSessionStorage";
+import { useLocalStorage } from "@/hooks/useLocalStorage";
+import { StorageSession } from "@/types/zTypes/Login.type";
+import { StorageBranch } from "@/types/zTypes/Branch.type";
 
 type ContextType = {
     node: NodeModel<FileMetaData>,
@@ -41,7 +43,8 @@ const FileViewer: React.FC<{ info: { id: string; branch: string; } }> = ({ info 
     const [visibleMenu, setVisibleMenu] = useState(false);
     const [positionMenu, setPositionMenu] = useState({ x: 0, y: 0, pos: "top" });
     const [isLoading, setIsloading] = useState<boolean>(false);
-    const session = useSessionStorage
+    const [session,] = useLocalStorage("session", StorageSession(), null);
+    const [branch,] = useLocalStorage("branch", StorageBranch(), null);
 
     const [contextSelected, setContextSelected] = useState<ContextType | null>(null);
 
@@ -195,9 +198,19 @@ const FileViewer: React.FC<{ info: { id: string; branch: string; } }> = ({ info 
             cancelText: "Cancel",
             dismissable: true
         }).then(({ confirmed }) => {
+
             if (confirmed) {
-                //TODO ref3
-                dispatch(FileTreeActions.deleteAndChilds(context.node as DeclaredNodeModel<FileMetaData>));
+                setIsloading(true);
+
+                if (branch.draftId) {
+                    dispatch(FileTreeActions.deleteAndChilds({ id: context.node.id.toString(), commit: branch.draftId }))
+                        .then((a) => setIsloading(false))
+                        .catch((r) => console.error(r));;
+
+                } else {
+                    console.error("Nothing happened!!!");
+
+                }
             }
         });
     }

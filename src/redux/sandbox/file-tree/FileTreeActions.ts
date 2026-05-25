@@ -3,7 +3,6 @@ import OpenTabsSlice from "../open-files/OpenTabsSlice";
 import FileType from "@/types/enum/FileType";
 import { DeclaredNodeModel, FileMetaData, FileTreeType } from "@/types/ReduxState.type";
 import { AppDispatch, AppThunk, RootState } from "@/redux/store";
-import { ApiType } from "@/types/ApiResponse.type";
 import FileTreeSlice, { FileTreeSelectors } from "./FileTreeSlice";
 import { zodValidate } from "@/helpers/zod/ZodValidate";
 import { IFileCreation } from "@/types/zTypes/zTypes";
@@ -17,9 +16,11 @@ import { createAsyncThunk } from "@reduxjs/toolkit/react";
 import FileMapper from "@/helpers/FileMapper";
 import { ProjectMetaActions } from "../project-meta/ProjectMetaActions";
 import { DbFileTabType } from "@/types/Database.type";
+import { ApiType } from "@/types/Api.type";
 
-type CreateNodeType = { node: DeclaredNodeModel<FileMetaData>, repoId: string, branch: string }
-type ThunkOptions = { state: RootState; dispatch: AppDispatch; rejectValue: { message: string }; }
+type CreateNodeType = { node: DeclaredNodeModel<FileMetaData>, repoId: string, branch: string };
+type DeleteNodeType = { id: string, commit: string };
+type ThunkOptions = { state: RootState; dispatch: AppDispatch; rejectValue: { message: string }; };
 
 const createAndOpenNode = createAsyncThunk<void, CreateNodeType, ThunkOptions>(
     "TREE/create",
@@ -155,16 +156,18 @@ async function pushNode({ node, repoId, branch }: CreateNodeType) {
     return await response.json() as ApiType.File;
 }
 
+const deleteAndChilds = createAsyncThunk<void, DeleteNodeType, ThunkOptions>(
+    "TREE/deleteAndChilds",
+    async ({ id, commit }, { getState, dispatch, rejectWithValue }) => {
 
-function deleteAndChilds(node: DeclaredNodeModel<FileMetaData>): AppThunk {
-    return (async (dispatch, getState) => {
-
-        const response = await ApiFile.remove(node.id.toString());
+        const response = await ApiFile.remove(id, commit);
 
         if (response instanceof ErrorHelper) {
             throw new ErrorHelper(response.message, response.exception);
 
         }
+
+        //TODO ESPERAR LA RESPUESTA DEL BACK Y CONFIRMAR/COMPARAR LOS ELEMENTOS HIJOS ELIMINADOS
 
         const find = (id: string) => {
             // const children = getState().FILE_TREE.tree.filter((child) => child.parent === id);
@@ -181,12 +184,12 @@ function deleteAndChilds(node: DeclaredNodeModel<FileMetaData>): AppThunk {
             });
         };
 
-        find(node.id.toString());
-        dispatch(FileTreeSlice.actions.delete(node.id.toString()));
-        dispatch(OpenTabsAction.closeAndChangeWindow(node.id.toString()));
+        find(id);
+        dispatch(FileTreeSlice.actions.delete(id));
+        dispatch(OpenTabsAction.closeAndChangeWindow(id));
 
-    });
-}
+    }
+);
 
 function save(data: { id: string, line?: number }[], project: string): AppThunk {
     return (async (dispatch, getState) => {

@@ -1,5 +1,4 @@
 "use client";
-
 import { useEffect } from "react";
 import { ErrorHelper } from "@/helpers/ErrorHelper";
 import { ApiProject } from "@/services/api";
@@ -44,7 +43,7 @@ const PreMain: React.FC<{ id: string, branch: string }> = ({ branch, id }) => {
                 } else {
                     window.location.href = AppUrl.dashboard;
                 }
-                
+
                 return;
 
             });
