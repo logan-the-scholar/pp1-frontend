@@ -21,7 +21,7 @@ async function create(data: IFileCreation): Promise<Response | ErrorHelper> {
 
         return response;
     } catch (error: any) {
-        return error instanceof ErrorHelper ? error : new ErrorHelper(ApiStatusEnum.UNKNOWN, error.message);
+        return error instanceof ErrorHelper ? error : new ErrorHelper(ApiStatusEnum.UNKNOWN, error);
 
     }
 }

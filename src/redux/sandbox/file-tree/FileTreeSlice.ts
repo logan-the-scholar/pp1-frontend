@@ -20,13 +20,17 @@ const FileTreeSlice = createSlice({
 
         createNode(state, action: PayloadAction<DeclaredNodeModel<FileMetaData>>) {
 
+            const isFolder = action.payload.data.extension === FileType.FOLDER;
+
             if (action.payload.parent !== 0) {
                 filesAdapter.addOne(state, {
                     ...action.payload,
-                    droppable: action.payload.data.extension === FileType.FOLDER ? true : undefined,
+                    droppable: isFolder ? true : undefined,
                     data: {
                         ...action.payload.data,
-                        extension: action.payload.data.extension || FileType.PLAIN_TEXT
+                        extension: action.payload.data.extension || FileType.PLAIN_TEXT,
+                        edited: isFolder ? action.payload.data.edited : true,
+                        saved: isFolder ? action.payload.data.edited : true
                     }
                 });
             } else {
@@ -88,6 +92,11 @@ const FileTreeSlice = createSlice({
             const { id, isDropped } = action.payload;
             const ref = state.entities[id];
             const path: string[] = [id];
+
+            if (!ref) {
+                return;
+            }
+
             if (ref.data.fullPath.length > 0) {
                 let builtPath = "";
 
@@ -109,7 +118,7 @@ const FileTreeSlice = createSlice({
                         data: {
                             ...state.entities[id_].data,
                             isDropped: id_ === id ? ref.droppable && !ref.data.isDropped : true//i === 0 ? isDropped :
-                                // true,
+                            // true,
                         }
                     }
                 }

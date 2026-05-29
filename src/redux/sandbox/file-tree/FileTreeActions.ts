@@ -31,9 +31,9 @@ const createAndOpenNode = createAsyncThunk<void, CreateNodeType, ThunkOptions>(
 
         dispatch(FileTreeSlice.actions.createNode(FileMapper(created)));
 
-        const createdNode = getState().FILE_TREE.entities[created.id];
+        const createdNode = getState().FILE_TREE.entities[created.path.join("/")];
 
-        if (createdNode && createdNode.data?.extension.toLowerCase() !== FileType.FOLDER) {
+        if (createdNode && createdNode.data?.extension !== FileType.FOLDER) {
 
             dispatch(OpenTabsAction.open({
                 ...createdNode,
@@ -138,8 +138,11 @@ async function pushNode({ node, repoId, branch }: CreateNodeType) {
         path: formatedPath,
         content: node.data.content || null,
         branch: branch,
-        createdAt: Number(node.id) || Date.now()
+        createdAt: Number(node.id) || Date.now(),
+        parent: node.parent.toString().length < 4 ? null : node.parent.toString()
     }, FileCreation);
+    console.log(data)
+    console.log(node)
 
     if (!success) {
         Object.entries(data.errors).forEach((e) => console.error(e));

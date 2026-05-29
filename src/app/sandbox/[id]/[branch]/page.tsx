@@ -58,13 +58,15 @@ export default function Sandbox({ params }: {
                         setFiles([
                             {
                                 id: "0",
-                                parent: "-1",
+                                // parent: "-1",
                                 name: response.name,
                                 author: "none",
                                 extension: "FOLDER",
                                 path: ["0"],
                                 commitId: "",
-                                isDrafted: true
+                                createdAt: 0,
+                                fileStatus: "CREATED",
+                                fileId: "0"
                             }, ...response.files]);
                     }
 

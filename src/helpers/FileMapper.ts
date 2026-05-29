@@ -1,4 +1,4 @@
-import { ApiType } from "@/types/ApiResponse.type";
+import { ApiType } from "@/types/Api.type";
 import { DbFileTabType } from "@/types/Database.type";
 import { DeclaredNodeModel, FileMetaData, } from "@/types/ReduxState.type";
 import { z } from "zod";
@@ -12,8 +12,8 @@ function FileMapper(file: ApiType.File, meta?: DbFileTabType): DeclaredNodeModel
         content_ = buffer.toString('utf8');
     }
 
-    console.log(meta);
-    console.log(file);
+    // console.log(meta);
+    // console.log(file);
     
     return {
         id: path_.join("/"),
@@ -29,11 +29,12 @@ function FileMapper(file: ApiType.File, meta?: DbFileTabType): DeclaredNodeModel
             isDropped: file.id === "0",
             author: file.author,
             commit: file.commitId,
-            movedFrom: file.moved_from || undefined,
-            isDrafted: file.isDrafted,
+            fileStatus: file.fileStatus,
+            createdAt: file.createdAt,
             line: meta?.line || undefined,
             edited: meta?.edited || false,
             saved: meta?.edited || true,
+            fileId: file.fileId
         }
     }
 

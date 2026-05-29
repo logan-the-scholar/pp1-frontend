@@ -7,7 +7,7 @@ import CodeViewer from "./CodeViewer";
 import { useEffect, useMemo, useState } from "react";
 import { useAppDispatch } from "@/hooks/useTypedSelectors";
 import { FileTreeActions } from "@/redux/sandbox/file-tree/FileTreeActions";
-import { ApiType } from "@/types/ApiResponse.type";
+import { ApiType } from "@/types/Api.type";
 import FileTreeSlice, { FileTreeSelectors } from "@/redux/sandbox/file-tree/FileTreeSlice";
 import { useSelector } from "react-redux";
 import { RootState } from "@/redux/store";
@@ -24,7 +24,8 @@ const Main: React.FC<{ files: ApiType.File[] | null, info: RepositoryMetadata }>
     const [files_, setFiles_] = useState<Record<string, { code: string; active?: boolean; }> | undefined>(undefined);
 
     useEffect(() => {
-        if (files !== null && files.length > 0) {
+        if (!files) return;
+        if (files.length > 0) {
             dispatch(ProjectMetaSlice.actions.setProject(info.id));
             dispatch(ProjectMetaSlice.actions.setBranch(info.branch));
             dispatch(FileTreeActions.createStore(files));

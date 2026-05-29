@@ -16,5 +16,7 @@ export const FileCreation = () => Path().extend({
 
     content: z.string().nullable(),
 
-    createdAt: z.number({ message: "creation date must be a timestamp number" })
+    createdAt: z.number({ message: "creation date must be a timestamp number" }),
+
+    parent: z.string().uuid().nullable(),
 });

@@ -1,17 +1,20 @@
 import { NodeModel } from "@minoru/react-dnd-treeview"
 
 export type FileMetaData = {
+    fileId: string,
+    versionId: string,
     extension: string,
     fullPath: string[],
-    versionId: string;
     content?: string,
     last_content?: string;
     line?: number,
     isDropped?: boolean,
     author: string,
     commit: string,
-    movedFrom?: string,
-    isDrafted: boolean,
+    fileStatus: string,
+    createdAt: number,
+    //movedFrom?: string,
+    //isDrafted: boolean,
     edited: boolean,
     saved: boolean,
 }

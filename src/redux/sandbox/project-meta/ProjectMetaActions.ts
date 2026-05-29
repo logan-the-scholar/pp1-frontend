@@ -6,7 +6,7 @@ function select(id: string): AppThunk {
     return (async (dispatch, getState) => {
         dispatch(FileTreeSlice.actions.dropFrom({ id }));
         const foundNode = getState().FILE_TREE.entities[id];
-        if (foundNode.droppable) {
+        if (!foundNode || foundNode.droppable) {
 
         } else {
             dispatch(ProjectMetaSlice.actions.select({ id }));

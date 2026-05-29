@@ -50,6 +50,7 @@ const FileViewer: React.FC<{ info: { id: string; branch: string; } }> = ({ info 
 
     const [creatingNode, setCreatingNode] = useState<{
         parentId: string | number,
+        realParentId: string,
         type: FileType.PLAIN_TEXT | FileType.FOLDER
     } | null>(null);
 
@@ -124,7 +125,7 @@ const FileViewer: React.FC<{ info: { id: string; branch: string; } }> = ({ info 
 
 
     const addNode = (fileType: FileType.PLAIN_TEXT | FileType.FOLDER) => {
-        if (contextSelected?.node.id !== undefined) {
+        if (!!contextSelected?.node && !!contextSelected.node.data) {
 
             if (!contextSelected.isOpen) {
                 // contextSelected.onToggle();
@@ -132,7 +133,7 @@ const FileViewer: React.FC<{ info: { id: string; branch: string; } }> = ({ info 
                 dispatch(ProjectMetaActions.select(contextSelected.node.id.toString()));
             }
 
-            setCreatingNode({ parentId: contextSelected?.node.id, type: fileType });
+            setCreatingNode({ realParentId: contextSelected.node.data?.fileId, parentId: contextSelected?.node.id, type: fileType });
             setVisibleMenu(false);
             setContextSelected(null);
 
@@ -155,7 +156,7 @@ const FileViewer: React.FC<{ info: { id: string; branch: string; } }> = ({ info 
 
             const newNode: DeclaredNodeModel<FileMetaData> = {
                 id: tempId.toString(),
-                parent: creatingNode.parentId,
+                parent: creatingNode.realParentId,
                 text: name,
                 droppable: creatingNode.type === FileType.FOLDER,
                 data: {
@@ -170,10 +171,12 @@ const FileViewer: React.FC<{ info: { id: string; branch: string; } }> = ({ info 
                         })(),
                     fullPath: [],
                     commit: "",
-                    isDrafted: true,
                     versionId: "",
+                    fileId: "",
                     edited: false,
-                    saved: true
+                    saved: true,
+                    fileStatus: "CREATED",
+                    createdAt: 0
                 }
             };
 
@@ -305,14 +308,16 @@ const FileViewer: React.FC<{ info: { id: string; branch: string; } }> = ({ info 
                     onContextMenu={(e) => {
                         handleContextMenu(e, {
                             id: "0", parent: "-1", text: "root", droppable: true, data: {
+                                fileId: "",
                                 extension: "folder",
                                 author: "none",
                                 fullPath: ["0"],
                                 commit: "",
-                                isDrafted: false,
                                 versionId: "",
                                 edited: false,
-                                saved: true
+                                saved: true,
+                                fileStatus: "CREATED",
+                                createdAt: 0
                             }
                         });
                     }}
